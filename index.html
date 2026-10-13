@@ -81,12 +81,12 @@
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
     <div class="actions" style="margin-bottom:15px;flex-direction:column;align-items:stretch">
       <div class="field" style="margin-bottom:8px">
-        <label for="adminUser">ID đăng nhập</label>
-        <input type="text" id="adminUser" placeholder="thaytuan0990" style="max-width:280px">
+        <label for="adminUser">ID giáo viên</label>
+        <input type="text" id="adminUser" placeholder="Nhập ID giáo viên..." style="max-width:280px" autocomplete="off">
       </div>
       <div class="field" style="margin-bottom:8px">
         <label for="adminPass">Mật khẩu bí mật</label>
-        <input type="password" id="adminPass" placeholder="Trongthien233" style="max-width:280px">
+        <input type="password" id="adminPass" placeholder="Nhập mật khẩu..." style="max-width:280px" autocomplete="new-password">
       </div>
       <div>
         <button class="btn primary" id="adminLogin" type="button">Đăng nhập Quản trị</button>
@@ -605,7 +605,11 @@ document.addEventListener('DOMContentLoaded', () => {
   $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
   $('retryBtn').onclick = () => {$('result').classList.add('hidden'); $('start').classList.remove('hidden');$('name').focus(); started=false; isSubmitting=false; };
 
-  $('adminToggle').onclick = () =>$('adminPanel').classList.toggle('hidden');
+  $('adminToggle').onclick = () => {$('adminPanel').classList.toggle('hidden');
+    // Xóa trắng ô nhập mỗi khi đóng/mở panel quản trị để bảo mật
+    $('adminUser').value = '';
+    $('adminPass').value = '';$('adminContent').classList.add('hidden');
+  };
   
   // Xác thực đăng nhập bằng ID thaytuan0990 và mật khẩu Trongthien233
   $('adminLogin').onclick = () => {
@@ -617,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderExistingExamsList();
       renderExistingDocsList();
     } else {
-      alert('ID đăng nhập hoặc Mật khẩu bí mật không chính xác!');
+      alert('ID giáo viên hoặc Mật khẩu bí mật không chính xác!');
     }
   };
 
