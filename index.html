@@ -79,9 +79,18 @@
     <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị Hệ thống</button>
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
-    <div class="actions" style="margin-bottom:15px">
-      <input type="password" id="adminPass" placeholder="Mật khẩu quản trị (mặc định: 1234)" style="max-width:280px;padding:8px 12px;border:1px solid var(--border);border-radius:8px">
-      <button class="btn primary" id="adminLogin" type="button">Đăng nhập Quản trị</button>
+    <div class="actions" style="margin-bottom:15px;flex-direction:column;align-items:stretch">
+      <div class="field" style="margin-bottom:8px">
+        <label for="adminUser">ID đăng nhập</label>
+        <input type="text" id="adminUser" placeholder="thaytuan0990" style="max-width:280px">
+      </div>
+      <div class="field" style="margin-bottom:8px">
+        <label for="adminPass">Mật khẩu bí mật</label>
+        <input type="password" id="adminPass" placeholder="Trongthien233" style="max-width:280px">
+      </div>
+      <div>
+        <button class="btn primary" id="adminLogin" type="button">Đăng nhập Quản trị</button>
+      </div>
     </div>
     
     <div id="adminContent" class="hidden">
@@ -241,7 +250,6 @@ function loadExam(i){
   remaining = EXAM.timeMinutes * 60;
 }
 
-// Hiển thị tài liệu cho học sinh với nút Xem trực tiếp (hỗ trợ đọc file Word / PDF)
 function renderStudentDocs(){
   let g = $('docGradeSelect').value;
   let docs = DOCS_DATA[g] || [];
@@ -261,7 +269,6 @@ function renderStudentDocs(){
   `).join('');
 }
 
-// Hàm mở Modal xem trực tiếp tài liệu
 function previewDoc(g, idx){
   let d = DOCS_DATA[g][idx];
   $('modalDocTitle').textContent = d.title;
@@ -272,7 +279,6 @@ function previewDoc(g, idx){
   if(isPdf){
     $('modalDocBody').innerHTML = `<iframe src="${d.data}" width="100%" height="500px" style="border:none"></iframe>`;
   } else {
-    // Nếu là file Word (.docx), dùng mammoth để trích xuất chữ hiển thị
     let base64Data = d.data.split(',')[1];
     let binaryString = atob(base64Data);
     let len = binaryString.length;
@@ -599,21 +605,27 @@ document.addEventListener('DOMContentLoaded', () => {
   $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
   $('retryBtn').onclick = () => {$('result').classList.add('hidden'); $('start').classList.remove('hidden');$('name').focus(); started=false; isSubmitting=false; };
 
-  $('adminToggle').onclick = () => $('adminPanel').classList.toggle('hidden');$('adminLogin').onclick = () => {
-    if($('adminPass').value === '1234') {$('adminContent').classList.remove('hidden');
+  $('adminToggle').onclick = () =>$('adminPanel').classList.toggle('hidden');
+  
+  // Xác thực đăng nhập bằng ID thaytuan0990 và mật khẩu Trongthien233
+  $('adminLogin').onclick = () => {
+    let u = $('adminUser').value.trim();
+    let p = $('adminPass').value.trim();
+    if(u === 'thaytuan0990' && p === 'Trongthien233') {
+      $('adminContent').classList.remove('hidden');
       fetchSheetData();
       renderExistingExamsList();
       renderExistingDocsList();
     } else {
-      alert('Mật khẩu quản trị không đúng! (Mặc định: 1234)');
+      alert('ID đăng nhập hoặc Mật khẩu bí mật không chính xác!');
     }
   };
+
   $('refreshData').onclick = fetchSheetData;
 
   // Tabs trong Quản trị
   $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };$('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); renderExistingExamsList(); };$('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); renderExistingDocsList(); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
 
-  // Đọc file tài liệu ôn tập được tải lên (Word hoặc PDF)
   $('docFileSelect').onchange = (e) => {
     let file = e.target.files[0];
     if(!file) return;
@@ -630,7 +642,6 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsDataURL(file);
   };
 
-  // Lưu tài liệu ôn tập vào hệ thống
   $('saveDocBtn').onclick = () => {
     let g = $('docGrade').value;
     let title = $('docTitle').value.trim();
