@@ -23,7 +23,7 @@
 </head>
 <body>
 <div id="app">
-<section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA & ÔN TẬP • THCS</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Làm bài trực tuyến • Tải tài liệu ôn tập dễ dàng</p></div></section>
+<section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA & ÔN TẬP • THCS</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Làm bài trực tuyến • Tải và xem tài liệu ôn tập dễ dàng</p></div></section>
 <div class="container">
 
 <!-- PHẦN 1: LÀM BÀI KIỂM TRA -->
@@ -47,10 +47,10 @@
 
 <section id="start" class="card"><h2>Thông tin học sinh</h2><p class="small">Em hãy nhập chính xác thông tin trước khi bắt đầu.</p><div class="grid"><div class="field"><label for="name">Họ và tên *</label><input id="name" placeholder="Nguyễn Văn A" autocomplete="name"></div><div class="field"><label for="className">Lớp *</label><input id="className" placeholder="7A1"></div></div><div style="height:16px"></div><div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div></section>
 
-<!-- PHẦN 2: TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG (ĐÃ ĐƯA XUỐNG DƯỚI) -->
+<!-- PHẦN 2: TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG (CÓ NÚT XEM TRỰC TIẾP & TẢI XUỐNG) -->
 <section class="card">
 <h2>📚 Tài liệu ôn tập & Đề cương</h2>
-<p class="small">Chọn khối lớp để xem và tải về các tài liệu, đề cương ôn tập (Word, PDF) do giáo viên cung cấp.</p>
+<p class="small">Chọn khối lớp để xem trực tuyến hoặc tải về các tài liệu, đề cương ôn tập (Word, PDF) do giáo viên cung cấp.</p>
 <div class="field" style="margin-bottom:14px">
   <label for="docGradeSelect">Chọn khối lớp xem tài liệu</label>
   <select id="docGradeSelect" style="max-width:280px">
@@ -135,10 +135,10 @@
         </div>
       </div>
 
-      <!-- Phần Quản lý Tài liệu Ôn tập (Tải file Word/PDF trực tiếp) -->
+      <!-- Phần Quản lý Tài liệu Ôn tập -->
       <div id="panelDocs" class="hidden">
         <h3>Quản lý Tài liệu ôn tập & Đề cương</h3>
-        <p class="small">Thầy có thể tải lên tệp Word hoặc PDF trực tiếp để học sinh tải về.</p>
+        <p class="small">Thầy có thể xem danh sách tài liệu hiện tại hoặc xóa các tài liệu không cần thiết.</p>
         
         <div class="field" style="margin-bottom:15px">
           <label><b>Danh sách tài liệu hiện có:</b></label>
@@ -186,16 +186,14 @@ let defaultExams = {
   "9": [{title:"Chưa có đề khối 9",timeMinutes:15,questions:[{text:"Chưa có câu hỏi",options:["A","B","C","D"],answer:0}]}]
 };
 
-let defaultDocs = {
-  "6": [], "7": [], "8": [], "9": []
-};
+let defaultDocs = { "6": [], "7": [], "8": [], "9": [] };
 
 let EXAMS_DATA = JSON.parse(localStorage.getItem('customExamsData') || JSON.stringify(defaultExams));
 let DOCS_DATA = JSON.parse(localStorage.getItem('customDocsData') || JSON.stringify(defaultDocs));
 
 let currentGrade="6", examIndex=0, EXAM=EXAMS_DATA["6"][0];
 let answers=[], activeQuestions=[], remaining=15*60, timerId=null, started=false, isSubmitting=false;
-let uploadedDocData = null; // Lưu trữ nội dung file tải lên dạng Base64
+let uploadedDocData = null;
 
 const $=id=>document.getElementById(id);
 
@@ -227,7 +225,7 @@ function loadExam(i){
   remaining = EXAM.timeMinutes * 60;
 }
 
-// Hiển thị tài liệu cho học sinh theo khối
+// Hiển thị tài liệu cho học sinh với cả 2 nút: Xem trực tiếp và Tải xuống
 function renderStudentDocs(){
   let g = $('docGradeSelect').value;
   let docs = DOCS_DATA[g] || [];
@@ -238,13 +236,15 @@ function renderStudentDocs(){
   }
   container.innerHTML = docs.map((d, idx) => `
     <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span>📄 <b>${d.title}</b></span>
-      <a href="${d.data}" download="${d.fileName}" class="btn primary" style="padding:6px 14px;font-size:14px;text-decoration:none">📥 Tải xuống</a>
+      <span>📄 <b>${d.title}</b> (${d.fileName})</span>
+      <div class="actions">
+        <a href="${d.data}" target="_blank" class="btn secondary" style="padding:6px 12px;font-size:14px;text-decoration:none">👁️ Xem trực tiếp</a>
+        <a href="${d.data}" download="${d.fileName}" class="btn primary" style="padding:6px 12px;font-size:14px;text-decoration:none">📥 Tải xuống</a>
+      </div>
     </div>
   `).join('');
 }
 
-// Hiển thị danh sách tài liệu trong quản trị để xóa
 function renderExistingDocsList(){
   let container = $('existingDocsList');
   let html = '';
@@ -572,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.onload = function(event) {
       uploadedDocData = {
         fileName: file.name,
-        data: event.target.result // Base64 của file
+        data: event.target.result
       };
       if($('docTitle').value.trim() === ''){
         $('docTitle').value = file.name.replace(/\.[^/.]+$/, "");
