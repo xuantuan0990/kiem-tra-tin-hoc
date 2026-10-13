@@ -53,6 +53,7 @@
 
 <section id="result" class="card hidden result"><h2>Trạng thái nộp bài</h2><div id="resultText"></div><div class="actions" style="justify-content:center;margin-top:20px"><button class="btn secondary" id="retryBtn">Làm bài khác</button></div></section>
 
+<!-- KHU VỰC QUẢN TRỊ GIÁO VIÊN ĐÃ ĐƯỢC TỐI ƯU VÀ KÍCH HOẠT ĐẦY ĐỦ -->
 <section class="card">
   <div class="actions" style="justify-content:space-between">
     <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Xem nhanh lịch sử bài làm trên thiết bị hoặc mở bảng điểm trực tuyến.</div></div>
@@ -60,7 +61,7 @@
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
     <div class="actions" style="margin-bottom:10px">
-      <input type="password" id="adminPass" placeholder="Nhập mật khẩu quản trị (mặc định: 1234)" style="max-width:280px;padding:8px 12px;border:1px solid var(--border);border-radius:8px">
+      <input type="password" id="adminPass" placeholder="Mật khẩu quản trị (mặc định: 1234)" style="max-width:280px;padding:8px 12px;border:1px solid var(--border);border-radius:8px">
       <button class="btn primary" id="adminLogin" type="button">Đăng nhập</button>
     </div>
     <div id="adminContent" class="hidden">
@@ -68,7 +69,7 @@
         <span class="small" id="totalSubmissions">Tổng số bài đã lưu trên máy: 0</span>
         <button class="btn danger-action" id="clearHistory" type="button">🗑️ Xóa sạch lịch sử máy này</button>
       </div>
-      <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Mã đề</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"></tbody></table></div>
+      <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Mã đề</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Trạng thái</th></tr></thead><tbody id="historyList"></tbody></table></div>
     </div>
   </div>
 </section>
@@ -78,7 +79,6 @@
 <script>
 const GOOGLE_SHEETS_URL='https://script.google.com/macros/s/AKfycbyi8yEfIGPU1WL0zW8Kqlwsi2cxYZ6mxuZycH65z_XGHMQRaD4VdnZZ-GV9bL82C-gA/exec';
 
-// Ngân hàng đề mở rộng đầy đủ Khối 6, 7, 8, 9
 const EXAMS_DATA = {
   "6": [
     {title:"Tin học 6 – Bài kiểm tra Chương 1 (Thông tin & Dữ liệu)",timeMinutes:15,questions:[
@@ -102,7 +102,7 @@ const EXAMS_DATA = {
     ]},
     {title:"Tin học 7 – Khám phá phần mềm bảng tính (Excel)",timeMinutes:15,questions:[
       {text:"Phần mềm bảng tính điện tử dùng để làm gì?",options:["Tính toán, lập bảng số liệu và vẽ biểu đồ","Soạn thảo văn bản đơn thuần","Chỉnh sửa video","Diệt virus"],answer:0},
-      {text:"Trong Excel, địa chỉ một ô được xác định bởi sự giao nhau giữa:",options:[Tên cột và tên hàng","Tên trang và tên tệp","Màu sắc và kích thước","Công thức và dữ liệu"],answer:0},
+      {text:"Trong Excel, địa chỉ một ô được xác định bởi sự giao nhau giữa:",options:["Tên cột và tên hàng","Tên trang và tên tệp","Màu sắc và kích thước","Công thức và dữ liệu"],answer:0},
       {text:"Hàm nào dùng để tính tổng các số trong Excel?",options:["SUM","AVERAGE","MAX","MIN"],answer:0}
     ]}
   ],
@@ -259,26 +259,28 @@ function finish(auto=false){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-$('gradeSelect').onchange = e => loadGrade(e.target.value);
-$('examSelect').onchange = e => loadExam(e.target.value);$('qrBtn').onclick = makeQR;
-$('startBtn').onclick = start;
-$('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
-$('retryBtn').onclick = () => {$('result').classList.add('hidden'); $('start').classList.remove('hidden');$('name').focus(); started=false; isSubmitting=false; };
+document.addEventListener('DOMContentLoaded', () => {
+  $('gradeSelect').onchange = e => loadGrade(e.target.value);
+  $('examSelect').onchange = e => loadExam(e.target.value);$('qrBtn').onclick = makeQR;
+  $('startBtn').onclick = start;
+  $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
+  $('retryBtn').onclick = () => {$('result').classList.add('hidden'); $('start').classList.remove('hidden');$('name').focus(); started=false; isSubmitting=false; };
 
-// Quản trị giáo viên
-$('adminToggle').onclick = () => $('adminPanel').classList.toggle('hidden');$('adminLogin').onclick = () => {
-  if($('adminPass').value === '1234') {$('adminContent').classList.remove('hidden');
-    showHistory();
-  } else {
-    alert('Mật khẩu quản trị không đúng! (Mặc định: 1234)');
-  }
-};
-$('clearHistory').onclick = () => {
-  if(confirm('Xóa toàn bộ kết quả đã lưu trên thiết bị này?')){
-    localStorage.removeItem('quizResults');
-    showHistory();
-  }
-};
+  // Kích hoạt khu vực quản trị giáo viên chính xác
+  $('adminToggle').onclick = () => $('adminPanel').classList.toggle('hidden');$('adminLogin').onclick = () => {
+    if($('adminPass').value === '1234') {$('adminContent').classList.remove('hidden');
+      showHistory();
+    } else {
+      alert('Mật khẩu quản trị không đúng! (Mặc định: 1234)');
+    }
+  };
+  $('clearHistory').onclick = () => {
+    if(confirm('Xóa toàn bộ kết quả đã lưu trên thiết bị này?')){
+      localStorage.removeItem('quizResults');
+      showHistory();
+    }
+  };
 
-readExamFromUrl();
+  readExamFromUrl();
+});
 </script></body></html>
