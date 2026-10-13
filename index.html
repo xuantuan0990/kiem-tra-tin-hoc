@@ -23,7 +23,7 @@
 </head>
 <body>
 <div id="app">
-<section class="hero"><div class="hero-inner"><span class="badge">KIỂM TRA TRỰC TUYẾN • TẢI FILE WORD CHUẨN XÁC 100%</span><h1 id="examTitle">Hệ thống Kiểm tra Tin học THCS</h1><p id="examInfo">Hỗ trợ đầy đủ các khối lớp • Nhận diện toàn bộ câu hỏi từ file Word</p></div></section>
+<section class="hero"><div class="hero-inner"><span class="badge">KIỂM TRA TRỰC TUYẾN • TRỘN ĐỀ NGẪU NHIÊN</span><h1 id="examTitle">Hệ thống Kiểm tra Tin học THCS</h1><p id="examInfo">Hỗ trợ đầy đủ các khối lớp • Tự động đảo thứ tự câu hỏi</p></div></section>
 <div class="container">
 
 <section class="card">
@@ -50,7 +50,7 @@
 <div class="grid" id="fixedQrGrid"></div>
 </section>
 
-<section id="start" class="card"><h2>Thông tin học sinh</h2><p class="small">Em hãy nhập chính xác thông tin trước khi bắt đầu.</p><div class="grid"><div class="field"><label for="name">Họ và tên *</label><input id="name" placeholder="Nguyễn Văn A" autocomplete="name"></div><div class="field"><label for="className">Lớp *</label><input id="className" placeholder="7A1"></div></div><div style="height:16px"></div><div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài</button></div></section>
+<section id="start" class="card"><h2>Thông tin học sinh</h2><p class="small">Em hãy nhập chính xác thông tin trước khi bắt đầu.</p><div class="grid"><div class="field"><label for="name">Họ và tên *</label><input id="name" placeholder="Nguyễn Văn A" autocomplete="name"></div><div class="field"><label for="className">Lớp *</label><input id="className" placeholder="7A1"></div></div><div style="height:16px"></div><div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div></section>
 
 <section id="exam" class="hidden"><div class="topbar"><div class="topbar-inner"><strong id="studentLabel"></strong><span class="timer" id="timer">15:00</span></div><div class="topbar-inner"><div style="width:100%"><div class="progress"><div id="progressBar"></div></div></div></div></div><div class="card" style="margin-top:16px"><div id="questions"></div><div class="submitbox"><div><strong id="answered">0/10</strong><div class="small">câu đã trả lời</div></div><button class="btn primary" id="submitBtn">Nộp bài</button></div></div></section>
 
@@ -59,7 +59,7 @@
 <!-- KHU VỰC QUẢN TRỊ & TẢI FILE WORD SOẠN ĐỀ -->
 <section class="card">
   <div class="actions" style="justify-content:space-between">
-    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Xem điểm Google Sheets & Tải file Word tạo đề tự động toàn bộ số câu.</div></div>
+    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Xem điểm Google Sheets & Tải file Word tạo đề thi mới.</div></div>
     <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị & Tải đề Word</button>
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
@@ -87,7 +87,7 @@
       <!-- Phần Tải file Word tạo đề -->
       <div id="panelBuilder" class="hidden">
         <h3>Tạo đề thi tự động từ Tệp Word (.docx)</h3>
-        <p class="small">Hệ thống sẽ tự động bóc tách toàn bộ 10 câu (hoặc nhiều hơn) kể cả khi các đáp án A, B, C, D nằm chung một dòng.</p>
+        <p class="small">Hệ thống nhận diện toàn bộ câu hỏi và tự động trộn ngẫu nhiên khi học sinh làm bài.</p>
         
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
@@ -146,7 +146,7 @@ let defaultExams = {
 let EXAMS_DATA = JSON.parse(localStorage.getItem('customExamsData') || JSON.stringify(defaultExams));
 
 let currentGrade="6", examIndex=0, EXAM=EXAMS_DATA["6"][0];
-let answers=[], remaining=15*60, timerId=null, started=false, isSubmitting=false;
+let answers=[], activeQuestions=[], remaining=15*60, timerId=null, started=false, isSubmitting=false;
 
 const $=id=>document.getElementById(id);
 
@@ -170,11 +170,10 @@ function loadExam(i){
   examIndex = +i;
   EXAM = EXAMS_DATA[currentGrade][examIndex];
   $('examTitle').textContent = EXAM.title;
-  $('examInfo').textContent = `Khối ${currentGrade} • ${EXAM.questions.length} câu • ${EXAM.timeMinutes} phút • Không cần tài khoản`;
-  answers = Array(EXAM.questions.length).fill(null);
+  $('examInfo').textContent = `Khối ${currentGrade} • ${EXAM.questions.length} câu • ${EXAM.timeMinutes} phút • Đề có trộn ngẫu nhiên`;
+  answers = [];
+  activeQuestions = [];
   remaining = EXAM.timeMinutes * 60;
-  updateProgress();
-  renderQuestions();
 }
 
 function initFixedQR(){
@@ -244,7 +243,7 @@ async function fetchSheetData(){
 }
 
 function saveResult(score){
-  let total = EXAMS_DATA[currentGrade][examIndex].questions.length;
+  let total = activeQuestions.length;
   let correct = score;
   let wrong = total - correct;
   let finalScore = ((correct / total) * 10).toFixed(1);
@@ -296,8 +295,29 @@ function readExamFromUrl(){
   }
 }
 
+// Thuật toán trộn ngẫu nhiên mảng câu hỏi (Fisher-Yates Shuffle)
+function shuffleArray(array) {
+  let arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 function renderQuestions(){
-  $('questions').innerHTML = EXAM.questions.map((q,i)=>`<div class="question"><div class="q-title">Câu ${i+1}. ${q.text}</div>${q.options.map((o,j)=>`<label class="option"><input type="radio" name="q${i}" value="${j}"> <span>${String.fromCharCode(65+j)}.${o}</span></label>`).join('')}</div>`).join('');
+  $('questions').innerHTML = activeQuestions.map((q,i)=>`
+    <div class="question">
+      <div class="q-title">Câu ${i+1}. ${q.text}</div>
+      ${q.options.map((o,j)=>`
+        <label class="option">
+          <input type="radio" name="q${i}" value="${j}">
+          <span>${String.fromCharCode(65+j)}.${o}</span>
+        </label>
+      `).join('')}
+    </div>
+  `).join('');
+  
   document.querySelectorAll('input[type=radio]').forEach(x=>x.addEventListener('change',e=>{
     answers[+e.target.name.slice(1)] = +e.target.value;
     updateProgress();
@@ -306,18 +326,32 @@ function renderQuestions(){
 
 function updateProgress(){
   let n = answers.filter(x=>x!==null).length;
-  $('answered').textContent = `${n}/${EXAM.questions.length}`;
-  $('progressBar').style.width = `${n/EXAM.questions.length*100}%`;
+  $('answered').textContent = `${n}/${activeQuestions.length}`;
+  $('progressBar').style.width = `${n/activeQuestions.length*100}%`;
 }
 
 function start(){
   let n = $('name').value.trim(), c =$('className').value.trim();
   if(!n || !c){ alert('Thầy yêu cầu học sinh nhập đầy đủ Họ và tên và Lớp.'); return; }
-  started = true; isSubmitting = false; answers.fill(null); remaining = EXAM.timeMinutes * 60;
+  
+  started = true; 
+  isSubmitting = false; 
+  
+  // Trộn ngẫu nhiên câu hỏi mỗi khi bắt đầu làm bài
+  activeQuestions = shuffleArray(EXAM.questions);
+  answers = Array(activeQuestions.length).fill(null);
+  remaining = EXAM.timeMinutes * 60;
+
   $('studentLabel').textContent = `${n} • ${c}`;
-  $('start').classList.add('hidden'); $('result').classList.add('hidden');$('exam').classList.remove('hidden');
-  renderQuestions(); updateProgress(); tick();
-  clearInterval(timerId); timerId = setInterval(tick, 1000);
+  $('start').classList.add('hidden'); 
+  $('result').classList.add('hidden');$('exam').classList.remove('hidden');
+  
+  renderQuestions(); 
+  updateProgress(); 
+  tick();
+  
+  clearInterval(timerId); 
+  timerId = setInterval(tick, 1000);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -329,10 +363,19 @@ function tick(){
 
 function finish(auto=false){
   if(!started || isSubmitting) return;
-  isSubmitting = true; clearInterval(timerId);
-  let score = answers.reduce((sum,a,i)=>sum+(a===EXAM.questions[i].answer?1:0),0);
+  isSubmitting = true; 
+  clearInterval(timerId);
+  
+  // Chấm điểm dựa trên danh sách câu hỏi đã được trộn
+  let score = answers.reduce((sum,a,i)=>sum+(a===activeQuestions[i].answer?1:0),0);
   saveResult(score);
-  $('exam').classList.add('hidden'); $('result').classList.remove('hidden');$('resultText').innerHTML = `<div class="score">✅ ĐÃ NỘP BÀI THÀNH CÔNG</div><p class="small">${auto?'Hết thời gian, hệ thống đã tự động nộp bài.':'Bài làm của em đã được ghi nhận vào hệ thống.'}</p><p class="small" style="font-size:16px;font-weight:bold;color:var(--primary);margin-top:15px">Em vui lòng giữ trật tự và chờ giáo viên thông báo điểm.</p>`;
+  
+  $('exam').classList.add('hidden'); 
+  $('result').classList.remove('hidden');$('resultText').innerHTML = `
+    <div class="score">✅ ĐÃ NỘP BÀI THÀNH CÔNG</div>
+    <p class="small">${auto?'Hết thời gian, hệ thống đã tự động nộp bài.':'Bài làm của em đã được ghi nhận vào hệ thống.'}</p>
+    <p class="small" style="font-size:16px;font-weight:bold;color:var(--primary);margin-top:15px">Em vui lòng giữ trật tự và chờ giáo viên thông báo điểm.</p>
+  `;
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -368,11 +411,8 @@ function addBuilderQuestion(qData = null){
   container.appendChild(div);
 }
 
-// Cải tiến bộ phân tích: Tự động tách các đáp án nằm chung dòng và nhận diện cả dấu chấm/hai chấm sau chữ Câu
 function parseWordText(text){
-  // Tự động tách các đáp án A, B, C, D nếu chúng nằm chung trên một dòng
   text = text.replace(/([ \t]+)([A-D][\.\)])/g, '\n$2');
-  
   let lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   let questions = [];
   let currentQ = null;
@@ -487,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     localStorage.setItem('customExamsData', JSON.stringify(EXAMS_DATA));
 
-    alert(`Đã lưu và phát hành thành công bài kiểm tra với ${questions.length} câu hỏi!`);
+    alert(`Đã lưu và phát hành thành công bài kiểm tra với ${questions.length} câu hỏi (kèm tính năng trộn đề)!`);
     $('builderTitle').value = '';$('wordFileSelect').value = '';
     $('builderQuestionsContainer').innerHTML = '';$('gradeSelect').value = g;
     loadGrade(g);
