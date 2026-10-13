@@ -490,4 +490,210 @@ function start(){
   updateProgress(); 
   tick();
   
-  clearInterval
+  clearInterval(timerId); 
+  timerId = setInterval(tick, 1000);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function tick(){
+  let m = Math.floor(remaining/60), s = remaining%60;
+  $('timer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(remaining <= 0){ clearInterval(timerId); finish(true); } else { remaining--; }
+}
+
+function finish(auto=false){
+  if(!started || isSubmitting) return;
+  isSubmitting = true; 
+  clearInterval(timerId);
+  
+  let score = answers.reduce((sum,a,i)=>sum+(a===activeQuestions[i].answer?1:0),0);
+  saveResult(score);
+  
+  $('exam').classList.add('hidden'); 
+  $('result').classList.remove('hidden');$('resultText').innerHTML = `
+    <div class="score">✅ ĐÃ NỘP BÀI THÀNH CÔNG</div>
+    <p class="small">${auto?'Hết thời gian, hệ thống đã tự động nộp bài.':'Bài làm của em đã được ghi nhận vào hệ thống.'}</p>
+    <p class="small" style="font-size:16px;font-weight:bold;color:var(--primary);margin-top:15px">Em vui lòng giữ trật tự và chờ giáo viên thông báo điểm.</p>
+  `;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function addBuilderQuestion(qData = null){
+  let container = $('builderQuestionsContainer');
+  let qIndex = container.children.length + 1;
+  let div = document.createElement('div');
+  div.className = 'builder-q';
+  div.innerHTML = `
+    <div class="actions" style="justify-content:space-between;margin-bottom:8px">
+      <strong>Câu hỏi ${qIndex}</strong>
+      <button class="btn danger-action" type="button" style="padding:4px 10px;font-size:13px" onclick="this.parentElement.parentElement.remove()">Xóa câu</button>
+    </div>
+    <div class="field" style="margin-bottom:8px">
+      <input type="text" class="bq-text" placeholder="Nhập nội dung câu hỏi..." value="${qData?qData.text:''}">
+    </div>
+    <div class="grid">
+      <div class="field"><input type="text" class="bq-opt0" placeholder="Đáp án A" value="${qData?qData.options[0]:''}"></div>
+      <div class="field"><input type="text" class="bq-opt1" placeholder="Đáp án B" value="${qData?qData.options[1]:''}"></div>
+      <div class="field"><input type="text" class="bq-opt2" placeholder="Đáp án C" value="${qData?qData.options[2]:''}"></div>
+      <div class="field"><input type="text" class="bq-opt3" placeholder="Đáp án D" value="${qData?qData.options[3]:''}"></div>
+    </div>
+    <div class="field" style="margin-top:8px">
+      <label class="small">Đáp án đúng:</label>
+      <select class="bq-ans" style="max-width:200px">
+        <option value="0" ${qData&&qData.answer===0?'selected':''}>Đáp án A</option>
+        <option value="1" ${qData&&qData.answer===1?'selected':''}>Đáp án B</option>
+        <option value="2" ${qData&&qData.answer===2?'selected':''}>Đáp án C</option>
+        <option value="3" ${qData&&qData.answer===3?'selected':''}>Đáp án D</option>
+      </select>
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+function parseWordText(text){
+  text = text.replace(/([ \t]+)([A-D][\.\)])/g, '\n$2');
+  let lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  let questions = [];
+  let currentQ = null;
+  let currentOpts = [];
+
+  for(let line of lines){
+    if(/^câu\s*\d+[\:\.]/i.test(line)){
+      if(currentQ && currentOpts.length >= 2){
+        questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
+      }
+      currentQ = line.replace(/^câu\s*\d+[\:\.]\s*/i, '');
+      currentOpts = [];
+    } 
+    else if(/^[A-D][\.\)]\s*/i.test(line)){
+      let optText = line.replace(/^[A-D][\.\)]\s*/i, '');
+      currentOpts.push(optText);
+    } 
+    else {
+      if(currentOpts.length > 0){
+        currentOpts[currentOpts.length - 1] += " " + line;
+      } else if(currentQ){
+        currentQ += " " + line;
+      }
+    }
+  }
+  if(currentQ && currentOpts.length >= 2){
+    questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
+  }
+  return questions;
+}
+
+function padOptions(opts){
+  while(opts.length < 4) opts.push("Không có đáp án");
+  return opts.slice(0, 4);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  $('gradeSelect').onchange = e => loadGrade(e.target.value);
+  $('examSelect').onchange = e => loadExam(e.target.value);$('docGradeSelect').onchange = renderStudentDocs;
+  $('qrBtn').onclick = makeQR;
+  $('startBtn').onclick = start;
+  $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
+  $('retryBtn').onclick = () => {$('result').classList.add('hidden'); $('start').classList.remove('hidden');$('name').focus(); started=false; isSubmitting=false; };
+
+  // Đóng/mở khung Quản trị
+  $('adminToggle').onclick = () => {
+    let panel = $('adminPanel');
+    if(panel.classList.contains('hidden')){
+      panel.classList.remove('hidden');
+    } else {
+      panel.classList.add('hidden');
+      $('adminPass').value = '';$('adminContent').classList.add('hidden');
+    }
+  };
+  
+  // Đăng nhập mật khẩu Trongthien233
+  $('adminLogin').onclick = () => {
+    let p = $('adminPass').value.trim();
+    if(p === 'Trongthien233') {
+      $('adminContent').classList.remove('hidden');
+      fetchSheetData();
+      renderExistingExamsList();
+      renderExistingDocsList();
+    } else {
+      alert('Mật khẩu quản trị không chính xác!');
+    }
+  };
+
+  $('refreshData').onclick = fetchSheetData;
+
+  // Tabs trong Quản trị
+  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };$('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); renderExistingExamsList(); };$('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); renderExistingDocsList(); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
+
+  $('docFileSelect').onchange = (e) => {
+    let file = e.target.files[0];
+    if(!file) return;
+    let reader = new FileReader();
+    reader.onload = function(event) {
+      uploadedDocData = {
+        fileName: file.name,
+        data: event.target.result
+      };
+      if($('docTitle').value.trim() === ''){
+        $('docTitle').value = file.name.replace(/\.[^/.]+$/, "");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  $('saveDocBtn').onclick = () => {
+    let g = $('docGrade').value;
+    let title = $('docTitle').value.trim();
+    if(!title || !uploadedDocData){ alert('Thầy vui lòng nhập tên tài liệu và chọn file tệp để tải lên!'); return; }
+
+    if(!DOCS_DATA[g]) DOCS_DATA[g] = [];
+    DOCS_DATA[g].push({
+      title: title,
+      fileName: uploadedDocData.fileName,
+      data: uploadedDocData.data
+    });
+    localStorage.setItem('customDocsData', JSON.stringify(DOCS_DATA));
+
+    alert('Đã tải lên và phát hành tài liệu ôn tập thành công!');
+    $('docTitle').value = '';$('docFileSelect').value = '';
+    uploadedDocData = null;
+    renderExistingDocsList();
+    renderStudentDocs();
+  };
+
+  $('wordFileSelect').onchange = (e) => {
+    let file = e.target.files[0];
+    if(!file) return;
+    let reader = new FileReader();
+    reader.onload = function(event) {
+      let arrayBuffer = event.target.result;
+      mammoth.extractRawText({arrayBuffer: arrayBuffer})
+        .then(function(result) {
+          let text = result.value;
+          let parsedQs = parseWordText(text);
+          if(parsedQs.length === 0){
+            alert('Không tự động nhận diện được câu hỏi từ tệp này.');
+            return;
+          }
+          $('builderQuestionsContainer').innerHTML = '';
+          if($('builderTitle').value.trim() === ''){
+            $('builderTitle').value = file.name.replace(/\.[^/.]+$/, "");
+          }
+          parsedQs.forEach(q => addBuilderQuestion(q));
+          alert(`Đã nhận diện thành công toàn bộ ${parsedQs.length} câu hỏi từ tệp Word!`);
+        })
+        .catch(function(err) {
+          alert('Lỗi đọc tệp Word: ' + err);
+        });
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  $('saveExamBtn').onclick = () => {
+    let g = $('builderGrade').value;
+    let title = $('builderTitle').value.trim();
+    let timeM = parseInt($('builderTime').value) || 15;
+    if(!title){ alert('Thầy vui lòng nhập tên bài kiểm tra!'); return; }
+
+    let qDivs = document.querySelectorAll('.builder-q');
+    if(qDiv
