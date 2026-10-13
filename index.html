@@ -45,10 +45,12 @@
 <div id="qrBox" class="hidden" style="margin-top:16px;text-align:center;border-top:1px solid var(--border);padding-top:16px"><img id="qrImg" alt="Mã QR" width="200" height="200" style="border:6px solid white;border-radius:8px"><p class="small">Học sinh quét mã QR để mở đúng bài kiểm tra.</p><div id="qrLink" class="small" style="word-break:break-all"></div></div>
 </section>
 
-<!-- PHẦN 2: TÀI LIỆU ÔN TẬP CHO HỌC SINH -->
+<section id="start" class="card"><h2>Thông tin học sinh</h2><p class="small">Em hãy nhập chính xác thông tin trước khi bắt đầu.</p><div class="grid"><div class="field"><label for="name">Họ và tên *</label><input id="name" placeholder="Nguyễn Văn A" autocomplete="name"></div><div class="field"><label for="className">Lớp *</label><input id="className" placeholder="7A1"></div></div><div style="height:16px"></div><div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div></section>
+
+<!-- PHẦN 2: TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG (ĐÃ ĐƯA XUỐNG DƯỚI) -->
 <section class="card">
 <h2>📚 Tài liệu ôn tập & Đề cương</h2>
-<p class="small">Chọn khối lớp để xem và tải về các tài liệu, đề cương ôn tập do giáo viên cung cấp.</p>
+<p class="small">Chọn khối lớp để xem và tải về các tài liệu, đề cương ôn tập (Word, PDF) do giáo viên cung cấp.</p>
 <div class="field" style="margin-bottom:14px">
   <label for="docGradeSelect">Chọn khối lớp xem tài liệu</label>
   <select id="docGradeSelect" style="max-width:280px">
@@ -60,8 +62,6 @@
 </div>
 <div id="studentDocsList" style="border-top:1px solid var(--border);padding-top:12px"></div>
 </section>
-
-<section id="start" class="card"><h2>Thông tin học sinh</h2><p class="small">Em hãy nhập chính xác thông tin trước khi bắt đầu.</p><div class="grid"><div class="field"><label for="name">Họ và tên *</label><input id="name" placeholder="Nguyễn Văn A" autocomplete="name"></div><div class="field"><label for="className">Lớp *</label><input id="className" placeholder="7A1"></div></div><div style="height:16px"></div><div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div></section>
 
 <section id="exam" class="hidden"><div class="topbar"><div class="topbar-inner"><strong id="studentLabel"></strong><span class="timer" id="timer">15:00</span></div><div class="topbar-inner"><div style="width:100%"><div class="progress"><div id="progressBar"></div></div></div></div></div><div class="card" style="margin-top:16px"><div id="questions"></div><div class="submitbox"><div><strong id="answered">0/10</strong><div class="small">câu đã trả lời</div></div><button class="btn primary" id="submitBtn">Nộp bài</button></div></div></section>
 
@@ -135,10 +135,10 @@
         </div>
       </div>
 
-      <!-- Phần Quản lý Tài liệu Ôn tập -->
+      <!-- Phần Quản lý Tài liệu Ôn tập (Tải file Word/PDF trực tiếp) -->
       <div id="panelDocs" class="hidden">
         <h3>Quản lý Tài liệu ôn tập & Đề cương</h3>
-        <p class="small">Thêm hoặc xóa các tài liệu ôn tập để học sinh các khối lớp tải về.</p>
+        <p class="small">Thầy có thể tải lên tệp Word hoặc PDF trực tiếp để học sinh tải về.</p>
         
         <div class="field" style="margin-bottom:15px">
           <label><b>Danh sách tài liệu hiện có:</b></label>
@@ -147,7 +147,7 @@
 
         <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
 
-        <h3>Đăng tải liệu mới</h3>
+        <h3>Tải lên tệp tài liệu mới</h3>
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
             <label>Chọn khối lớp</label>
@@ -163,9 +163,9 @@
             <input type="text" id="docTitle" placeholder="Ví dụ: Đề cương ôn tập giữa kì 1">
           </div>
         </div>
-        <div class="field" style="margin-bottom:15px">
-          <label>Đường dẫn tải tài liệu (Link Google Drive, OneDrive, v.v.)</label>
-          <input type="text" id="docUrl" placeholder="https://drive.google.com/...">
+        <div class="field" style="margin-bottom:15px;background:var(--bg);padding:15px;border-radius:12px;border:2px dashed var(--border)">
+          <label style="font-weight:bold;margin-bottom:8px">📂 Chọn tệp tài liệu (.docx, .pdf)</label>
+          <input type="file" id="docFileSelect" accept=".docx,.pdf" style="padding:8px">
         </div>
         <button class="btn primary" id="saveDocBtn" type="button">💾 Lưu và đăng tài liệu</button>
       </div>
@@ -187,10 +187,7 @@ let defaultExams = {
 };
 
 let defaultDocs = {
-  "6": [{title:"Đề cương ôn tập môn Tin học 6", url:"#"}],
-  "7": [{title:"Đề cương ôn tập môn Tin học 7", url:"#"}],
-  "8": [{title:"Đề cương ôn tập môn Tin học 8", url:"#"}],
-  "9": [{title:"Đề cương ôn tập môn Tin học 9", url:"#"}]
+  "6": [], "7": [], "8": [], "9": []
 };
 
 let EXAMS_DATA = JSON.parse(localStorage.getItem('customExamsData') || JSON.stringify(defaultExams));
@@ -198,6 +195,7 @@ let DOCS_DATA = JSON.parse(localStorage.getItem('customDocsData') || JSON.string
 
 let currentGrade="6", examIndex=0, EXAM=EXAMS_DATA["6"][0];
 let answers=[], activeQuestions=[], remaining=15*60, timerId=null, started=false, isSubmitting=false;
+let uploadedDocData = null; // Lưu trữ nội dung file tải lên dạng Base64
 
 const $=id=>document.getElementById(id);
 
@@ -238,10 +236,10 @@ function renderStudentDocs(){
     container.innerHTML = '<p class="small">Chưa có tài liệu ôn tập nào cho khối này.</p>';
     return;
   }
-  container.innerHTML = docs.map(d => `
+  container.innerHTML = docs.map((d, idx) => `
     <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
       <span>📄 <b>${d.title}</b></span>
-      <a href="${d.url}" target="_blank" class="btn primary" style="padding:6px 14px;font-size:14px;text-decoration:none">📥 Tải tài liệu</a>
+      <a href="${d.data}" download="${d.fileName}" class="btn primary" style="padding:6px 14px;font-size:14px;text-decoration:none">📥 Tải xuống</a>
     </div>
   `).join('');
 }
@@ -255,7 +253,7 @@ function renderExistingDocsList(){
     docs.forEach((d, idx) => {
       html += `
         <div class="actions" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
-          <span><b>[Khối ${g}]</b> ${d.title}</span>
+          <span><b>[Khối ${g}]</b> ${d.title} (${d.fileName})</span>
           <button class="btn danger-action" type="button" style="padding:4px 10px;font-size:13px" onclick="deleteDoc('${g}', ${idx})">🗑️ Xóa tài liệu</button>
         </div>
       `;
@@ -566,19 +564,40 @@ document.addEventListener('DOMContentLoaded', () => {
   // Tabs trong Quản trị
   $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };$('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); renderExistingExamsList(); };$('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); renderExistingDocsList(); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
 
-  // Lưu tài liệu ôn tập mới
+  // Đọc file tài liệu ôn tập được tải lên (Word hoặc PDF)
+  $('docFileSelect').onchange = (e) => {
+    let file = e.target.files[0];
+    if(!file) return;
+    let reader = new FileReader();
+    reader.onload = function(event) {
+      uploadedDocData = {
+        fileName: file.name,
+        data: event.target.result // Base64 của file
+      };
+      if($('docTitle').value.trim() === ''){
+        $('docTitle').value = file.name.replace(/\.[^/.]+$/, "");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Lưu tài liệu ôn tập vào hệ thống
   $('saveDocBtn').onclick = () => {
     let g = $('docGrade').value;
     let title = $('docTitle').value.trim();
-    let url = $('docUrl').value.trim();
-    if(!title || !url){ alert('Thầy vui lòng nhập đầy đủ tên tài liệu và đường dẫn tải!'); return; }
+    if(!title || !uploadedDocData){ alert('Thầy vui lòng nhập tên tài liệu và chọn file tệp để tải lên!'); return; }
 
     if(!DOCS_DATA[g]) DOCS_DATA[g] = [];
-    DOCS_DATA[g].push({title: title, url: url});
+    DOCS_DATA[g].push({
+      title: title,
+      fileName: uploadedDocData.fileName,
+      data: uploadedDocData.data
+    });
     localStorage.setItem('customDocsData', JSON.stringify(DOCS_DATA));
 
-    alert('Đã đăng tải liệu ôn tập thành công!');
-    $('docTitle').value = '';$('docUrl').value = '';
+    alert('Đã tải lên và phát hành tài liệu ôn tập thành công!');
+    $('docTitle').value = '';$('docFileSelect').value = '';
+    uploadedDocData = null;
     renderExistingDocsList();
     renderStudentDocs();
   };
