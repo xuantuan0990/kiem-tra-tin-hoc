@@ -696,4 +696,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!title){ alert('Thầy vui lòng nhập tên bài kiểm tra!'); return; }
 
     let qDivs = document.querySelectorAll('.builder-q');
-    if(qDiv
+    if(qDivs.length === 0){ alert('Thầy vui lòng thêm ít nhất một câu hỏi!'); return; }
+
+    let questions = [];
+    for(let div of qDivs){
+      let text = div.querySelector('.bq-text').value.trim();
+      let o0 = div.querySelector('.bq-opt0').value.trim();
+      let o1 = div.querySelector('.bq-opt1').value.trim();
+      let o2 = div.querySelector('.bq-opt2').value.trim();
+      let o3 = div.querySelector('.bq-opt3').value.trim();
+      let ans = parseInt(div.querySelector('.bq-ans').value);
+
+      if(!text || !o0 || !o1 || !o2 || !o3){
+        alert('Vui lòng điền đầy đủ nội dung câu hỏi và các đáp án A, B, C, D!');
+        return;
+      }
+      questions.push({text: text, options: [o0, o1, o2, o3], answer: ans});
+    }
+
+    let newExam = {title: title, timeMinutes: timeM, questions: questions};
+    if(!EXAMS_DATA[g]) EXAMS_DATA[g] = [];
+    EXAMS_DATA[g].push(newExam);
+
+    localStorage.setItem('customExamsData', JSON.stringify(EXAMS_DATA));
+
+    alert(`Đã lưu và phát hành thành công bài kiểm tra với ${questions.length} câu hỏi!`);
+    $('builderTitle').value = '';$('wordFileSelect').value = '';
+    $('builderQuestionsContainer').innerHTML = '';$('gradeSelect').value = g;
+    loadGrade(g);
+    renderExistingExamsList();
+    $('panelScores').classList.remove('hidden');
+    $('panelExams').classList.add('hidden');$('panelDocs').classList.add('hidden');
+  };
+
+  readExamFromUrl();
+  renderStudentDocs();
+});
+</script></body></html>
