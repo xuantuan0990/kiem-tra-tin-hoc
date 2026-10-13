@@ -17,6 +17,11 @@
 .hidden{display:none!important}.topbar{position:sticky;top:0;z-index:4;background:var(--surface);border-bottom:1px solid var(--border);padding:11px 16px}.topbar-inner{max-width:1000px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:10px}.timer{font-weight:800;color:var(--danger);background:#fee2e2;padding:8px 12px;border-radius:10px}.progress{height:8px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin-top:10px}.progress>div{height:100%;background:var(--primary);width:0;transition:width .2s}
 .question{border:1px solid var(--border);border-radius:15px;padding:18px;margin:14px 0}.q-title{font-weight:800;line-height:1.5;margin-bottom:13px}.option{display:flex;gap:10px;align-items:flex-start;padding:11px;border:1px solid var(--border);border-radius:10px;margin:8px 0;cursor:pointer}.option:hover{background:#eff6ff}.option input{margin-top:4px}.submitbox{position:sticky;bottom:12px;background:var(--surface);border:1px solid var(--border);box-shadow:0 8px 30px #0002;padding:14px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}.result{text-align:center}.score{font-size:32px;font-weight:900;color:var(--primary);margin:8px}.small{color:var(--muted);font-size:14px}.footer{text-align:center;color:var(--muted);padding:18px}
 .builder-q{border:1px dashed var(--border);padding:15px;border-radius:12px;margin-bottom:12px;background:var(--bg)}
+/* Modal xem trước tài liệu */
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:100;display:flex;justify-content:center;align-items:center;padding:20px}
+.modal-content{background:var(--surface);width:100%;max-width:800px;max-height:85vh;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border);box-shadow:0 12px 40px rgba(0,0,0,0.2)}
+.modal-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-body{padding:20px;overflow-y:auto;flex-grow:1;font-size:15px;line-height:1.6}
 @media(max-width:650px){.grid{grid-template-columns:1fr}.hero h1{font-size:25px}.card{padding:16px}.submitbox{flex-direction:column;align-items:stretch}.submitbox .btn{width:100%}}
 @media(prefers-color-scheme:dark){:root{--bg:#0b1220;--surface:#111827;--text:#e5e7eb;--muted:#9ca3af;--border:#263244}.option:hover{background:#172554}.secondary{background:#1f2937;color:var(--text)}}
 </style>
@@ -47,7 +52,7 @@
 
 <section id="start" class="card"><h2>Thông tin học sinh</h2><p class="small">Em hãy nhập chính xác thông tin trước khi bắt đầu.</p><div class="grid"><div class="field"><label for="name">Họ và tên *</label><input id="name" placeholder="Nguyễn Văn A" autocomplete="name"></div><div class="field"><label for="className">Lớp *</label><input id="className" placeholder="7A1"></div></div><div style="height:16px"></div><div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div></section>
 
-<!-- PHẦN 2: TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG (CÓ NÚT XEM TRỰC TIẾP & TẢI XUỐNG) -->
+<!-- PHẦN 2: TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG -->
 <section class="card">
 <h2>📚 Tài liệu ôn tập & Đề cương</h2>
 <p class="small">Chọn khối lớp để xem trực tuyến hoặc tải về các tài liệu, đề cương ôn tập (Word, PDF) do giáo viên cung cấp.</p>
@@ -174,6 +179,17 @@
   </div>
 </section>
 
+<!-- MODAL XEM TRỰC TIẾP TÀI LIỆU -->
+<div id="docModal" class="modal hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalDocTitle" style="margin:0">Xem trước tài liệu</h3>
+      <button class="btn danger-action" type="button" style="padding:6px 12px;font-size:14px" onclick="closeDocModal()">✕ Đóng</button>
+    </div>
+    <div class="modal-body" id="modalDocBody">Đang tải nội dung...</div>
+  </div>
+</div>
+
 <div class="footer">Hệ thống kiểm tra & Tài liệu THCS • Không cần tài khoản học sinh</div>
 </div></div>
 <script>
@@ -225,7 +241,7 @@ function loadExam(i){
   remaining = EXAM.timeMinutes * 60;
 }
 
-// Hiển thị tài liệu cho học sinh với cả 2 nút: Xem trực tiếp và Tải xuống
+// Hiển thị tài liệu cho học sinh với nút Xem trực tiếp (hỗ trợ đọc file Word / PDF)
 function renderStudentDocs(){
   let g = $('docGradeSelect').value;
   let docs = DOCS_DATA[g] || [];
@@ -238,11 +254,44 @@ function renderStudentDocs(){
     <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
       <span>📄 <b>${d.title}</b> (${d.fileName})</span>
       <div class="actions">
-        <a href="${d.data}" target="_blank" class="btn secondary" style="padding:6px 12px;font-size:14px;text-decoration:none">👁️ Xem trực tiếp</a>
+        <button class="btn secondary" type="button" style="padding:6px 12px;font-size:14px" onclick="previewDoc('${g}', ${idx})">👁️ Xem trực tiếp</button>
         <a href="${d.data}" download="${d.fileName}" class="btn primary" style="padding:6px 12px;font-size:14px;text-decoration:none">📥 Tải xuống</a>
       </div>
     </div>
   `).join('');
+}
+
+// Hàm mở Modal xem trực tiếp tài liệu
+function previewDoc(g, idx){
+  let d = DOCS_DATA[g][idx];
+  $('modalDocTitle').textContent = d.title;
+  $('modalDocBody').innerHTML = 'Đang tải nội dung tài liệu...';
+  $('docModal').classList.remove('hidden');
+
+  let isPdf = d.fileName.toLowerCase().endsWith('.pdf');
+  if(isPdf){
+    $('modalDocBody').innerHTML = `<iframe src="${d.data}" width="100%" height="500px" style="border:none"></iframe>`;
+  } else {
+    // Nếu là file Word (.docx), dùng mammoth để trích xuất chữ hiển thị
+    let base64Data = d.data.split(',')[1];
+    let binaryString = atob(base64Data);
+    let len = binaryString.length;
+    let bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    mammoth.convertToHtml({arrayBuffer: bytes.buffer})
+      .then(function(result){
+        $('modalDocBody').innerHTML = result.value || '<p>Không có nội dung hiển thị.</p>';
+      })
+      .catch(function(err){
+        $('modalDocBody').innerHTML = '<p style="color:var(--danger)">Không thể đọc trước định dạng file này. Thầy/em vui lòng bấm "Tải xuống" để xem.</p>';
+      });
+  }
+}
+
+function closeDocModal(){
+  $('docModal').classList.add('hidden');$('modalDocBody').innerHTML = '';
 }
 
 function renderExistingDocsList(){
