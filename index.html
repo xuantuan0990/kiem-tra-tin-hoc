@@ -23,7 +23,7 @@
 </head>
 <body>
 <div id="app">
-<section class="hero"><div class="hero-inner"><span class="badge">KIỂM TRA TRỰC TUYẾN • TRỘN ĐỀ NGẪU NHIÊN</span><h1 id="examTitle">Hệ thống Kiểm tra Tin học THCS</h1><p id="examInfo">Hỗ trợ đầy đủ các khối lớp • Tự động đảo thứ tự câu hỏi</p></div></section>
+<section class="hero"><div class="hero-inner"><span class="badge">KIỂM TRA TRỰC TUYẾN • QUẢN LÝ VÀ XÓA ĐỀ THI</span><h1 id="examTitle">Hệ thống Kiểm tra Tin học THCS</h1><p id="examInfo">Hỗ trợ đầy đủ các khối lớp • Quản lý, thêm và xóa đề linh hoạt</p></div></section>
 <div class="container">
 
 <section class="card">
@@ -56,11 +56,11 @@
 
 <section id="result" class="card hidden result"><h2>Trạng thái nộp bài</h2><div id="resultText"></div><div class="actions" style="justify-content:center;margin-top:20px"><button class="btn secondary" id="retryBtn">Làm bài khác</button></div></section>
 
-<!-- KHU VỰC QUẢN TRỊ & TẢI FILE WORD SOẠN ĐỀ -->
+<!-- KHU VỰC QUẢN TRỊ & QUẢN LÝ ĐỀ THI -->
 <section class="card">
   <div class="actions" style="justify-content:space-between">
-    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Xem điểm Google Sheets & Tải file Word tạo đề thi mới.</div></div>
-    <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị & Tải đề Word</button>
+    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Xem điểm Google Sheets, tải đề Word và quản lý/xóa đề cũ.</div></div>
+    <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị Hệ thống</button>
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
     <div class="actions" style="margin-bottom:15px">
@@ -72,7 +72,7 @@
       <!-- Tab chuyển đổi -->
       <div class="actions" style="margin-bottom:15px">
         <button class="btn primary" id="tabScores" type="button">📊 Xem bảng điểm</button>
-        <button class="btn qr-action" id="tabBuilder" type="button">📄 Tải File Word Tạo Đề</button>
+        <button class="btn qr-action" id="tabBuilder" type="button">📄 Quản lý & Tải đề Word</button>
       </div>
 
       <!-- Phần Xem điểm -->
@@ -84,11 +84,19 @@
         <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Mã đề</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Sai</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Tổng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="10" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
       </div>
 
-      <!-- Phần Tải file Word tạo đề -->
+      <!-- Phần Quản lý và Tải file Word tạo đề -->
       <div id="panelBuilder" class="hidden">
-        <h3>Tạo đề thi tự động từ Tệp Word (.docx)</h3>
-        <p class="small">Hệ thống nhận diện toàn bộ câu hỏi và tự động trộn ngẫu nhiên khi học sinh làm bài.</p>
+        <h3>Quản lý danh sách đề hiện tại</h3>
+        <p class="small">Thầy có thể xóa các đề cũ không còn sử dụng hoặc tải thêm đề mới từ tệp Word.</p>
         
+        <div class="field" style="margin-bottom:15px">
+          <label><b>Danh sách các đề đang có trên hệ thống theo khối:</b></label>
+          <div id="existingExamsList" style="margin-top:8px;border:1px solid var(--border);padding:10px;border-radius:10px;max-height:200px;overflow-y:auto"></div>
+        </div>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+        <h3>Tạo đề thi mới từ Tệp Word (.docx)</h3>
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
             <label>Chọn khối lớp</label>
@@ -159,6 +167,7 @@ function updateExamSelect(){
   $('examSelect').innerHTML = list.map((ex, idx)=>`<option value="${idx}">${ex.title}</option>`).join('');
   loadExam(0);
   initFixedQR();
+  renderExistingExamsList();
 }
 
 function loadGrade(g){
@@ -168,6 +177,8 @@ function loadGrade(g){
 
 function loadExam(i){
   examIndex = +i;
+  let list = EXAMS_DATA[currentGrade];
+  if(!list || !list[examIndex]) examIndex = 0;
   EXAM = EXAMS_DATA[currentGrade][examIndex];
   $('examTitle').textContent = EXAM.title;
   $('examInfo').textContent = `Khối ${currentGrade} • ${EXAM.questions.length} câu • ${EXAM.timeMinutes} phút • Đề có trộn ngẫu nhiên`;
@@ -202,6 +213,36 @@ function printFixedQR(g, idx){
   if(!w){alert('Trình duyệt đang chặn cửa sổ in. Cho phép pop-up để tiếp tục.');return;}
   w.document.write(`<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>${ex.title}</title><style>body{font-family:Arial;text-align:center;padding:40px}img{width:300px;border:4px solid #000;padding:10px}h1{font-size:24px}</style></head><body><h1>${ex.title}</h1><img src="${qr}"><p><b>Quét mã QR bằng điện thoại để làm bài trực tuyến</b></p><p style="color:#666">${url}</p><script>window.onload=function(){window.print();}<\/script></body></html>`);
   w.document.close();
+}
+
+// Hiển thị danh sách đề trong quản trị để xóa
+function renderExistingExamsList(){
+  let container = $('existingExamsList');
+  let html = '';
+  ['6', '7', '8', '9'].forEach(g => {
+    let exams = EXAMS_DATA[g] || [];
+    exams.forEach((ex, idx) => {
+      html += `
+        <div class="actions" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span><b>[Khối ${g}]</b> ${ex.title} (${ex.questions.length} câu)</span>
+          <button class="btn danger-action" type="button" style="padding:4px 10px;font-size:13px" onclick="deleteExam('${g}', ${idx})">🗑️ Xóa đề này</button>
+        </div>
+      `;
+    });
+  });
+  container.innerHTML = html || '<p class="small">Chưa có đề nào.</p>';
+}
+
+function deleteExam(g, idx){
+  if(confirm(`Thầy chắc chắn muốn xóa đề này khỏi Khối ${g}?`)){
+    EXAMS_DATA[g].splice(idx, 1);
+    if(EXAMS_DATA[g].length === 0){
+      EXAMS_DATA[g] = [{title:"Chưa có đề nào", timeMinutes:15, questions:[{text:"Chưa có câu hỏi", options:["A","B","C","D"], answer:0}]}];
+    }
+    localStorage.setItem('customExamsData', JSON.stringify(EXAMS_DATA));
+    updateExamSelect();
+    alert('Đã xóa đề thành công!');
+  }
 }
 
 async function fetchSheetData(){
@@ -295,7 +336,6 @@ function readExamFromUrl(){
   }
 }
 
-// Thuật toán trộn ngẫu nhiên mảng câu hỏi (Fisher-Yates Shuffle)
 function shuffleArray(array) {
   let arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -336,8 +376,6 @@ function start(){
   
   started = true; 
   isSubmitting = false; 
-  
-  // Trộn ngẫu nhiên câu hỏi mỗi khi bắt đầu làm bài
   activeQuestions = shuffleArray(EXAM.questions);
   answers = Array(activeQuestions.length).fill(null);
   remaining = EXAM.timeMinutes * 60;
@@ -366,7 +404,6 @@ function finish(auto=false){
   isSubmitting = true; 
   clearInterval(timerId);
   
-  // Chấm điểm dựa trên danh sách câu hỏi đã được trộn
   let score = answers.reduce((sum,a,i)=>sum+(a===activeQuestions[i].answer?1:0),0);
   saveResult(score);
   
@@ -459,6 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('adminToggle').onclick = () => $('adminPanel').classList.toggle('hidden');$('adminLogin').onclick = () => {
     if($('adminPass').value === '1234') {$('adminContent').classList.remove('hidden');
       fetchSheetData();
+      renderExistingExamsList();
     } else {
       alert('Mật khẩu quản trị không đúng! (Mặc định: 1234)');
     }
@@ -466,7 +504,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('refreshData').onclick = fetchSheetData;
 
   $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelBuilder').classList.add('hidden'); };
-  $('tabBuilder').onclick = () => {$('panelScores').classList.add('hidden'); $('panelBuilder').classList.remove('hidden'); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
+  $('tabBuilder').onclick = () => {$('panelScores').classList.add('hidden'); $('panelBuilder').classList.remove('hidden'); renderExistingExamsList(); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
 
   $('wordFileSelect').onchange = (e) => {
     let file = e.target.files[0];
@@ -479,7 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let text = result.value;
           let parsedQs = parseWordText(text);
           if(parsedQs.length === 0){
-            alert('Không tự động nhận diện được câu hỏi từ tệp này. Thầy vui lòng kiểm tra lại định dạng.');
+            alert('Không tự động nhận diện được câu hỏi từ tệp này.');
             return;
           }
           $('builderQuestionsContainer').innerHTML = '';
@@ -527,10 +565,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     localStorage.setItem('customExamsData', JSON.stringify(EXAMS_DATA));
 
-    alert(`Đã lưu và phát hành thành công bài kiểm tra với ${questions.length} câu hỏi (kèm tính năng trộn đề)!`);
+    alert(`Đã lưu và phát hành thành công bài kiểm tra với ${questions.length} câu hỏi!`);
     $('builderTitle').value = '';$('wordFileSelect').value = '';
     $('builderQuestionsContainer').innerHTML = '';$('gradeSelect').value = g;
     loadGrade(g);
+    renderExistingExamsList();
     $('panelScores').classList.remove('hidden');$('panelBuilder').classList.add('hidden');
   };
 
