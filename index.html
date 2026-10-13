@@ -69,7 +69,7 @@
         <span class="small" id="totalSubmissions">Đang tải dữ liệu từ Google Sheets...</span>
         <button class="btn primary" id="refreshData" type="button">🔄 Tải lại dữ liệu</button>
       </div>
-      <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Mã đề</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="7" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
+      <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Mã đề</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Sai</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Tổng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="10" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
     </div>
   </div>
 </section>
@@ -81,40 +81,40 @@ const GOOGLE_SHEETS_URL='https://script.google.com/macros/s/AKfycbyi8yEfIGPU1WL0
 
 const EXAMS_DATA = {
   "6": [
-    {title:"Tin học 6 – Bài kiểm tra Chương 1 (Thông tin & Dữ liệu)",timeMinutes:15,questions:[
+    {title:"Tin học 6 – Kiểm tra Chương 1",timeMinutes:15,questions:[
       {text:"Thông tin là gì?",options:["Hiểu biết về thế giới xung quanh","Chỉ là con số","Chỉ là văn bản","Chỉ là hình ảnh"],answer:0},
       {text:"Dữ liệu trong máy tính biểu diễn bằng?",options:["Dãy bit gồm 0 và 1","Âm thanh","Hình ảnh","Chữ viết tay"],answer:0},
       {text:"1 Byte bằng bao nhiêu bit?",options:["8 bit","2 bit","10 bit","16 bit"],answer:0},
       {text:"Thiết bị nào là thiết bị nhập?",options:["Bàn phím","Màn hình","Loa","Máy chiếu"],answer:0},
       {text:"Thiết bị nào là thiết bị xuất?",options:["Màn hình","Chuột","Bàn phím","Micro"],answer:0}
     ]},
-    {title:"Tin học 6 – Bài 6: Internet & Mạng máy tính",timeMinutes:15,questions:[
+    {title:"Tin học 6 – Bài 6: Internet & Mạng",timeMinutes:15,questions:[
       {text:"Internet là gì?",options:["Mạng máy tính toàn cầu","Một phần mềm","Một trang web","Một trò chơi"],answer:0},
       {text:"WWW viết tắt của từ gì?",options:["World Wide Web","World Wide Word","Web Wide World","Windows Web"],answer:0},
       {text:"Trình duyệt web dùng để làm gì?",options:["Truy cập trang web","Quét virus","In tài liệu","Tạo bảng tính"],answer:0}
     ]}
   ],
   "7": [
-    {title:"Tin học 7 – Thiết bị phần cứng và Hệ điều hành",timeMinutes:15,questions:[
+    {title:"Tin học 7 – Thiết bị phần cứng và HĐH",timeMinutes:15,questions:[
       {text:"Bộ xử lý trung tâm (CPU) được ví như gì của máy tính?",options:["Bộ não của máy tính","Trái tim của máy tính","Đôi mắt của máy tính","Bàn tay của máy tính"],answer:0},
       {text:"Đâu là hệ điều hành dùng cho máy tính phổ biến hiện nay?",options:["Windows","Microsoft Word","Google Chrome","Unikey"],answer:0},
       {text:"Bộ nhớ nào lưu trữ dữ liệu tạm thời và sẽ mất đi khi tắt máy?",options:["RAM","Ổ cứng HDD","Ổ cứng SSD","USB"],answer:0}
     ]},
-    {title:"Tin học 7 – Khám phá phần mềm bảng tính (Excel)",timeMinutes:15,questions:[
+    {title:"Tin học 7 – Khám phá phần mềm bảng tính",timeMinutes:15,questions:[
       {text:"Phần mềm bảng tính điện tử dùng để làm gì?",options:["Tính toán, lập bảng số liệu và vẽ biểu đồ","Soạn thảo văn bản đơn thuần","Chỉnh sửa video","Diệt virus"],answer:0},
       {text:"Trong Excel, địa chỉ một ô được xác định bởi sự giao nhau giữa:",options:["Tên cột và tên hàng","Tên trang và tên tệp","Màu sắc và kích thước","Công thức và dữ liệu"],answer:0},
       {text:"Hàm nào dùng để tính tổng các số trong Excel?",options:["SUM","AVERAGE","MAX","MIN"],answer:0}
     ]}
   ],
   "8": [
-    {title:"Tin học 8 – Khảo sát mạng máy tính và Internet",timeMinutes:15,questions:[
+    {title:"Tin học 8 – Khảo sát mạng máy tính",timeMinutes:15,questions:[
       {text:"Mạng LAN là viết tắt của?",options:["Local Area Network","Large Area Network","Line Access Network","Local Auto Net"],answer:0},
       {text:"Thiết bị nào dùng để kết nối các mạng?",options:["Router (Bộ định tuyến)","Máy in","Bàn phím","Ổ cứng ngoài"],answer:0},
       {text:"Đâu là nguy cơ khi dùng mạng xã hội?",options:["Lộ thông tin cá nhân","Máy chạy nhanh hơn","Tăng dung lượng pin","Được tặng quà"],answer:0}
     ]}
   ],
   "9": [
-    {title:"Tin học 9 – Khảo sát trí tuệ nhân tạo & Thuật toán",timeMinutes:15,questions:[
+    {title:"Tin học 9 – Khảo sát trí tuệ nhân tạo",timeMinutes:15,questions:[
       {text:"Trí tuệ nhân tạo (AI) là gì?",options:["Công nghệ mô phỏng trí tuệ con người","Phần mềm diệt virus","Cáp quang internet","Loa thông minh"],answer:0},
       {text:"Robot dò line thường sử dụng cảm biến gì?",options:["Cảm biến ánh sáng/hồng ngoại","Cảm biến nhiệt độ nước","Cảm biến áp suất","Cảm biến khói"],answer:0},
       {text:"Đâu là ứng dụng của AI trong đời sống?",options:["Xe tự lái, nhận diện khuôn mặt","Tắt mở quạt bằng công tắc cơ","Dùng thước kẻ vẽ hình","In văn bản bằng máy in kim"],answer:0}
@@ -178,7 +178,6 @@ function printFixedQR(g, idx){
   w.document.close();
 }
 
-// Hàm tải dữ liệu trực tiếp từ Google Sheets lên trang Quản trị
 async function fetchSheetData(){
   if(!GOOGLE_SHEETS_URL) return;
   $('totalSubmissions').textContent = "Đang đồng bộ từ Google Sheets...";
@@ -187,13 +186,12 @@ async function fetchSheetData(){
     let result = await res.json();
     if(result.success && result.data){
       let rows = result.data;
-      // rows[0] là tiêu đề, rows[1...] là dữ liệu
       if(rows.length <= 1){
         $('totalSubmissions').textContent = "Chưa có bài nào nộp lên Google Sheets.";
-        $('historyList').innerHTML = '<tr><td colspan="7" class="small" style="padding:10px">Chưa có dữ liệu bài nộp.</td></tr>';
+        $('historyList').innerHTML = '<tr><td colspan="10" class="small" style="padding:10px">Chưa có dữ liệu bài nộp.</td></tr>';
         return;
       }
-      let dataRows = rows.slice(1); // bỏ dòng tiêu đề
+      let dataRows = rows.slice(1);
       $('totalSubmissions').textContent = `Tổng số bài trên Google Sheets: ${dataRows.length}`;
       $('historyList').innerHTML = dataRows.slice().reverse().map(r=>`
         <tr>
@@ -203,7 +201,10 @@ async function fetchSheetData(){
           <td style="padding:8px;border-bottom:1px solid var(--border)">${r[3]||''}</td>
           <td style="padding:8px;border-bottom:1px solid var(--border)">${r[4]||''}</td>
           <td style="padding:8px;border-bottom:1px solid var(--border)">${r[5]||''}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--primary);font-weight:bold">${r[6]!==undefined?r[6]:''}/${r[7]||''}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--ok);font-weight:bold">${r[6]!==undefined?r[6]:''}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--danger);font-weight:bold">${r[7]!==undefined?r[7]:''}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${r[8]||''}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--primary);font-weight:bold">${r[9]!==undefined?r[9]:''}</td>
         </tr>
       `).join('');
     } else {
@@ -216,6 +217,12 @@ async function fetchSheetData(){
 }
 
 function saveResult(score){
+  let total = EXAMS_DATA[currentGrade][examIndex].questions.length;
+  let correct = score;
+  let wrong = total - correct;
+  // Tính điểm hệ 10 (làm tròn 1 chữ số thập phân)
+  let finalScore = ((correct / total) * 10).toFixed(1);
+
   let result = {
     time: new Date().toLocaleString('vi-VN'),
     name: $('name').value.trim(),
@@ -223,9 +230,12 @@ function saveResult(score){
     grade: 'Khối ' + currentGrade,
     exam: EXAM.title,
     code: String(examIndex+1).padStart(2,'0'),
-    score: score,
-    total: EXAM.questions.length
+    correct: correct,
+    wrong: wrong,
+    total: total,
+    score: finalScore
   };
+
   if(GOOGLE_SHEETS_URL){
     fetch(GOOGLE_SHEETS_URL,{
       method:'POST',
@@ -307,7 +317,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
   $('retryBtn').onclick = () => {$('result').classList.add('hidden'); $('start').classList.remove('hidden');$('name').focus(); started=false; isSubmitting=false; };
 
-  // Xử lý khu vực quản trị đồng bộ Google Sheets
   $('adminToggle').onclick = () => $('adminPanel').classList.toggle('hidden');$('adminLogin').onclick = () => {
     if($('adminPass').value === '1234') {$('adminContent').classList.remove('hidden');
       fetchSheetData();
