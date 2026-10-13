@@ -29,7 +29,7 @@
 <section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA & TÀI LIỆU ÔN TẬP • THCS</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Học sinh làm bài và xem tài liệu trên Mọi thiết bị</p></div></section>
 <div class="container">
 
-<!-- PHẦN 1: LÀM BÀI KIỂM TRA -->
+<!-- CHỌN BÀI KIỂM TRA -->
 <section class="card">
 <h2>📝 Chọn bài kiểm tra theo khối lớp</h2>
 <div class="grid">
@@ -62,20 +62,17 @@
 <div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div>
 </section>
 
-<!-- PHẦN 2: TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG CHO HỌC SINH -->
+<!-- TÀI LIỆU ÔN TẬP -->
 <section class="card">
 <h2>📚 Tài liệu ôn tập & Đề cương</h2>
-<p class="small">Chọn khối lớp để xem trực tuyến hoặc tải về các tài liệu, đề cương ôn tập do giáo viên cung cấp.</p>
+<p class="small">Chọn khối lớp để xem trực tuyến hoặc tải về các tài liệu do giáo viên cung cấp.</p>
 <div class="field" style="margin-bottom:14px">
   <label for="docGradeSelect">Chọn khối lớp xem tài liệu</label>
   <select id="docGradeSelect" style="max-width:280px">
-    <option value="6">Khối 6</option>
-    <option value="7">Khối 7</option>
-    <option value="8">Khối 8</option>
-    <option value="9">Khối 9</option>
+    <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
   </select>
 </div>
-<div id="studentDocsList" style="border-top:1px solid var(--border);padding-top:12px">⏳ Đang đồng bộ tài liệu từ Cloud...</div>
+<div id="studentDocsList" style="border-top:1px solid var(--border);padding-top:12px">⏳ Đang đồng bộ tài liệu...</div>
 </section>
 
 <section id="exam" class="hidden">
@@ -98,10 +95,10 @@
   <div class="actions" style="justify-content:center;margin-top:20px"><button class="btn secondary" id="retryBtn">Làm bài khác</button></div>
 </section>
 
-<!-- KHU VỰC QUẢN TRỊ GIÁO VIÊN -->
+<!-- QUẢN TRỊ GIÁO VIÊN -->
 <section class="card">
   <div class="actions" style="justify-content:space-between">
-    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Xem điểm, đăng đề thi và đăng tài liệu ôn tập lên Cloud.</div></div>
+    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Quản lý điểm, đề thi và tài liệu.</div></div>
     <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị</button>
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
@@ -160,7 +157,6 @@
       <!-- Quản lý Tài liệu ôn tập -->
       <div id="panelDocs" class="hidden">
         <h3>Tải lên Tài liệu ôn tập / Đề cương lên Cloud</h3>
-        <p class="small">Học sinh dùng điện thoại có thể bấm xem trực tiếp hoặc tải về máy.</p>
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
             <label>Chọn khối lớp</label>
@@ -209,7 +205,6 @@ let uploadedDocData = null;
 
 const $ = id => document.getElementById(id);
 
-// Tải dữ liệu Đề thi và Tài liệu từ Cloud
 async function fetchCloudData() {
   try {
     let res = await fetch(GOOGLE_SHEETS_URL + '?action=getExams');
@@ -218,7 +213,10 @@ async function fetchCloudData() {
       EXAMS_DATA = result.data;
       updateExamSelect();
     }
-  } catch(e) {}
+  } catch(e) {
+    let sel = $('examSelect');
+    if(sel) sel.innerHTML = '<option value="">Chưa có đề nào trên Cloud.</option>';
+  }
 
   try {
     let resDoc = await fetch(GOOGLE_SHEETS_URL + '?action=getDocs');
@@ -227,7 +225,10 @@ async function fetchCloudData() {
       DOCS_DATA = resDocJson.data;
       renderStudentDocs();
     }
-  } catch(e) {}
+  } catch(e) {
+    let docList = $('studentDocsList');
+    if(docList) docList.innerHTML = '<p class="small">Chưa có tài liệu ôn tập nào.</p>';
+  }
 }
 
 function updateExamSelect(){
@@ -520,37 +521,94 @@ function padOptions(opts){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  $('gradeSelect').onchange = e => loadGrade(e.target.value);
-  $('examSelect').onchange = e => loadExam(e.target.value);$('docGradeSelect').onchange = renderStudentDocs;
-  $('reloadExamsBtn').onclick = fetchCloudData;
-  $('qrBtn').onclick = makeQR;
-  $('startBtn').onclick = start;
-  $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
-  $('retryBtn').onclick = () => { $('result').classList.add('hidden');$('start').classList.remove('hidden'); started = false; isSubmitting = false; };
+  let gradeSel = $('gradeSelect');
+  if(gradeSel) gradeSel.onchange = e => loadGrade(e.target.value);
 
-  $('adminToggle').onclick = () => { $('adminPanel').classList.toggle('hidden'); };$('adminLogin').onclick = () => {
-    if($('adminPass').value.trim() === 'Trongthien233') {$('adminContent').classList.remove('hidden');
-      fetchSheetData();
-    } else alert('Mật khẩu không đúng!');
+  let examSel = $('examSelect');
+  if(examSel) examSel.onchange = e => loadExam(e.target.value);
+
+  let docGradeSel = $('docGradeSelect');
+  if(docGradeSel) docGradeSel.onchange = renderStudentDocs;
+
+  let reloadExamsBtn = $('reloadExamsBtn');
+  if(reloadExamsBtn) reloadExamsBtn.onclick = fetchCloudData;
+
+  let qrBtn = $('qrBtn');
+  if(qrBtn) qrBtn.onclick = makeQR;
+
+  let startBtn = $('startBtn');
+  if(startBtn) startBtn.onclick = start;
+
+  let submitBtn = $('submitBtn');
+  if(submitBtn) submitBtn.onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
+
+  let retryBtn = $('retryBtn');
+  if(retryBtn) retryBtn.onclick = () => {
+    $('result').classList.add('hidden');$('start').classList.remove('hidden');
+    let nameInput = $('name');
+    if(nameInput) nameInput.focus();
+    started = false;
+    isSubmitting = false;
   };
 
-  $('refreshData').onclick = fetchSheetData;
-  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };$('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };$('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
+  let adminToggle = $('adminToggle');
+  if(adminToggle) adminToggle.onclick = () => {
+    let panel = $('adminPanel');
+    if(panel) panel.classList.toggle('hidden');
+  };
 
-  // Đọc file Tài liệu
-  $('docFileSelect').onchange = (e) => {
+  let adminLogin = $('adminLogin');
+  if(adminLogin) adminLogin.onclick = () => {
+    let passInput = $('adminPass');
+    if(!passInput) return;
+    if(passInput.value.trim() === 'Trongthien233') {
+      let content = $('adminContent');
+      if(content) content.classList.remove('hidden');
+      fetchSheetData();
+    } else {
+      alert('Mật khẩu không đúng!');
+    }
+  };
+
+  let refreshData = $('refreshData');
+  if(refreshData) refreshData.onclick = fetchSheetData;
+
+  let tabScores = $('tabScores');
+  if(tabScores) tabScores.onclick = () => {
+    $('panelScores').classList.remove('hidden');
+    $('panelExams').classList.add('hidden');$('panelDocs').classList.add('hidden');
+  };
+
+  let tabExams = $('tabExams');
+  if(tabExams) tabExams.onclick = () => {
+    $('panelScores').classList.add('hidden');
+    $('panelExams').classList.remove('hidden');$('panelDocs').classList.add('hidden');
+  };
+
+  let tabDocs = $('tabDocs');
+  if(tabDocs) tabDocs.onclick = () => {
+    $('panelScores').classList.add('hidden');
+    $('panelExams').classList.add('hidden');$('panelDocs').classList.remove('hidden');
+  };
+
+  let addQBtn = $('addQuestionBtn');
+  if(addQBtn) addQBtn.onclick = () => addBuilderQuestion();
+
+  let docFileSelect = $('docFileSelect');
+  if(docFileSelect) docFileSelect.onchange = (e) => {
     let file = e.target.files[0];
     if(!file) return;
     let reader = new FileReader();
     reader.onload = function(event) {
       uploadedDocData = { fileName: file.name, data: event.target.result };
-      if($('docTitle').value.trim() === '') $('docTitle').value = file.name.replace(/\.[^/.]+$/, "");
+      let docTitle = $('docTitle');
+      if(docTitle && docTitle.value.trim() === '') docTitle.value = file.name.replace(/\.[^/.]+$/, "");
     };
     reader.readAsDataURL(file);
   };
 
-  // NÚT LƯU TÀI LIỆU LÊN CLOUD
-  $('saveDocBtn').onclick = async () => {
+  let saveDocBtn = $('saveDocBtn');
+  if(saveDocBtn) saveDocBtn.onclick = async () => {
     let g = $('docGrade').value;
     let title = $('docTitle').value.trim();
     if(!title || !uploadedDocData){ alert('Vui lòng nhập tên tài liệu và chọn file (Word/PDF)!'); return; }
@@ -561,8 +619,8 @@ document.addEventListener('DOMContentLoaded', () => {
       doc: { title: title, fileName: uploadedDocData.fileName, data: uploadedDocData.data }
     };
 
-    $('saveDocBtn').textContent = "⏳ Đang tải tài liệu lên Cloud...";
-    $('saveDocBtn').disabled = true;
+    saveDocBtn.textContent = "⏳ Đang tải tài liệu lên Cloud...";
+    saveDocBtn.disabled = true;
 
     try {
       await fetch(GOOGLE_SHEETS_URL, {
@@ -571,20 +629,20 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(payload)
       });
 
-      alert('🎉 ĐÃ TẢI LÊN THÀNH CÔNG! Tài liệu đã được lưu lên Cloud, học sinh mở điện thoại sẽ thấy ngay.');
+      alert('🎉 ĐÃ TẢI LÊN THÀNH CÔNG! Tài liệu đã được lưu lên Cloud.');
       $('docTitle').value = '';$('docFileSelect').value = '';
       uploadedDocData = null;
       fetchCloudData();
     } catch(err) {
       alert('Lỗi: ' + err);
     } finally {
-      $('saveDocBtn').textContent = "☁️ LƯU TÀI LIỆU LÊN CLOUD CHO HỌC SINH";
-      $('saveDocBtn').disabled = false;
+      saveDocBtn.textContent = "☁️ LƯU TÀI LIỆU LÊN CLOUD CHO HỌC SINH";
+      saveDocBtn.disabled = false;
     }
   };
 
-  // Đọc file Đề thi Word
-  $('wordFileSelect').onchange = (e) => {
+  let wordFileSelect = $('wordFileSelect');
+  if(wordFileSelect) wordFileSelect.onchange = (e) => {
     let file = e.target.files[0];
     if(!file) return;
     let reader = new FileReader();
@@ -592,8 +650,10 @@ document.addEventListener('DOMContentLoaded', () => {
       mammoth.extractRawText({arrayBuffer: event.target.result}).then(function(result) {
         let parsedQs = parseWordText(result.value);
         if(parsedQs.length === 0){ alert('Không nhận diện được câu hỏi.'); return; }
-        $('builderQuestionsContainer').innerHTML = '';
-        if($('builderTitle').value.trim() === '') $('builderTitle').value = file.name.replace(/\.[^/.]+$/, "");
+        let container = $('builderQuestionsContainer');
+        if(container) container.innerHTML = '';
+        let bTitle = $('builderTitle');
+        if(bTitle && bTitle.value.trim() === '') bTitle.value = file.name.replace(/\.[^/.]+$/, "");
         parsedQs.forEach(q => addBuilderQuestion(q));
         alert(`Nhận diện thành công ${parsedQs.length} câu hỏi!`);
       });
@@ -601,8 +661,8 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsArrayBuffer(file);
   };
 
-  // NÚT LƯU ĐỀ THI LÊN CLOUD
-  $('saveExamBtn').onclick = async () => {
+  let saveExamBtn = $('saveExamBtn');
+  if(saveExamBtn) saveExamBtn.onclick = async () => {
     let g = $('builderGrade').value;
     let title = $('builderTitle').value.trim();
     let timeM = parseInt($('builderTime').value) || 15;
@@ -628,8 +688,8 @@ document.addEventListener('DOMContentLoaded', () => {
       exam: { title: title, timeMinutes: timeM, questions: questions }
     };
 
-    $('saveExamBtn').textContent = "⏳ Đang tải đề lên Cloud...";
-    $('saveExamBtn'].disabled = true;
+    saveExamBtn.textContent = "⏳ Đang tải đề lên Cloud...";
+    saveExamBtn.disabled = true;
 
     try {
       await fetch(GOOGLE_SHEETS_URL, {
@@ -638,14 +698,15 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(payload)
       });
       alert('🎉 ĐÃ LƯU ĐỀ THI THÀNH CÔNG LÊN CLOUD!');
-      $('builderTitle').value = '';
-      $('wordFileSelect').value = '';$('builderQuestionsContainer').innerHTML = '';
+      $('builderTitle').value = '';$('wordFileSelect').value = '';
+      let container = $('builderQuestionsContainer');
+      if(container) container.innerHTML = '';
       fetchCloudData();
     } catch(err) {
       alert('Lỗi: ' + err);
     } finally {
-      $('saveExamBtn').textContent = "☁️ LƯU ĐỀ THI LÊN CLOUD";
-      $('saveExamBtn'].disabled = false;
+      saveExamBtn.textContent = "☁️ LƯU ĐỀ THI LÊN CLOUD";
+      saveExamBtn.disabled = false;
     }
   };
 
