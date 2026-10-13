@@ -115,10 +115,11 @@
 <script>
 const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyi8yEfIGPU1WL0zW8Kqlwsi2cxYZ6mxuZycH65z_XGHMQRaD4VdnZZ-GV9bL82C-gA/exec';
 
+// ⭐ ĐỀ THI VÀ CÂU HỎI ÔN TẬP ĐÃ TÍCH HỢP SẴN TRÊN HỆ THỐNG
 const EXAMS_DATA = {
   "6": [
     {
-      title: "Kiểm tra 15 phút Tin học 6 - Đề số 1",
+      title: "Kiểm tra 15 phút Tin học 6 - Đề chuẩn",
       timeMinutes: 15,
       questions: [
         { text: "Thông tin là gì?", options: ["Hiểu biết về sự vật, hiện tượng","Chỉ là những con số","Chỉ là văn bản chữ viết","Các bức tranh ảnh"], answer: 0 },
@@ -131,7 +132,7 @@ const EXAMS_DATA = {
   ],
   "7": [
     {
-      title: "Kiểm tra 15 phút Tin học 7 - Đề số 1",
+      title: "Kiểm tra 15 phút Tin học 7 - Đề chuẩn",
       timeMinutes: 15,
       questions: [
         { text: "CPU được ví là gì của máy tính?", options: ["Bộ não của máy tính","Bộ nhớ dài hạn","Thiết bị phát âm thanh","Thiết bị hiển thị hình ảnh"], answer: 0 },
@@ -144,7 +145,7 @@ const EXAMS_DATA = {
   ],
   "8": [
     {
-      title: "Kiểm tra 15 phút Tin học 8 - Đề số 1",
+      title: "Kiểm tra 15 phút Tin học 8 - Đề chuẩn",
       timeMinutes: 15,
       questions: [
         { text: "Internet vạn vật được viết tắt bằng thuật ngữ tiếng Anh nào?", options: ["AI","IoT","ICT","STEM"], answer: 1 },
@@ -157,7 +158,7 @@ const EXAMS_DATA = {
   ],
   "9": [
     {
-      title: "Kiểm tra 15 phút Tin học 9 - Đề số 1",
+      title: "Kiểm tra 15 phút Tin học 9 - Đề chuẩn",
       timeMinutes: 15,
       questions: [
         { text: "Ngôn ngữ lập trình trực quan Scratch sử dụng phương pháp nào để lập trình?", options: ["Kéo thả các khối lệnh","Gõ mã lệnh bằng tiếng Anh hoàn toàn","Sử dụng sơ đồ mạch điện","Vẽ tranh trực tiếp"], answer: 0 },
@@ -170,6 +171,7 @@ const EXAMS_DATA = {
   ]
 };
 
+// ⭐ TÀI LIỆU ÔN TẬP / ĐỀ CƯƠNG CHO HỌC SINH
 const DOCS_DATA = {
   "6": [{ title: "Đề cương ôn tập Tin học 6", link: "https://drive.google.com/" }],
   "7": [{ title: "Đề cương ôn tập Tin học 7", link: "https://drive.google.com/" }],
@@ -425,15 +427,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if(adminLogin) adminLogin.onclick = () => {
     let passInput = $('adminPass');
     if(!passInput) return;
-    
-    // ⭐ Đã xử lý an toàn: Dù gõ thừa khoảng trắng hoặc viết hoa/thường đều nhận diện đúng
-    let enteredPass = passInput.value.trim();
-    if(enteredPass === 'Trongthien233') {
+    if(passInput.value.trim() === 'Trongthien233') {
       let content = $('adminContent');
       if(content) content.classList.remove('hidden');
       fetchSheetData();
     } else {
-      alert('Mật khẩu quản trị không chính xác! Thầy kiểm tra lại nhé.');
+      alert('Mật khẩu quản trị không chính xác!');
     }
   };
 
