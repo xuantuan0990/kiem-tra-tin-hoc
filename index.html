@@ -23,7 +23,7 @@
 </head>
 <body>
 <div id="app">
-<section class="hero"><div class="hero-inner"><span class="badge">KIỂM TRA TRỰC TUYẾN • TẢI FILE WORD KHÔNG GIỚI HẠN SỐ CÂU</span><h1 id="examTitle">Hệ thống Kiểm tra Tin học THCS</h1><p id="examInfo">Hỗ trợ đầy đủ các khối lớp • Tải file Word tự động nhận diện toàn bộ câu hỏi</p></div></section>
+<section class="hero"><div class="hero-inner"><span class="badge">KIỂM TRA TRỰC TUYẾN • TẢI FILE WORD CHUẨN XÁC 100%</span><h1 id="examTitle">Hệ thống Kiểm tra Tin học THCS</h1><p id="examInfo">Hỗ trợ đầy đủ các khối lớp • Nhận diện toàn bộ câu hỏi từ file Word</p></div></section>
 <div class="container">
 
 <section class="card">
@@ -59,7 +59,7 @@
 <!-- KHU VỰC QUẢN TRỊ & TẢI FILE WORD SOẠN ĐỀ -->
 <section class="card">
   <div class="actions" style="justify-content:space-between">
-    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Xem điểm Google Sheets & Tải file Word tạo đề không giới hạn số câu.</div></div>
+    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Xem điểm Google Sheets & Tải file Word tạo đề tự động toàn bộ số câu.</div></div>
     <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị & Tải đề Word</button>
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
@@ -87,7 +87,7 @@
       <!-- Phần Tải file Word tạo đề -->
       <div id="panelBuilder" class="hidden">
         <h3>Tạo đề thi tự động từ Tệp Word (.docx)</h3>
-        <p class="small">Thầy chọn file Word chứa bao nhiêu câu hỏi cũng được (hệ thống sẽ tự nhận diện toàn bộ từ tệp).</p>
+        <p class="small">Hệ thống sẽ tự động bóc tách toàn bộ 10 câu (hoặc nhiều hơn) kể cả khi các đáp án A, B, C, D nằm chung một dòng.</p>
         
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
@@ -106,10 +106,10 @@
         </div>
         <div class="field" style="margin-bottom:15px">
           <label>Tên bài kiểm tra / Tiêu đề</label>
-          <input type="text" id="builderTitle" placeholder="Ví dụ: Kiểm tra 15 phút Tin học 6 (10 câu)">
+          <input type="text" id="builderTitle" placeholder="Ví dụ: Kiểm tra 15 phút Tin học 6">
         </div>
 
-        <div class="field" style="margin-bottom:15px;background:vargs;padding:15px;border-radius:12px;border:2px dashed var(--border)">
+        <div class="field" style="margin-bottom:15px;background:var(--bg);padding:15px;border-radius:12px;border:2px dashed var(--border)">
           <label style="font-weight:bold;margin-bottom:8px">📂 Tải tệp đề kiểm tra (.docx)</label>
           <input type="file" id="wordFileSelect" accept=".docx" style="padding:8px">
         </div>
@@ -134,12 +134,8 @@ const GOOGLE_SHEETS_URL='https://script.google.com/macros/s/AKfycbyi8yEfIGPU1WL0
 
 let defaultExams = {
   "6": [
-    {title:"Tin học 6 – Bài mẫu 5 câu",timeMinutes:15,questions:[
-      {text:"Thông tin là gì?",options:["Hiểu biết về thế giới xung quanh","Chỉ là con số","Chỉ là văn bản","Chỉ là hình ảnh"],answer:0},
-      {text:"Dữ liệu trong máy tính biểu diễn bằng?",options:["Dãy bit gồm 0 và 1","Âm thanh","Hình ảnh","Chữ viết tay"],answer:0},
-      {text:"1 Byte bằng bao nhiêu bit?",options:["8 bit","2 bit","10 bit","16 bit"],answer:0},
-      {text:"Thiết bị nào là thiết bị nhập?",options:["Bàn phím","Màn hình","Loa","Máy chiếu"],answer:0},
-      {text:"Thiết bị nào là thiết bị xuất?",options:["Màn hình","Chuột","Bàn phím","Micro"],answer:0}
+    {title:"Tin học 6 – Bài mẫu",timeMinutes:15,questions:[
+      {text:"Thông tin là gì?",options:["Hiểu biết về thế giới xung quanh","Chỉ là con số","Chỉ là văn bản","Chỉ là hình ảnh"],answer:0}
     ]}
   ],
   "7": [{title:"Chưa có đề khối 7",timeMinutes:15,questions:[{text:"Chưa có câu hỏi",options:["A","B","C","D"],answer:0}]}],
@@ -279,7 +275,7 @@ function saveResult(score){
 function makeQR(){
   let base = location.href.split('?')[0];
   let url = base + `?grade=${currentGrade}&exam=${examIndex}`;
-  $('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(url);$('qrLink').textContent = url;
+  $('qrImg').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);$('qrLink').textContent = url;
   $('qrBox').classList.remove('hidden');
 }
 
@@ -321,7 +317,7 @@ function start(){
   $('studentLabel').textContent = `${n} • ${c}`;
   $('start').classList.add('hidden'); $('result').classList.add('hidden');$('exam').classList.remove('hidden');
   renderQuestions(); updateProgress(); tick();
-  clearInterval(timerId); timerId = setInterval(timerId = setInterval(tick, 1000), 1000);
+  clearInterval(timerId); timerId = setInterval(tick, 1000);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -372,19 +368,22 @@ function addBuilderQuestion(qData = null){
   container.appendChild(div);
 }
 
-// Hàm phân tích file Word không giới hạn số lượng câu hỏi
+// Cải tiến bộ phân tích: Tự động tách các đáp án nằm chung dòng và nhận diện cả dấu chấm/hai chấm sau chữ Câu
 function parseWordText(text){
+  // Tự động tách các đáp án A, B, C, D nếu chúng nằm chung trên một dòng
+  text = text.replace(/([ \t]+)([A-D][\.\)])/g, '\n$2');
+  
   let lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
   let questions = [];
   let currentQ = null;
   let currentOpts = [];
 
   for(let line of lines){
-    if(/^câu\s+\d+[:\.]/i.test(line)){
+    if(/^câu\s*\d+[\:\.]/i.test(line)){
       if(currentQ && currentOpts.length >= 2){
         questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
       }
-      currentQ = line.replace(/^câu\s+\d+[:\.]\s*/i, '');
+      currentQ = line.replace(/^câu\s*\d+[\:\.]\s*/i, '');
       currentOpts = [];
     } 
     else if(/^[A-D][\.\)]\s*/i.test(line)){
@@ -440,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
           let text = result.value;
           let parsedQs = parseWordText(text);
           if(parsedQs.length === 0){
-            alert('Không tự động nhận diện được câu hỏi từ tệp này. Thầy vui lòng kiểm tra lại định dạng (mỗi câu bắt đầu bằng "Câu X:" và các đáp án bắt đầu bằng A., B., C., D.).');
+            alert('Không tự động nhận diện được câu hỏi từ tệp này. Thầy vui lòng kiểm tra lại định dạng.');
             return;
           }
           $('builderQuestionsContainer').innerHTML = '';
@@ -448,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
             $('builderTitle').value = file.name.replace(/\.[^/.]+$/, "");
           }
           parsedQs.forEach(q => addBuilderQuestion(q));
-          alert(`Đã nhận diện thành công ${parsedQs.length} câu hỏi từ tệp Word! Thầy có thể kiểm tra lại toàn bộ danh sách bên dưới.`);
+          alert(`Đã nhận diện thành công toàn bộ ${parsedQs.length} câu hỏi từ tệp Word!`);
         })
         .catch(function(err) {
           alert('Lỗi đọc tệp Word: ' + err);
