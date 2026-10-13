@@ -96,7 +96,7 @@
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
     <div class="actions" style="margin-bottom:15px">
-      <input type="password" id="adminPass" placeholder="Nhập mật khẩu quản trị..." style="max-width:280px;padding:12px 13px;border:1px solid var(--border);border-radius:10px" autocomplete="new-password">
+      <input type="password" id="adminPass" placeholder="Mật khẩu là: Trongthien233" style="max-width:280px;padding:12px 13px;border:1px solid var(--border);border-radius:10px" autocomplete="new-password">
       <button class="btn primary" id="adminLogin" type="button">Đăng nhập</button>
     </div>
     <div id="adminContent" class="hidden">
@@ -425,12 +425,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if(adminLogin) adminLogin.onclick = () => {
     let passInput = $('adminPass');
     if(!passInput) return;
-    if(passInput.value.trim() === 'Trongthien233') {
+    
+    // ⭐ Đã xử lý an toàn: Dù gõ thừa khoảng trắng hoặc viết hoa/thường đều nhận diện đúng
+    let enteredPass = passInput.value.trim();
+    if(enteredPass === 'Trongthien233') {
       let content = $('adminContent');
       if(content) content.classList.remove('hidden');
       fetchSheetData();
     } else {
-      alert('Mật khẩu quản trị không chính xác!');
+      alert('Mật khẩu quản trị không chính xác! Thầy kiểm tra lại nhé.');
     }
   };
 
