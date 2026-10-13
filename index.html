@@ -23,7 +23,7 @@
 </head>
 <body>
 <div id="app">
-<section class="hero"><div class="hero-inner"><span class="badge">KIỂM TRA TRỰC TUYẾN • QUẢN LÝ VÀ XÓA ĐỀ THI</span><h1 id="examTitle">Hệ thống Kiểm tra Tin học THCS</h1><p id="examInfo">Hỗ trợ đầy đủ các khối lớp • Quản lý, thêm và xóa đề linh hoạt</p></div></section>
+<section class="hero"><div class="hero-inner"><span class="badge">KIỂM TRA TRỰC TUYẾN • THCS</span><h1 id="examTitle">Hệ thống Kiểm tra Tin học THCS</h1><p id="examInfo">Hỗ trợ đầy đủ các khối lớp • Tự động đảo thứ tự câu hỏi</p></div></section>
 <div class="container">
 
 <section class="card">
@@ -42,12 +42,6 @@
 </div>
 <div style="margin-top:14px" class="actions"><button class="btn qr-action" id="qrBtn" type="button">📱 Xem mã QR bài này</button></div>
 <div id="qrBox" class="hidden" style="margin-top:16px;text-align:center;border-top:1px solid var(--border);padding-top:16px"><img id="qrImg" alt="Mã QR" width="200" height="200" style="border:6px solid white;border-radius:8px"><p class="small">Học sinh quét mã QR để mở đúng bài kiểm tra.</p><div id="qrLink" class="small" style="word-break:break-all"></div></div>
-</section>
-
-<section class="card">
-<h2>📱 Bộ mã QR cố định cho học sinh</h2>
-<p class="small">Thầy có thể in trực tiếp hoặc chiếu mã QR của từng bài để học sinh quét nhanh.</p>
-<div class="grid" id="fixedQrGrid"></div>
 </section>
 
 <section id="start" class="card"><h2>Thông tin học sinh</h2><p class="small">Em hãy nhập chính xác thông tin trước khi bắt đầu.</p><div class="grid"><div class="field"><label for="name">Họ và tên *</label><input id="name" placeholder="Nguyễn Văn A" autocomplete="name"></div><div class="field"><label for="className">Lớp *</label><input id="className" placeholder="7A1"></div></div><div style="height:16px"></div><div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div></section>
@@ -166,7 +160,6 @@ function updateExamSelect(){
   }
   $('examSelect').innerHTML = list.map((ex, idx)=>`<option value="${idx}">${ex.title}</option>`).join('');
   loadExam(0);
-  initFixedQR();
   renderExistingExamsList();
 }
 
@@ -187,35 +180,6 @@ function loadExam(i){
   remaining = EXAM.timeMinutes * 60;
 }
 
-function initFixedQR(){
-  let base = location.href.split('?')[0];
-  let list = EXAMS_DATA[currentGrade];
-  let html = '';
-  list.forEach((ex, idx)=>{
-    let url = base + `?grade=${currentGrade}&exam=${idx}`;
-    let qr = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent(url);
-    html += `<div class="card" style="margin:0;text-align:center">
-      <h3>Mã đề ${String(idx+1).padStart(2,'0')}</h3>
-      <img src="${qr}" alt="QR" width="160" height="160" style="border:6px solid white;border-radius:8px">
-      <p class="small">${ex.title}</p>
-      <button class="btn qr-action" type="button" onclick="printFixedQR('${currentGrade}', ${idx})">🖨️ In mã QR này</button>
-    </div>`;
-  });
-  $('fixedQrGrid').innerHTML = html;
-}
-
-function printFixedQR(g, idx){
-  let base = location.href.split('?')[0];
-  let ex = EXAMS_DATA[g][idx];
-  let url = base + `?grade=${g}&exam=${idx}`;
-  let qr = 'https://api.qrserver.com/v1/create-qr-code/?size=350x350&data=' + encodeURIComponent(url);
-  let w = window.open('','_blank');
-  if(!w){alert('Trình duyệt đang chặn cửa sổ in. Cho phép pop-up để tiếp tục.');return;}
-  w.document.write(`<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>${ex.title}</title><style>body{font-family:Arial;text-align:center;padding:40px}img{width:300px;border:4px solid #000;padding:10px}h1{font-size:24px}</style></head><body><h1>${ex.title}</h1><img src="${qr}"><p><b>Quét mã QR bằng điện thoại để làm bài trực tuyến</b></p><p style="color:#666">${url}</p><script>window.onload=function(){window.print();}<\/script></body></html>`);
-  w.document.close();
-}
-
-// Hiển thị danh sách đề trong quản trị để xóa
 function renderExistingExamsList(){
   let container = $('existingExamsList');
   let html = '';
