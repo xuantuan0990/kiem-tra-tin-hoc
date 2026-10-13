@@ -204,6 +204,7 @@ let defaultExams = {
 
 let defaultDocs = { "6": [], "7": [], "8": [], "9": [] };
 
+// Đồng bộ cơ chế tải toàn cục, nếu chưa có sẽ dùng giá trị mặc định chuẩn
 let EXAMS_DATA = JSON.parse(localStorage.getItem('customExamsData') || JSON.stringify(defaultExams));
 let DOCS_DATA = JSON.parse(localStorage.getItem('customDocsData') || JSON.stringify(defaultDocs));
 
@@ -716,20 +717,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let newExam = {title: title, timeMinutes: timeM, questions: questions};
     if(!EXAMS_DATA[g]) EXAMS_DATA[g] = [];
-    EXAMS_DATA[g].push(newExam);
-
-    localStorage.setItem('customExamsData', JSON.stringify(EXAMS_DATA));
-
-    alert(`Đã lưu và phát hành thành công bài kiểm tra với ${questions.length} câu hỏi!`);
-    $('builderTitle').value = '';$('wordFileSelect').value = '';
-    $('builderQuestionsContainer').innerHTML = '';$('gradeSelect').value = g;
-    loadGrade(g);
-    renderExistingExamsList();
-    $('panelScores').classList.remove('hidden');
-    $('panelExams').classList.add('hidden');$('panelDocs').classList.add('hidden');
-  };
-
-  readExamFromUrl();
-  renderStudentDocs();
-});
-</script></body></html>
+    EXAMS_DATA
