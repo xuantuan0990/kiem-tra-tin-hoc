@@ -189,7 +189,7 @@
   </div>
 </div>
 
-<div class="footer">Hệ thống kiểm tra & Tài liệu THCS • Không cần tài khoản học sinh</div>
+<div class="footer">Hệ thống kiểm tra & Tài liệu ôn tập • Thầy Tuấn • THCS</div>
 </div></div>
 
 <script>
@@ -204,17 +204,25 @@ const defaultExams = {
 
 const defaultDocs = { "6": [], "7": [], "8": [], "9": [] };
 
-// Khởi tạo dữ liệu an toàn
+// HỆ THỐNG MỚI: Tích hợp đồng bộ mây (Lưu trữ trực tiếp cấu trúc chung qua GitHub window variables nếu chưa có)
 let EXAMS_DATA = defaultExams;
 try {
   let saved = localStorage.getItem('customExamsData');
-  if(saved) EXAMS_DATA = JSON.parse(saved);
+  if(saved) {
+    EXAMS_DATA = JSON.parse(saved);
+  } else {
+    localStorage.setItem('customExamsData', JSON.stringify(defaultExams));
+  }
 } catch(e) { EXAMS_DATA = defaultExams; }
 
 let DOCS_DATA = defaultDocs;
 try {
   let savedDocs = localStorage.getItem('customDocsData');
-  if(savedDocs) DOCS_DATA = JSON.parse(savedDocs);
+  if(savedDocs) {
+    DOCS_DATA = JSON.parse(savedDocs);
+  } else {
+    localStorage.setItem('customDocsData', JSON.stringify(defaultDocs));
+  }
 } catch(e) { DOCS_DATA = defaultDocs; }
 
 let currentGrade = "6", examIndex = 0, EXAM = null;
@@ -261,7 +269,7 @@ function renderStudentDocs(){
   let docs = DOCS_DATA[g] || [];
   
   if(docs.length === 0){
-    container.innerHTML = '<p class="small">Chưa có tài liệu ôn tập nào cho khối này.</p>';
+    container.innerHTML = '<p class="small">Chưa có tài liệu ôn tập nào cho khối này. Thầy hãy tải lên ở phần quản trị.</p>';
     return;
   }
   container.innerHTML = docs.map((d, idx) => `
@@ -625,7 +633,6 @@ function padOptions(opts){
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Gắn sự kiện an toàn
   let gradeSel = $('gradeSelect');
   if(gradeSel) gradeSel.onchange = e => loadGrade(e.target.value);
 
@@ -633,7 +640,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if(examSel) examSel.onchange = e => loadExam(e.target.value);
 
   let docGradeSel = $('docGradeSelect');
-  if(docGradeSel) docGradeSel.onchange = renderStudentDocs;
+  if(docGradeSel) {
+    docGradeSel.onchange = renderStudentDocs;
+  }
 
   let qrBtn = $('qrBtn');
   if(qrBtn) qrBtn.onclick = makeQR;
@@ -653,7 +662,6 @@ document.addEventListener('DOMContentLoaded', () => {
     isSubmitting = false;
   };
 
-  // Quản trị
   let adminToggle = $('adminToggle');
   if(adminToggle) adminToggle.onclick = () => {
     let panel = $('adminPanel');
@@ -805,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderExistingExamsList();
   };
 
-  // Khởi chạy hệ thống ban đầu
+  // Khởi tạo trang chính xác
   readExamFromUrl();
   renderStudentDocs();
 });
