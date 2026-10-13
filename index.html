@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hệ thống Kiểm tra Trực tuyến Tin học – THCS</title>
+<!-- Thư viện hỗ trợ đọc file Word (.docx) trực tiếp trên trình duyệt -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
 :root{font-family:Inter,Segoe UI,Arial,sans-serif;color-scheme:light dark;--bg:#f4f7fb;--surface:#fff;--text:#172033;--muted:#667085;--primary:#2563eb;--primary2:#1d4ed8;--border:#dbe2ea;--ok:#15803d;--danger:#dc2626}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}
@@ -21,7 +23,7 @@
 </head>
 <body>
 <div id="app">
-<section class="hero"><div class="hero-inner"><span class="badge">KIỂM TRA TRỰC TUYẾN • SOẠN ĐỀ TRỰC QUAN</span><h1 id="examTitle">Hệ thống Kiểm tra Tin học THCS</h1><p id="examInfo">Hỗ trợ đầy đủ các khối lớp • Tự tạo đề trực tiếp trên web</p></div></section>
+<section class="hero"><div class="hero-inner"><span class="badge">KIỂM TRA TRỰC TUYẾN • TẢI FILE WORD SOẠN ĐỀ</span><h1 id="examTitle">Hệ thống Kiểm tra Tin học THCS</h1><p id="examInfo">Hỗ trợ đầy đủ các khối lớp • Tải file Word tự động nhận diện câu hỏi</p></div></section>
 <div class="container">
 
 <section class="card">
@@ -54,11 +56,11 @@
 
 <section id="result" class="card hidden result"><h2>Trạng thái nộp bài</h2><div id="resultText"></div><div class="actions" style="justify-content:center;margin-top:20px"><button class="btn secondary" id="retryBtn">Làm bài khác</button></div></section>
 
-<!-- KHU VỰC QUẢN TRỊ & SOẠN ĐỀ TRỰC QUAN -->
+<!-- KHU VỰC QUẢN TRỊ & TẢI FILE WORD SOẠN ĐỀ -->
 <section class="card">
   <div class="actions" style="justify-content:space-between">
-    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Xem điểm Google Sheets & Soạn đề kiểm tra trực tiếp.</div></div>
-    <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị & Soạn đề</button>
+    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Xem điểm Google Sheets & Tải file Word tạo đề nhanh.</div></div>
+    <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị & Tải đề Word</button>
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
     <div class="actions" style="margin-bottom:15px">
@@ -70,7 +72,7 @@
       <!-- Tab chuyển đổi -->
       <div class="actions" style="margin-bottom:15px">
         <button class="btn primary" id="tabScores" type="button">📊 Xem bảng điểm</button>
-        <button class="btn qr-action" id="tabBuilder" type="button">➕ Soạn đề thi mới</button>
+        <button class="btn qr-action" id="tabBuilder" type="button">📄 Tải File Word Tạo Đề</button>
       </div>
 
       <!-- Phần Xem điểm -->
@@ -82,12 +84,14 @@
         <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Mã đề</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Sai</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Tổng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="10" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
       </div>
 
-      <!-- Phần Soạn đề thi trực quan -->
+      <!-- Phần Tải file Word tạo đề -->
       <div id="panelBuilder" class="hidden">
-        <h3>Tạo và thêm bài kiểm tra mới</h3>
+        <h3>Tạo đề thi tự động từ Tệp Word (.docx)</h3>
+        <p class="small">Thầy chọn file Word chứa câu hỏi theo định dạng chuẩn (<i>Ví dụ: Câu 1: ... có các đáp án A, B, C, D</i>).</p>
+        
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
-            <label>Chọn khối lớp cho đề mới</label>
+            <label>Chọn khối lớp</label>
             <select id="builderGrade">
               <option value="6">Khối 6</option>
               <option value="7">Khối 7</option>
@@ -102,14 +106,19 @@
         </div>
         <div class="field" style="margin-bottom:15px">
           <label>Tên bài kiểm tra / Tiêu đề</label>
-          <input type="text" id="builderTitle" placeholder="Ví dụ: Kiểm tra 15 phút Tin học 7 – Bài số 2">
+          <input type="text" id="builderTitle" placeholder="Ví dụ: Kiểm tra 15 phút Tin học 6">
         </div>
 
-        <h4>Danh sách câu hỏi trắc nghiệm</h4>
+        <div class="field" style="margin-bottom:15px;background:var(--bg);padding:15px;border-radius:12px;border:2px dashed var(--border)">
+          <label style="font-weight:bold;margin-bottom:8px">📂 Tải tệp đề kiểm tra (.docx)</label>
+          <input type="file" id="wordFileSelect" accept=".docx" style="padding:8px">
+        </div>
+
+        <h4>Xem trước các câu hỏi đã nhận diện từ tệp:</h4>
         <div id="builderQuestionsContainer"></div>
 
         <div class="actions" style="margin-top:15px">
-          <button class="btn secondary" id="addQuestionBtn" type="button">➕ Thêm câu hỏi</button>
+          <button class="btn secondary" id="addQuestionBtn" type="button">➕ Thêm câu hỏi thủ công</button>
           <button class="btn primary" id="saveExamBtn" type="button">💾 Lưu và phát hành đề</button>
         </div>
       </div>
@@ -123,7 +132,6 @@
 <script>
 const GOOGLE_SHEETS_URL='https://script.google.com/macros/s/AKfycbyi8yEfIGPU1WL0zW8Kqlwsi2cxYZ6mxuZycH65z_XGHMQRaD4VdnZZ-GV9bL82C-gA/exec';
 
-// Lấy danh sách đề từ localStorage nếu có, nếu chưa thì dùng mặc định
 let defaultExams = {
   "6": [
     {title:"Tin học 6 – Kiểm tra Chương 1",timeMinutes:15,questions:[
@@ -132,32 +140,21 @@ let defaultExams = {
       {text:"1 Byte bằng bao nhiêu bit?",options:["8 bit","2 bit","10 bit","16 bit"],answer:0},
       {text:"Thiết bị nào là thiết bị nhập?",options:["Bàn phím","Màn hình","Loa","Máy chiếu"],answer:0},
       {text:"Thiết bị nào là thiết bị xuất?",options:["Màn hình","Chuột","Bàn phím","Micro"],answer:0}
-    ]},
-    {title:"Tin học 6 – Bài 6: Internet & Mạng",timeMinutes:15,questions:[
-      {text:"Internet là gì?",options:["Mạng máy tính toàn cầu","Một phần mềm","Một trang web","Một trò chơi"],answer:0},
-      {text:"WWW viết tắt của từ gì?",options:["World Wide Web","World Wide Word","Web Wide World","Windows Web"],answer:0},
-      {text:"Trình duyệt web dùng để làm gì?",options:["Truy cập trang web","Quét virus","In tài liệu","Tạo bảng tính"],answer:0}
     ]}
   ],
   "7": [
-    {title:"Tin học 7 – Thiết bị phần cứng và HĐH",timeMinutes:15,questions:[
-      {text:"Bộ xử lý trung tâm (CPU) được ví như gì của máy tính?",options:["Bộ não của máy tính","Trái tim của máy tính","Đôi mắt của máy tính","Bàn tay của máy tính"],answer:0},
-      {text:"Đâu là hệ điều hành dùng cho máy tính phổ biến hiện nay?",options:["Windows","Microsoft Word","Google Chrome","Unikey"],answer:0},
-      {text:"Bộ nhớ nào lưu trữ dữ liệu tạm thời và sẽ mất đi khi tắt máy?",options:["RAM","Ổ cứng HDD","Ổ cứng SSD","USB"],answer:0}
+    {title:"Tin học 7 – Thiết bị phần cứng",timeMinutes:15,questions:[
+      {text:"Bộ xử lý trung tâm (CPU) được ví như gì của máy tính?",options:["Bộ não của máy tính","Trái tim của máy tính","Đôi mắt của máy tính","Bàn tay của máy tính"],answer:0}
     ]}
   ],
   "8": [
-    {title:"Tin học 8 – Khảo sát mạng máy tính",timeMinutes:15,questions:[
-      {text:"Mạng LAN là viết tắt của?",options:["Local Area Network","Large Area Network","Line Access Network","Local Auto Net"],answer:0},
-      {text:"Thiết bị nào dùng để kết nối các mạng?",options:["Router (Bộ định tuyến)","Máy in","Bàn phím","Ổ cứng ngoài"],answer:0},
-      {text:"Đâu là nguy cơ khi dùng mạng xã hội?",options:["Lộ thông tin cá nhân","Máy chạy nhanh hơn","Tăng dung lượng pin","Được tặng quà"],answer:0}
+    {title:"Tin học 8 – Khảo sát mạng",timeMinutes:15,questions:[
+      {text:"Mạng LAN là viết tắt của?",options:["Local Area Network","Large Area Network","Line Access Network","Local Auto Net"],answer:0}
     ]}
   ],
   "9": [
-    {title:"Tin học 9 – Khảo sát trí tuệ nhân tạo",timeMinutes:15,questions:[
-      {text:"Trí tuệ nhân tạo (AI) là gì?",options:["Công nghệ mô phỏng trí tuệ con người","Phần mềm diệt virus","Cáp quang internet","Loa thông minh"],answer:0},
-      {text:"Robot dò line thường sử dụng cảm biến gì?",options:["Cảm biến ánh sáng/hồng ngoại","Cảm biến nhiệt độ nước","Cảm biến áp suất","Cảm biến khói"],answer:0},
-      {text:"Đâu là ứng dụng của AI trong đời sống?",options:["Xe tự lái, nhận diện khuôn mặt","Tắt mở quạt bằng công tắc cơ","Dùng thước kẻ vẽ hình","In văn bản bằng máy in kim"],answer:0}
+    {title:"Tin học 9 – Khảo sát AI",timeMinutes:15,questions:[
+      {text:"Trí tuệ nhân tạo (AI) là gì?",options:["Công nghệ mô phỏng trí tuệ con người","Phần mềm diệt virus","Cáp quang internet","Loa thông minh"],answer:0}
     ]}
   ]
 };
@@ -355,7 +352,7 @@ function finish(auto=false){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-// Xử lý giao diện Soạn đề trực quan
+// Thêm câu hỏi thủ công lên giao diện
 function addBuilderQuestion(qData = null){
   let container = $('builderQuestionsContainer');
   let qIndex = container.children.length + 1;
@@ -388,6 +385,47 @@ function addBuilderQuestion(qData = null){
   container.appendChild(div);
 }
 
+// Xử lý đọc file Word tự động phân tích câu hỏi
+function parseWordText(text){
+  let lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  let questions = [];
+  let currentQ = null;
+  let currentOpts = [];
+
+  for(let line of lines){
+    // Nhận diện dòng bắt đầu bằng "Câu X:" hoặc "Câu X."
+    if(/^câu\s+\d+[:\.]/i.test(line)){
+      if(currentQ && currentOpts.length >= 2){
+        questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
+      }
+      currentQ = line.replace(/^câu\s+\d+[:\.]\s*/i, '');
+      currentOpts = [];
+    } 
+    // Nhận diện các đáp án A., B., C., D. hoặc A), B), C), D)
+    else if(/^[A-D][\.\)]\s*/i.test(line)){
+      let optText = line.replace(/^[A-D][\.\)]\s*/i, '');
+      currentOpts.push(optText);
+    } 
+    else {
+      // Nếu dòng tiếp theo là phần nối tiếp của câu hỏi hoặc đáp án
+      if(currentOpts.length > 0){
+        currentOpts[currentOpts.length - 1] += " " + line;
+      } else if(currentQ){
+        currentQ += " " + line;
+      }
+    }
+  }
+  if(currentQ && currentOpts.length >= 2){
+    questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
+  }
+  return questions;
+}
+
+function padOptions(opts){
+  while(opts.length < 4) opts.push("Không có đáp án");
+  return opts.slice(0, 4);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   $('gradeSelect').onchange = e => loadGrade(e.target.value);
   $('examSelect').onchange = e => loadExam(e.target.value);$('qrBtn').onclick = makeQR;
@@ -406,9 +444,39 @@ document.addEventListener('DOMContentLoaded', () => {
   $('refreshData').onclick = fetchSheetData;
 
   // Chuyển tab trong Quản trị
-  $('tabScores').onclick = () => {$('panelScores').classList.remove('hidden'); $('panelBuilder').classList.add('hidden'); };$('tabBuilder').onclick = () => { $('panelScores').classList.add('hidden');$('panelBuilder').classList.remove('hidden'); if($('builderQuestionsContainer').children.length === 0) addBuilderQuestion(); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
+  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelBuilder').classList.add('hidden'); };
+  $('tabBuilder').onclick = () => {$('panelScores').classList.add('hidden'); $('panelBuilder').classList.remove('hidden'); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
 
-  // Lưu đề thi mới vào trình duyệt
+  // Xử lý khi thầy chọn file Word (.docx)
+  $('wordFileSelect').onchange = (e) => {
+    let file = e.target.files[0];
+    if(!file) return;
+    let reader = new FileReader();
+    reader.onload = function(event) {
+      let arrayBuffer = event.target.result;
+      mammoth.extractRawText({arrayBuffer: arrayBuffer})
+        .then(function(result) {
+          let text = result.value;
+          let parsedQs = parseWordText(text);
+          if(parsedQs.length === 0){
+            alert('Không tự động nhận diện được câu hỏi từ tệp này. Thầy vui lòng kiểm tra lại định dạng (mỗi câu bắt đầu bằng "Câu X:" và các đáp án bắt đầu bằng A., B., C., D.).');
+            return;
+          }
+          $('builderQuestionsContainer').innerHTML = '';
+          if($('builderTitle').value.trim() === ''){
+            $('builderTitle').value = file.name.replace(/\.[^/.]+$/, "");
+          }
+          parsedQs.forEach(q => addBuilderQuestion(q));
+          alert(`Đã nhận diện thành công ${parsedQs.length} câu hỏi từ tệp Word! Thầy có thể kiểm tra lại bên dưới.`);
+        })
+        .catch(function(err) {
+          alert('Lỗi đọc tệp Word: ' + err);
+        });
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  // Lưu đề thi mới vào hệ thống
   $('saveExamBtn').onclick = () => {
     let g = $('builderGrade').value;
     let title = $('builderTitle').value.trim();
@@ -438,14 +506,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if(!EXAMS_DATA[g]) EXAMS_DATA[g] = [];
     EXAMS_DATA[g].push(newExam);
 
-    // Lưu vào localStorage để dữ liệu đề tự tạo không bị mất khi tải lại trang
     localStorage.setItem('customExamsData', JSON.stringify(EXAMS_DATA));
 
     alert('Đã lưu và phát hành đề thi mới thành công!');
-    $('builderTitle').value = '';$('builderQuestionsContainer').innerHTML = '';
-    
-    // Chuyển về khối vừa tạo và cập nhật lại giao diện
-    $('gradeSelect').value = g;
+    $('builderTitle').value = '';$('wordFileSelect').value = '';
+    $('builderQuestionsContainer').innerHTML = '';$('gradeSelect').value = g;
     loadGrade(g);
     $('panelScores').classList.remove('hidden');$('panelBuilder').classList.add('hidden');
   };
