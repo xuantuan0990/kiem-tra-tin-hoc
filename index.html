@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hệ thống Kiểm tra & Tài liệu Tin học THCS</title>
+<title>Hệ thống Kiểm tra & Tài liệu Tin học THCS (v4.0)</title>
 <style>
 :root{font-family:Inter,Segoe UI,Arial,sans-serif;color-scheme:light dark;--bg:#f4f7fb;--surface:#fff;--text:#172033;--muted:#667085;--primary:#2563eb;--primary2:#1d4ed8;--border:#dbe2ea;--ok:#15803d;--danger:#dc2626}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}
@@ -115,7 +115,6 @@
 <script>
 const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyi8yEfIGPU1WL0zW8Kqlwsi2cxYZ6mxuZycH65z_XGHMQRaD4VdnZZ-GV9bL82C-gA/exec';
 
-// ⭐ ĐỀ THI CỐ ĐỊNH TRÊN MÃ NGUỒN (ĐIỆN THOẠI & MÁY TÍNH ĐỀU THẤY 100%)
 const EXAMS_DATA = {
   "6": [
     {
@@ -171,20 +170,11 @@ const EXAMS_DATA = {
   ]
 };
 
-// ⭐ TÀI LIỆU ÔN TẬP / ĐỀ CƯƠNG ĐẶT SẴN (Thầy có thể thay link Google Drive hoặc file trực tiếp vào đây)
 const DOCS_DATA = {
-  "6": [
-    { title: "Đề cương ôn tập Tin học 6 (Giữa kì & Cuối kì)", link: "https://drive.google.com/drive/folders/your-folder-id" }
-  ],
-  "7": [
-    { title: "Đề cương ôn tập Tin học 7", link: "https://drive.google.com/drive/folders/your-folder-id" }
-  ],
-  "8": [
-    { title: "Đề cương ôn tập Tin học 8", link: "https://drive.google.com/drive/folders/your-folder-id" }
-  ],
-  "9": [
-    { title: "Đề cương ôn tập Tin học 9 & Lập trình ESP32", link: "https://drive.google.com/drive/folders/your-folder-id" }
-  ]
+  "6": [{ title: "Đề cương ôn tập Tin học 6", link: "https://drive.google.com/" }],
+  "7": [{ title: "Đề cương ôn tập Tin học 7", link: "https://drive.google.com/" }],
+  "8": [{ title: "Đề cương ôn tập Tin học 8", link: "https://drive.google.com/" }],
+  "9": [{ title: "Đề cương ôn tập Tin học 9 & ESP32", link: "https://drive.google.com/" }]
 };
 
 let currentGrade = "6", examIndex = 0, EXAM = EXAMS_DATA["6"][0];
@@ -267,8 +257,6 @@ async function fetchSheetData(){
           <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--primary);font-weight:bold">${r[9]!==undefined?r[9]:''} điểm</td>
         </tr>
       `).join('');
-    } else {
-      subEl.textContent = "Không thể tải dữ liệu từ Google Sheets.";
     }
   } catch(e) {
     subEl.textContent = "Lỗi kết nối khi tải dữ liệu.";
@@ -437,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if(adminLogin) adminLogin.onclick = () => {
     let passInput = $('adminPass');
     if(!passInput) return;
-    if(passInput.value.trim() === 'Trongthien233') {
+    if(passInput.value.trim() === 'Trongth_2026!') { // Mật khẩu cập nhật an toàn
       let content = $('adminContent');
       if(content) content.classList.remove('hidden');
       fetchSheetData();
