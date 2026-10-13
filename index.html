@@ -61,7 +61,7 @@
 <section id="exam" class="hidden"><div class="topbar"><div class="topbar-inner"><strong id="studentLabel"></strong><span class="timer" id="timer">15:00</span></div><div class="topbar-inner"><div style="width:100%"><div class="progress"><div id="progressBar"></div></div></div></div></div><div class="card" style="margin-top:16px"><div id="questions"></div><div class="submitbox"><div><strong id="answered">0/10</strong><div class="small">câu đã trả lời</div></div><button class="btn primary" id="submitBtn">Nộp bài</button></div></div></section>
 <section id="result" class="card hidden result"><h2>Trạng thái nộp bài</h2><div id="resultText"></div><div class="actions" style="justify-content:center;margin-top:20px"><button class="btn secondary" id="retryBtn">Làm bài khác</button></div></section>
 <section class="card hidden" id="historyCard">
-<div class="actions" style="justify-content:space-between"><div><h2 style="margin:0">Kết quả đã lưu</h2><div class="small">Lưu trên thiết bị của thiết bị đang dùng, không cần tài khoản.</div></div><button class="btn danger-action" id="clearHistory" type="button">🗑️ Xóa kết quả trên máy này</button></div>
+<div class="actions" style="justify-content:space-between"><div><h2 style="margin:0">Kết quả đã lưu</h2><div class="small">Lưu trên trình duyệt của thiết bị đang dùng, không cần tài khoản.</div></div><button class="btn danger-action" id="clearHistory" type="button">🗑️ Xóa kết quả trên máy này</button></div>
 <div style="overflow:auto;margin-top:14px"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:9px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:9px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:9px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:9px;border-bottom:1px solid var(--border)">Bài</th><th style="text-align:left;padding:9px;border-bottom:1px solid var(--border)">Điểm</th><th style="text-align:left;padding:9px;border-bottom:1px solid var(--border)">Mã đề</th></tr></thead><tbody id="historyList"></tbody></table></div>
 </section>
 <div class="footer">Website kiểm tra trực tuyến • Không cần tài khoản học sinh</div>
@@ -84,17 +84,126 @@ const EXAM={title:'Bài kiểm tra Tin học 6 – Mẫu',timeMinutes:15,questio
 let answers=Array(EXAM.questions.length).fill(null),remaining=EXAM.timeMinutes*60,timerId=null,started=false,isSubmitting=false;
 const EXAMS=[EXAM,{title:'Bài kiểm tra Tin học 6 – Bài 6 Internet',timeMinutes:15,questions:[{text:'Internet là gì?',options:['Mạng máy tính toàn cầu kết nối nhiều mạng máy tính','Một phần mềm','Một thiết bị','Một trò chơi'],answer:0},{text:'Dịch vụ nào dùng để truy cập trang web?',options:['Trình duyệt web','Máy in','Loa','Bàn phím'],answer:0},{text:'WWW là viết tắt của?',options:['World Wide Web','World Wide Word','Web Wide World','Windows Web'],answer:0},{text:'Công cụ tìm kiếm giúp?',options:['Tìm thông tin trên Internet','Tăng RAM','In tài liệu','Sửa bàn phím'],answer:0},{text:'Hành động nào an toàn hơn?',options:['Không mở liên kết đáng ngờ','Chia sẻ mật khẩu','Bấm mọi quảng cáo','Dùng mật khẩu 123456'],answer:0},{text:'Email là dịch vụ?',options:['Thư điện tử','Lưu trữ điện thoại','In ảnh','Chơi game'],answer:0},{text:'Khi dùng Internet cần?',options:['Tôn trọng quyền riêng tư và bản quyền','Công khai mật khẩu','Tin mọi thông tin','Tải mọi tệp'],answer:0},{text:'Một trang web thường được truy cập bằng?',options:['Địa chỉ URL','Mã PIN','Số điện thoại bắt buộc','Tên máy in'],answer:0}]},{title:'Kiểm tra Tin học 6 – Bài 1-5',timeMinutes:10,questions:[{text:'Thông tin giúp con người?',options:['Hiểu biết','Mất dữ liệu','Tắt máy','Hỏng mạng'],answer:0},{text:'Dữ liệu máy tính biểu diễn bằng?',options:['Bit 0 và 1','Chỉ chữ','Chỉ ảnh','Chỉ âm thanh'],answer:0},{text:'Một byte bằng?',options:['8 bit','2 bit','10 bit','16 bit'],answer:0},{text:'Thiết bị nhập?',options:['Bàn phím','Màn hình','Loa','Máy chiếu'],answer:0},{text:'Thiết bị xuất?',options:['Màn hình','Bàn phím','Chuột','Micro'],answer:0}]}];
 let examIndex=0;
-function loadExam(i){examIndex=+i;Object.assign(EXAM,EXAMS[examIndex]);$('examTitle').textContent=EXAM.title;$('examInfo').textContent=`Mã đề ${String(examIndex+1).padStart(2,'0')} • ${EXAM.questions.length} câu • ${EXAM.timeMinutes} phút • Không cần tài khoản`;answers=Array(EXAM.questions.length).fill(null);remaining=EXAM.timeMinutes*60;updateProgress();renderQuestions();}
-function showHistory(){let rows=JSON.parse(localStorage.getItem('quizResults')||'[]');$('historyList').innerHTML=rows.length?rows.slice().reverse().map(r=>`<tr><td>${r.time}</td><td>${r.name}</td><td>${r.className}</td><td>${r.exam}</td><td><b>Đã nộp</b></td><td>${r.code}</td></tr>`).join(''):'<tr><td colspan="6" class="small">Chưa có kết quả trên thiết bị này.</td></tr>';}
-function saveResult(score){let result={time:new Date().toLocaleString('vi-VN'),name:$('name').value.trim(),className:$('className').value.trim(),exam:EXAM.title,code:String(examIndex+1).padStart(2,'0'),score,total:EXAM.questions.length};let rows=JSON.parse(localStorage.getItem('quizResults')||'[]');rows.push(result);localStorage.setItem('quizResults',JSON.stringify(rows.slice(-500)));showHistory();if(GOOGLE_SHEETS_URL){fetch(GOOGLE_SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(result)}).catch(()=>{});}}
-function makeQR(){let base='https://xuantuan0990.github.io/kiem-tra-tin-hoc/';let url=base+'?exam='+examIndex;$('qrImg').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);$('qrLink').textContent=url;$('qrBox').classList.remove('hidden');}
-function printQR(i){let url='https://xuantuan0990.github.io/kiem-tra-tin-hoc/?exam='+i,title=['Mã đề 01 – Bài kiểm tra Tin học 6','Mã đề 02 – Bài 6 Internet','Mã đề 03 – Bài 1-5'][i],qr='https://api.qrserver.com/v1/create-qr-code/?size=350x350&data='+encodeURIComponent(url),w=window.open('','_blank');if(!w){alert('Trình duyệt đang chặn cửa sổ in. Thầy hãy cho phép cửa sổ bật lên (pop-up) rồi thử lại.');return}w.document.write('<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>'+title+'</title><style>body{font-family:Arial;text-align:center;padding:40px}img{width:300px;max-width:90vw;border:4px solid #000;padding:10px}h1{font-size:26px}p{font-size:16px}</style></head><body><h1>'+title+'</h1><img src="'+qr+'"><p><b>Hướng dẫn:</b> Học sinh dùng điện thoại quét mã QR để làm bài kiểm tra trực tuyến.</p><p style="color:#666">'+url+'</p><script>window.onload=function(){window.print();}<\/script></body></html>');w.document.close();}
-function readExamFromUrl(){let p=new URLSearchParams(location.search),i=p.get('exam');if(i!==null&&EXAMS[+i]){loadExam(+i);$('examSelect').value=i;}}
-const $=id=>document.getElementById(id);$('examTitle').textContent=EXAM.title;$('examInfo').textContent=`${EXAM.questions.length} câu • ${EXAM.timeMinutes} phút • Không cần tài khoản`;
-function renderQuestions(){ $('questions').innerHTML=EXAM.questions.map((q,i)=>`<div class="question" id="q${i}"><div class="q-title">Câu ${i+1}. ${q.text}</div>${q.options.map((o,j)=>`<label class="option"><input type="radio" name="q${i}" value="${j}"> <span>${String.fromCharCode(65+j)}.${o}</span></label>`).join('')}</div>`).join('');document.querySelectorAll('input[type=radio]').forEach(x=>x.addEventListener('change',e=>{answers[+e.target.name.slice(1)]=+e.target.value;updateProgress()}));}
-function updateProgress(){let n=answers.filter(x=>x!==null).length;$('answered').textContent=`${n}/${EXAM.questions.length}`;$('progressBar').style.width=`${n/EXAM.questions.length*100}%`}
-function start(){let n=$('name').value.trim(),c=$('className').value.trim();if(!n\vert{}\vert{}!c){alert('Thầy yêu cầu học sinh nhập đầy đủ Họ và tên và Lớp.');return}started=true;isSubmitting=false;answers.fill(null);remaining=EXAM.timeMinutes*60;$('studentLabel').textContent=`${n} • ${c}`;$('start').classList.add('hidden');$('result').classList.add('hidden');$('exam').classList.remove('hidden');renderQuestions();updateProgress();tick();clearInterval(timerId);timerId=setInterval(tick,1000);window.scrollTo({top:0,behavior:'smooth'})}
-function tick(){let m=Math.floor(remaining/60),s=remaining%60;$('timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;if(remaining<=0){clearInterval(timerId);finish(true)}else remaining--}
-function finish(auto=false){if(!started||isSubmitting)return;isSubmitting=true;clearInterval(timerId);let score=answers.reduce((sum,a,i)=>sum+(a===EXAM.questions[i].answer?1:0),0);saveResult(score);$('exam').classList.add('hidden');$('result').classList.remove('hidden');$('resultText').innerHTML=`<div class="score">✅ ĐÃ NỘP BÀI THÀNH CÔNG</div><p class="small">${auto?'Hết thời gian, hệ thống đã tự động nộp bài.':'Bài làm của em đã được ghi nhận vào hệ thống.'}</p><p class="small" style="font-size:16px;font-weight:bold;color:var(--primary);margin-top:15px">Em vui lòng giữ trật tự và chờ giáo viên thông báo điểm.</p>`;window.scrollTo({top:0,behavior:'smooth'})}
-$('startBtn').onclick=start;$('submitBtn').onclick=()=>{if(confirm('Em chắc chắn muốn nộp bài?'))finish(false)};$('retryBtn').onclick=()=>{$('result').classList.add('hidden');$('start').classList.remove('hidden');$('name').focus();started=false;isSubmitting=false;};$('examSelect').onchange=e=>loadExam(e.target.value);$('qrBtn').onclick=makeQR;$('clearHistory').onclick=()=>{if(confirm('Xóa toàn bộ kết quả đã lưu trên thiết bị này?')){localStorage.removeItem('quizResults');showHistory();}};showHistory();readExamFromUrl();
+function loadExam(i){
+  examIndex=+i;
+  Object.assign(EXAM,EXAMS[examIndex]);
+  $('examTitle').textContent=EXAM.title;
+  $('examInfo').textContent=`Mã đề ${String(examIndex+1).padStart(2,'0')} • ${EXAM.questions.length} câu • ${EXAM.timeMinutes} phút • Không cần tài khoản`;
+  answers=Array(EXAM.questions.length).fill(null);
+  remaining=EXAM.timeMinutes*60;
+  updateProgress();
+  renderQuestions();
+}
+function showHistory(){
+  let rows=JSON.parse(localStorage.getItem('quizResults')||'[]');
+  $('historyList').innerHTML=rows.length?rows.slice().reverse().map(r=>`<tr><td>${r.time}</td><td>${r.name}</td><td>${r.className}</td><td>${r.exam}</td><td><b>Đã nộp</b></td><td>${r.code}</td></tr>`).join(''):'<tr><td colspan="6" class="small">Chưa có kết quả trên thiết bị này.</td></tr>';
+}
+function saveResult(score){
+  let result={time:new Date().toLocaleString('vi-VN'),name:$('name').value.trim(),className:$('className').value.trim(),exam:EXAM.title,code:String(examIndex+1).padStart(2,'0'),score,total:EXAM.questions.length};
+  let rows=JSON.parse(localStorage.getItem('quizResults')||'[]');
+  rows.push(result);
+  localStorage.setItem('quizResults',JSON.stringify(rows.slice(-500)));
+  showHistory();
+  if(GOOGLE_SHEETS_URL){
+    fetch(GOOGLE_SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(result)}).catch(()=>{});
+  }
+}
+function makeQR(){
+  let base='https://xuantuan0990.github.io/kiem-tra-tin-hoc/';
+  let url=base+'?exam='+examIndex;
+  $('qrImg').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);$('qrLink').textContent=url;
+  $('qrBox').classList.remove('hidden');
+}
+function printQR(i){
+  let base='https://xuantuan0990.github.io/kiem-tra-tin-hoc/';
+  let url=base+'?exam='+i;
+  let titles=['Mã đề 01 – Bài kiểm tra Tin học 6','Mã đề 02 – Bài 6 Internet','Mã đề 03 – Bài 1-5'];
+  let title=titles[i]||'Bài kiểm tra Tin học';
+  let qr='https://api.qrserver.com/v1/create-qr-code/?size=350x350&data='+encodeURIComponent(url);
+  let w=window.open('','_blank');
+  if(!w){
+    alert('Trình duyệt đang chặn cửa sổ in. Thầy hãy cho phép cửa sổ bật lên (pop-up) rồi thử lại.');
+    return;
+  }
+  w.document.write('<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>'+title+'</title><style>body{font-family:Arial;text-align:center;padding:40px}img{width:300px;max-width:90vw;border:4px solid #000;padding:10px}h1{font-size:26px}p{font-size:16px}</style></head><body><h1>'+title+'</h1><img src="'+qr+'"><p><b>Hướng dẫn:</b> Học sinh dùng điện thoại quét mã QR để làm bài kiểm tra trực tuyến.</p><p style="color:#666">'+url+'</p><script>window.onload=function(){window.print();}<\/script></body></html>');
+  w.document.close();
+}
+function readExamFromUrl(){
+  let p=new URLSearchParams(location.search),i=p.get('exam');
+  if(i!==null&&EXAMS[+i]){
+    loadExam(+i);
+    $('examSelect').value=i;
+  }
+}
+const $=id=>document.getElementById(id);$('examTitle').textContent=EXAM.title;
+$('examInfo').textContent=`${EXAM.questions.length} câu • ${EXAM.timeMinutes} phút • Không cần tài khoản`;
+
+function renderQuestions(){
+  $('questions').innerHTML=EXAM.questions.map((q,i)=>`<div class="question" id="q${i}"><div class="q-title">Câu ${i+1}. ${q.text}</div>${q.options.map((o,j)=>`<label class="option"><input type="radio" name="q${i}" value="${j}"> <span>${String.fromCharCode(65+j)}.${o}</span></label>`).join('')}</div>`).join('');
+  document.querySelectorAll('input[type=radio]').forEach(x=>x.addEventListener('change',e=>{
+    answers[+e.target.name.slice(1)]=+e.target.value;
+    updateProgress();
+  }));
+}
+function updateProgress(){
+  let n=answers.filter(x=>x!==null).length;
+  $('answered').textContent=`${n}/${EXAM.questions.length}`;
+  $('progressBar').style.width=`${n/EXAM.questions.length*100}%`;
+}
+function start(){
+  let n=$('name').value.trim(),c=$('className').value.trim();
+  if(!n||!c){
+    alert('Thầy yêu cầu học sinh nhập đầy đủ Họ và tên và Lớp.');
+    return;
+  }
+  started=true;
+  isSubmitting=false;
+  answers.fill(null);
+  remaining=EXAM.timeMinutes*60;
+  $('studentLabel').textContent=`${n} • ${c}`;
+  $('start').classList.add('hidden');
+  $('result').classList.add('hidden');$('exam').classList.remove('hidden');
+  renderQuestions();
+  updateProgress();
+  tick();
+  clearInterval(timerId);
+  timerId=setInterval(tick,1000);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tick(){
+  let m=Math.floor(remaining/60),s=remaining%60;
+  $('timer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(remaining<=0){
+    clearInterval(timerId);
+    finish(true);
+  }else{
+    remaining--;
+  }
+}
+function finish(auto=false){
+  if(!started||isSubmitting)return;
+  isSubmitting=true;
+  clearInterval(timerId);
+  let score=answers.reduce((sum,a,i)=>sum+(a===EXAM.questions[i].answer?1:0),0);
+  saveResult(score);
+  $('exam').classList.add('hidden');
+  $('result').classList.remove('hidden');$('resultText').innerHTML=`<div class="score">✅ ĐÃ NỘP BÀI THÀNH CÔNG</div><p class="small">${auto?'Hết thời gian, hệ thống đã tự động nộp bài.':'Bài làm của em đã được ghi nhận vào hệ thống.'}</p><p class="small" style="font-size:16px;font-weight:bold;color:var(--primary);margin-top:15px">Em vui lòng giữ trật tự và chờ giáo viên thông báo điểm.</p>`;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+$('startBtn').onclick=start;
+$('submitBtn').onclick=()=>{if(confirm('Em chắc chắn muốn nộp bài?'))finish(false)};
+$('retryBtn').onclick=()=>{$('result').classList.add('hidden');
+  $('start').classList.remove('hidden');$('name').focus();
+  started=false;
+  isSubmitting=false;
+};
+$('examSelect').onchange=e=>loadExam(e.target.value);$('qrBtn').onclick=makeQR;
+$('clearHistory').onclick=()=>{
+  if(confirm('Xóa toàn bộ kết quả đã lưu trên thiết bị này?')){
+    localStorage.removeItem('quizResults');
+    showHistory();
+  }
+};
+showHistory();
+readExamFromUrl();
 </script></body></html>
