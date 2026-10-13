@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hệ thống Kiểm tra & Tài liệu Tin học THCS (v4.0)</title>
+<title>Hệ thống Kiểm tra & Tài liệu Tin học THCS</title>
 <style>
 :root{font-family:Inter,Segoe UI,Arial,sans-serif;color-scheme:light dark;--bg:#f4f7fb;--surface:#fff;--text:#172033;--muted:#667085;--primary:#2563eb;--primary2:#1d4ed8;--border:#dbe2ea;--ok:#15803d;--danger:#dc2626}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}
@@ -53,7 +53,7 @@
 <div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div>
 </section>
 
-<!-- TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG CHO HỌC SINH -->
+<!-- TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG -->
 <section class="card">
 <h2>📚 Tài liệu ôn tập & Đề cương</h2>
 <p class="small">Chọn khối lớp để xem danh sách tài liệu ôn tập do thầy cung cấp.</p>
@@ -425,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if(adminLogin) adminLogin.onclick = () => {
     let passInput = $('adminPass');
     if(!passInput) return;
-    if(passInput.value.trim() === 'Trongth_2026!') { // Mật khẩu cập nhật an toàn
+    if(passInput.value.trim() === 'Trongthien233') {
       let content = $('adminContent');
       if(content) content.classList.remove('hidden');
       fetchSheetData();
