@@ -94,7 +94,7 @@
 <!-- KHU VỰC QUẢN TRỊ DÀNH CHO GIÁO VIÊN -->
 <section class="card">
   <div class="actions" style="justify-content:space-between">
-    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Quản lý điểm, đề thi và gửi link tài liệu ôn tập lên Cloud.</div></div>
+    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Quản lý điểm, đề thi và tài liệu ôn tập.</div></div>
     <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị</button>
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
@@ -107,7 +107,7 @@
       <div class="actions" style="margin-bottom:15px">
         <button class="btn primary" id="tabScores" type="button">📊 Xem bảng điểm</button>
         <button class="btn qr-action" id="tabExams" type="button">📄 Quản lý Đề thi</button>
-        <button class="btn secondary" id="tabDocs" type="button" style="background:#0f766e">📂 Gửi Link Tài liệu</button>
+        <button class="btn secondary" id="tabDocs" type="button" style="background:#0f766e">📂 Quản lý Tài liệu</button>
       </div>
 
       <!-- Xem điểm -->
@@ -119,9 +119,12 @@
         <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="7" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
       </div>
 
-      <!-- Quản lý Đề thi -->
+      <!-- Quản lý & Xóa Đề thi -->
       <div id="panelExams" class="hidden">
-        <h3>Tải đề thi mới từ Tệp Word (.docx) lên Cloud</h3>
+        <h3>Quản lý & Thêm Đề thi mới</h3>
+        <div id="adminExamsList" style="margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:15px"></div>
+        
+        <h4 style="margin-top:10px">Tải đề thi mới từ Tệp Word (.docx)</h4>
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
             <label>Chọn khối lớp phát hành</label>
@@ -150,10 +153,12 @@
         </div>
       </div>
 
-      <!-- Gửi Link Tài liệu ôn tập -->
+      <!-- Quản lý & Xóa Tài liệu ôn tập -->
       <div id="panelDocs" class="hidden">
-        <h3>Gửi Đường dẫn (Link) Tài liệu ôn tập / Đề cương lên Cloud</h3>
-        <p class="small" style="color:var(--primary)">Thầy dán link Google Drive chứa tài liệu vào đây, học sinh mở điện thoại bấm vào là đọc ngay.</p>
+        <h3>Quản lý & Thêm Tài liệu ôn tập</h3>
+        <div id="adminDocsList" style="margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:15px"></div>
+
+        <h4 style="margin-top:10px">Gửi Link Tài liệu ôn tập / Đề cương mới</h4>
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
             <label>Chọn khối lớp</label>
@@ -163,7 +168,7 @@
           </div>
           <div class="field">
             <label>Tiêu đề tài liệu / Đề cương</label>
-            <input type="text" id="docTitle" placeholder="Ví dụ: Đề cương ôn tập giữa kì 1 Tin học 7">
+            <input type="text" id="docTitle" placeholder="Ví dụ: Đề cương ôn tập giữa kì 1">
           </div>
         </div>
         <div class="field" style="margin-bottom:15px">
@@ -191,23 +196,15 @@ let answers = [], activeQuestions = [], remaining = 15 * 60, timerId = null, sta
 const $ = id => document.getElementById(id);
 
 async function fetchCloudData() {
-  let select = $('examSelect');
-  if(select && Object.keys(EXAMS_DATA).length === 0) {
-    select.innerHTML = '<option value="">⏳ Đang đồng bộ đề thi từ Cloud...</option>';
-  }
-
   try {
     let res = await fetch(GOOGLE_SHEETS_URL + '?action=getExams');
     let result = await res.json();
-    if (result.success && result.data && Object.keys(result.data).length > 0) {
+    if (result.success && result.data) {
       EXAMS_DATA = result.data;
       updateExamSelect();
-    } else {
-      if(select) select.innerHTML = '<option value="">Chưa có đề nào trên hệ thống Google Sheets.</option>';
+      renderAdminExams();
     }
-  } catch(e) {
-    if(select) select.innerHTML = '<option value="">Chưa có đề thi hoặc đang chờ cập nhật.</option>';
-  }
+  } catch(e) {}
 
   try {
     let resDoc = await fetch(GOOGLE_SHEETS_URL + '?action=getDocs');
@@ -215,14 +212,9 @@ async function fetchCloudData() {
     if (resDocJson.success && resDocJson.data) {
       DOCS_DATA = resDocJson.data;
       renderStudentDocs();
-    } else {
-      let docList = $('studentDocsList');
-      if(docList) docList.innerHTML = '<p class="small">Chưa có tài liệu ôn tập nào.</p>';
+      renderAdminDocs();
     }
-  } catch(e) {
-    let docList = $('studentDocsList');
-    if(docList) docList.innerHTML = '<p class="small">Chưa có tài liệu ôn tập.</p>';
-  }
+  } catch(e) {}
 }
 
 function updateExamSelect(){
@@ -279,6 +271,80 @@ function renderStudentDocs(){
   `).join('');
 }
 
+function renderAdminExams(){
+  let container = $('adminExamsList');
+  if(!container) return;
+  let html = '<h4>Danh sách đề thi hiện tại trên Cloud:</h4>';
+  let hasAny = false;
+
+  for(let g in EXAMS_DATA){
+    if(EXAMS_DATA[g] && EXAMS_DATA[g].length > 0){
+      EXAMS_DATA[g].forEach((ex, idx) => {
+        hasAny = true;
+        html += `
+          <div class="actions" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span>[Khối ${g}] <b>${ex.title}</b> (${ex.questions.length} câu)</span>
+            <button class="btn danger-action" style="padding:6px 12px;font-size:13px" onclick="deleteExam('${g}', ${idx})">🗑️ Xóa đề này</button>
+          </div>
+        `;
+      });
+    }
+  }
+  container.innerHTML = hasAny ? html : '<p class="small">Chưa có đề thi nào trên hệ thống.</p>';
+}
+
+async function deleteExam(grade, index){
+  if(!confirm('Thầy có chắc chắn muốn xóa đề thi này không?')) return;
+  try {
+    await fetch(GOOGLE_SHEETS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({action: 'deleteExam', grade: grade, index: index})
+    });
+    alert('Đã xóa đề thi thành công!');
+    fetchCloudData();
+  } catch(err) {
+    alert('Lỗi khi xóa: ' + err);
+  }
+}
+
+function renderAdminDocs(){
+  let container = $('adminDocsList');
+  if(!container) return;
+  let html = '<h4>Danh sách tài liệu hiện tại trên Cloud:</h4>';
+  let hasAny = false;
+
+  for(let g in DOCS_DATA){
+    if(DOCS_DATA[g] && DOCS_DATA[g].length > 0){
+      DOCS_DATA[g].forEach((d, idx) => {
+        hasAny = true;
+        html += `
+          <div class="actions" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span>[Khối ${g}] <b>${d.title}</b></span>
+            <button class="btn danger-action" style="padding:6px 12px;font-size:13px" onclick="deleteDoc('${g}', ${idx})">🗑️ Xóa tài liệu</button>
+          </div>
+        `;
+      });
+    }
+  }
+  container.innerHTML = hasAny ? html : '<p class="small">Chưa có tài liệu nào trên hệ thống.</p>';
+}
+
+async function deleteDoc(grade, index){
+  if(!confirm('Thầy có chắc chắn muốn xóa tài liệu này không?')) return;
+  try {
+    await fetch(GOOGLE_SHEETS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({action: 'deleteDoc', grade: grade, index: index})
+    });
+    alert('Đã xóa tài liệu thành công!');
+    fetchCloudData();
+  } catch(err) {
+    alert('Lỗi khi xóa: ' + err);
+  }
+}
+
 async function fetchSheetData(){
   let subEl = $('totalSubmissions');
   let histEl = $('historyList');
@@ -331,8 +397,7 @@ function saveResult(score){
 
   if(GOOGLE_SHEETS_URL){
     fetch(GOOGLE_SHEETS_URL,{
-      method:'POST',
-      mode:'no-cors',
+      method:'POST', mode:'no-cors',
       headers:{'Content-Type':'text/plain;charset=utf-8'},
       body:JSON.stringify(result)
     }).catch(()=>{});
@@ -494,7 +559,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
   $('retryBtn').onclick = () => { $('result').classList.add('hidden');$('start').classList.remove('hidden'); started = false; isSubmitting = false; };
 
-  // ⭐ ĐÃ SỬA CHUẨN XÁC MẬT KHẨU ĐĂNG NHẬP
   $('adminToggle').onclick = () => { $('adminPanel').classList.toggle('hidden'); };$('adminLogin').onclick = () => {
     let passInput = $('adminPass');
     if(!passInput) return;
@@ -502,7 +566,7 @@ document.addEventListener('DOMContentLoaded', () => {
       $('adminContent').classList.remove('hidden');
       fetchSheetData();
     } else {
-      alert('Mật khẩu không đúng! Thầy vui lòng nhập lại.');
+      alert('Mật khẩu không đúng!');
     }
   };
 
@@ -514,14 +578,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let g = $('docGrade').value;
     let title = $('docTitle').value.trim();
     let link = $('docLink').value.trim();
-    if(!title || !link){ alert('Vui lòng nhập đầy đủ tiêu đề và đường dẫn link tài liệu!'); return; }
+    if(!title || !link){ alert('Vui lòng nhập đầy đủ tiêu đề và link tài liệu!'); return; }
 
-    let payload = {
-      action: 'saveDoc',
-      grade: g,
-      doc: { title: title, link: link }
-    };
-
+    let payload = { action: 'saveDoc', grade: g, doc: { title: title, link: link } };
     $('saveDocBtn').textContent = "⏳ Đang gửi Link lên Cloud...";
     $('saveDocBtn').disabled = true;
 
@@ -531,7 +590,6 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: {'Content-Type': 'text/plain;charset=utf-8'},
         body: JSON.stringify(payload)
       });
-
       alert('🎉 ĐÃ GỬI LINK TÀI LIỆU THÀNH CÔNG!');
       $('docTitle').value = '';$('docLink').value = '';
       fetchCloudData();
@@ -596,8 +654,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: {'Content-Type': 'text/plain;charset=utf-8'},
         body: JSON.stringify(payload)
       });
-
-      alert('🎉 ĐÃ PHÁT HÀNH ĐỀ THI THÀNH CÔNG LÊN CLOUD!');
+      alert('🎉 ĐÃ PHÁT HÀNH ĐỀ THI THÀNH CÔNG!');
       $('builderTitle').value = '';
       $('wordFileSelect').value = '';$('builderQuestionsContainer').innerHTML = '';
       fetchCloudData();
