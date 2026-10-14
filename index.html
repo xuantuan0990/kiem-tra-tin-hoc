@@ -121,10 +121,10 @@
 
       <!-- Quản lý & Xóa Đề thi -->
       <div id="panelExams" class="hidden">
-        <h3>Quản lý & Thêm Đề thi mới</h3>
-        <div id="adminExamsList" style="margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:15px"></div>
+        <h3>Danh sách Đề thi hiện có trên Cloud (Có nút Xóa)</h3>
+        <div id="adminExamsList" style="margin-bottom:20px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--bg)">Đang tải danh sách đề...</div>
         
-        <h4 style="margin-top:10px">Tải đề thi mới từ Tệp Word (.docx)</h4>
+        <h3 style="margin-top:15px">Tải đề thi mới từ Tệp Word (.docx)</h3>
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
             <label>Chọn khối lớp phát hành</label>
@@ -155,10 +155,10 @@
 
       <!-- Quản lý & Xóa Tài liệu ôn tập -->
       <div id="panelDocs" class="hidden">
-        <h3>Quản lý & Thêm Tài liệu ôn tập</h3>
-        <div id="adminDocsList" style="margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:15px"></div>
+        <h3>Danh sách Tài liệu hiện có trên Cloud (Có nút Xóa)</h3>
+        <div id="adminDocsList" style="margin-bottom:20px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--bg)">Đang tải danh sách tài liệu...</div>
 
-        <h4 style="margin-top:10px">Gửi Link Tài liệu ôn tập / Đề cương mới</h4>
+        <h3 style="margin-top:15px">Gửi Link Tài liệu ôn tập / Đề cương mới</h3>
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
             <label>Chọn khối lớp</label>
@@ -274,7 +274,7 @@ function renderStudentDocs(){
 function renderAdminExams(){
   let container = $('adminExamsList');
   if(!container) return;
-  let html = '<h4>Danh sách đề thi hiện tại trên Cloud:</h4>';
+  let html = '';
   let hasAny = false;
 
   for(let g in EXAMS_DATA){
@@ -293,7 +293,7 @@ function renderAdminExams(){
   container.innerHTML = hasAny ? html : '<p class="small">Chưa có đề thi nào trên hệ thống.</p>';
 }
 
-async function deleteExam(grade, index){
+window.deleteExam = async function(grade, index){
   if(!confirm('Thầy có chắc chắn muốn xóa đề thi này không?')) return;
   try {
     await fetch(GOOGLE_SHEETS_URL, {
@@ -302,16 +302,16 @@ async function deleteExam(grade, index){
       body: JSON.stringify({action: 'deleteExam', grade: grade, index: index})
     });
     alert('Đã xóa đề thi thành công!');
-    fetchCloudData();
+    setTimeout(fetchCloudData, 1000);
   } catch(err) {
     alert('Lỗi khi xóa: ' + err);
   }
-}
+};
 
 function renderAdminDocs(){
   let container = $('adminDocsList');
   if(!container) return;
-  let html = '<h4>Danh sách tài liệu hiện tại trên Cloud:</h4>';
+  let html = '';
   let hasAny = false;
 
   for(let g in DOCS_DATA){
@@ -330,7 +330,7 @@ function renderAdminDocs(){
   container.innerHTML = hasAny ? html : '<p class="small">Chưa có tài liệu nào trên hệ thống.</p>';
 }
 
-async function deleteDoc(grade, index){
+window.deleteDoc = async function(grade, index){
   if(!confirm('Thầy có chắc chắn muốn xóa tài liệu này không?')) return;
   try {
     await fetch(GOOGLE_SHEETS_URL, {
@@ -339,11 +339,11 @@ async function deleteDoc(grade, index){
       body: JSON.stringify({action: 'deleteDoc', grade: grade, index: index})
     });
     alert('Đã xóa tài liệu thành công!');
-    fetchCloudData();
+    setTimeout(fetchCloudData, 1000);
   } catch(err) {
     alert('Lỗi khi xóa: ' + err);
   }
-}
+};
 
 async function fetchSheetData(){
   let subEl = $('totalSubmissions');
@@ -565,6 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(passInput.value.trim() === 'Trongthien233') {
       $('adminContent').classList.remove('hidden');
       fetchSheetData();
+      fetchCloudData();
     } else {
       alert('Mật khẩu không đúng!');
     }
@@ -592,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       alert('🎉 ĐÃ GỬI LINK TÀI LIỆU THÀNH CÔNG!');
       $('docTitle').value = '';$('docLink').value = '';
-      fetchCloudData();
+      setTimeout(fetchCloudData, 1000);
     } catch(err) {
       alert('Lỗi: ' + err);
     } finally {
@@ -657,7 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('🎉 ĐÃ PHÁT HÀNH ĐỀ THI THÀNH CÔNG!');
       $('builderTitle').value = '';
       $('wordFileSelect').value = '';$('builderQuestionsContainer').innerHTML = '';
-      fetchCloudData();
+      setTimeout(fetchCloudData, 1000);
     } catch(err) {
       alert('Lỗi: ' + err);
     } finally {
