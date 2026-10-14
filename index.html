@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hệ thống Kiểm tra Tin học THCS</title>
+<title>Hệ thống Kiểm tra & Tài liệu Tin học THCS</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
 :root{font-family:Inter,Segoe UI,Arial,sans-serif;color-scheme:light dark;--bg:#f4f7fb;--surface:#fff;--text:#172033;--muted:#667085;--primary:#2563eb;--primary2:#1d4ed8;--border:#dbe2ea;--ok:#15803d;--danger:#dc2626}
@@ -22,7 +22,7 @@
 </head>
 <body>
 <div id="app">
-<section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA TRỰC TUYẾN • THCS</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Học sinh làm bài trên Điện thoại & Máy tính • Đồng bộ 100%</p></div></section>
+<section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA & TÀI LIỆU • THCS</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Học sinh làm bài & xem tài liệu trên Mọi thiết bị • Đồng bộ 100%</p></div></section>
 <div class="container">
 
 <!-- PHẦN 1: CHỌN ĐỀ THI -->
@@ -32,17 +32,14 @@
 <div class="field">
   <label for="gradeSelect">Chọn khối lớp</label>
   <select id="gradeSelect">
-    <option value="6">Khối 6</option>
-    <option value="7">Khối 7</option>
-    <option value="8">Khối 8</option>
-    <option value="9">Khối 9</option>
+    <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
   </select>
 </div>
 <div class="field"><label for="examSelect">Chọn bài / đề thi</label><select id="examSelect"><option value="">Đang tải danh sách đề từ máy chủ...</option></select></div>
 </div>
 <div style="margin-top:14px" class="actions">
   <button class="btn qr-action" id="qrBtn" type="button">📱 Xem mã QR bài này</button>
-  <button class="btn secondary" id="reloadExamsBtn" type="button" style="padding:8px 14px;font-size:14px">🔄 Cập nhật danh sách đề mới</button>
+  <button class="btn secondary" id="reloadExamsBtn" type="button" style="padding:8px 14px;font-size:14px">🔄 Cập nhật danh sách mới</button>
 </div>
 <div id="qrBox" class="hidden" style="margin-top:16px;text-align:center;border-top:1px solid var(--border);padding-top:16px"><img id="qrImg" alt="Mã QR" width="200" height="200" style="border:6px solid white;border-radius:8px"><p class="small">Học sinh quét mã QR để mở đúng bài kiểm tra.</p><div id="qrLink" class="small" style="word-break:break-all"></div></div>
 </section>
@@ -57,6 +54,19 @@
 </div>
 <div style="height:16px"></div>
 <div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div>
+</section>
+
+<!-- PHẦN 2: TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG CHO HỌC SINH -->
+<section class="card">
+<h2>📚 Tài liệu ôn tập & Đề cương</h2>
+<p class="small">Chọn khối lớp để xem hoặc mở trực tiếp tài liệu ôn tập.</p>
+<div class="field" style="max-width:280px;margin-bottom:14px">
+  <label for="docGradeSelect">Chọn khối lớp</label>
+  <select id="docGradeSelect">
+    <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
+  </select>
+</div>
+<div id="studentDocsList" style="border-top:1px solid var(--border);padding-top:12px">⏳ Đang tải tài liệu từ Cloud...</div>
 </section>
 
 <!-- MÀN HÌNH LÀM BÀI -->
@@ -84,7 +94,7 @@
 <!-- KHU VỰC QUẢN TRỊ DÀNH CHO GIÁO VIÊN -->
 <section class="card">
   <div class="actions" style="justify-content:space-between">
-    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Tải đề từ file Word lên Cloud và Xem bảng điểm.</div></div>
+    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Quản lý điểm, đề thi và gửi link tài liệu ôn tập lên Cloud.</div></div>
     <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị</button>
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
@@ -96,7 +106,8 @@
     <div id="adminContent" class="hidden">
       <div class="actions" style="margin-bottom:15px">
         <button class="btn primary" id="tabScores" type="button">📊 Xem bảng điểm</button>
-        <button class="btn qr-action" id="tabExams" type="button">📄 Tải đề Word lên Cloud</button>
+        <button class="btn qr-action" id="tabExams" type="button">📄 Quản lý Đề thi</button>
+        <button class="btn secondary" id="tabDocs" type="button" style="background:#0f766e">📂 Gửi Link Tài liệu</button>
       </div>
 
       <!-- Xem điểm -->
@@ -111,15 +122,11 @@
       <!-- Upload đề Word -->
       <div id="panelExams" class="hidden">
         <h3>Tải đề thi mới từ Tệp Word (.docx) lên Cloud cho Điện thoại</h3>
-        <p class="small" style="color:var(--primary)">Đề thi lưu tại đây sẽ đồng bộ lập tức sang toàn bộ điện thoại của học sinh.</p>
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
             <label>Chọn khối lớp phát hành</label>
             <select id="builderGrade">
-              <option value="6">Khối 6</option>
-              <option value="7">Khối 7</option>
-              <option value="8">Khối 8</option>
-              <option value="9">Khối 9</option>
+              <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
             </select>
           </div>
           <div class="field">
@@ -139,9 +146,33 @@
         <div id="builderQuestionsContainer"></div>
         <div class="actions" style="margin-top:15px">
           <button class="btn secondary" id="addQuestionBtn" type="button">➕ Thêm câu hỏi thủ công</button>
-          <button class="btn primary" id="saveExamBtn" type="button">☁️ LƯU & PHÁT HÀNH TỚI TẤT CẢ ĐIỆN THOẠI</button>
+          <button class="btn primary" id="saveExamBtn" type="button">☁️ LƯU & PHÁT HÀNH ĐỀ THI</button>
         </div>
       </div>
+
+      <!-- Gửi Link Tài liệu ôn tập -->
+      <div id="panelDocs" class="hidden">
+        <h3>Gửi Đường dẫn (Link) Tài liệu ôn tập / Đề cương lên Cloud</h3>
+        <p class="small" style="color:var(--primary)">Thầy dán link Google Drive hoặc trang web chứa nội dung ôn tập vào đây, học sinh mở điện thoại bấm vào là đọc ngay.</p>
+        <div class="grid" style="margin-bottom:10px">
+          <div class="field">
+            <label>Chọn khối lớp</label>
+            <select id="docGrade">
+              <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tiêu đề tài liệu / Đề cương</label>
+            <input type="text" id="docTitle" placeholder="Ví dụ: Đề cương ôn tập giữa kì 1 Tin học 7">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:15px">
+          <label>Đường dẫn liên kết (URL / Link Google Drive)</label>
+          <input type="text" id="docLink" placeholder="https://drive.google.com/file/d/...">
+        </div>
+        <button class="btn primary" id="saveDocBtn" type="button">☁️ GỬI LINK TÀI LIỆU LÊN CLOUD</button>
+      </div>
+
     </div>
   </div>
 </section>
@@ -153,28 +184,35 @@
 const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyi8yEfIGPU1WL0zW8Kqlwsi2cxYZ6mxuZycH65z_XGHMQRaD4VdnZZ-GV9bL82C-gA/exec';
 
 let EXAMS_DATA = {};
+let DOCS_DATA = {};
 let currentGrade = "6", examIndex = 0, EXAM = null;
 let answers = [], activeQuestions = [], remaining = 15 * 60, timerId = null, started = false, isSubmitting = false;
 
 const $ = id => document.getElementById(id);
 
-// Tải danh sách đề đồng bộ từ Cloud về Điện thoại
-async function fetchExamsFromCloud() {
-  let select = $('examSelect');
-  if(!select) return;
-  select.innerHTML = '<option value="">⏳ Đang đồng bộ đề thi từ Cloud...</option>';
-  
+async function fetchCloudData() {
   try {
     let res = await fetch(GOOGLE_SHEETS_URL + '?action=getExams');
     let result = await res.json();
     if (result.success && result.data && Object.keys(result.data).length > 0) {
       EXAMS_DATA = result.data;
       updateExamSelect();
+    }
+  } catch(e) {}
+
+  try {
+    let resDoc = await fetch(GOOGLE_SHEETS_URL + '?action=getDocs');
+    let resDocJson = await resDoc.json();
+    if (resDocJson.success && resDocJson.data) {
+      DOCS_DATA = resDocJson.data;
+      renderStudentDocs();
     } else {
-      select.innerHTML = '<option value="">Chưa có đề nào trên hệ thống.</option>';
+      let docList = $('studentDocsList');
+      if(docList) docList.innerHTML = '<p class="small">Chưa có tài liệu nào.</p>';
     }
   } catch(e) {
-    select.innerHTML = '<option value="">Lỗi kết nối máy chủ.</option>';
+    let docList = $('studentDocsList');
+    if(docList) docList.innerHTML = '<p class="small">Chưa có tài liệu ôn tập.</p>';
   }
 }
 
@@ -210,6 +248,25 @@ function loadExam(i){
   answers = [];
   activeQuestions = [];
   remaining = (EXAM.timeMinutes || 15) * 60;
+}
+
+function renderStudentDocs(){
+  let gSel = $('docGradeSelect');
+  let container = $('studentDocsList');
+  if(!gSel || !container) return;
+  let g = gSel.value;
+  let docs = DOCS_DATA[g] || [];
+  
+  if(docs.length === 0){
+    container.innerHTML = '<p class="small">Chưa có tài liệu ôn tập nào cho khối này.</p>';
+    return;
+  }
+  container.innerHTML = docs.map(d => `
+    <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span>📄 <b>${d.title}</b></span>
+      <a href="${d.link}" target="_blank" class="btn primary" style="padding:8px 14px;font-size:14px;text-decoration:none">📖 Mở & Đọc tài liệu</a>
+    </div>
+  `).join('');
 }
 
 async function fetchSheetData(){
@@ -321,7 +378,7 @@ function updateProgress(){
 function start(){
   let n = $('name').value.trim(), c =$('className').value.trim();
   if(!n || !c){ alert('Em vui lòng nhập đầy đủ Họ và tên và Lớp.'); return; }
-  if(!EXAM || !EXAM.questions || EXAM.questions.length === 0){ alert('Vui lòng chọn bài kiểm tra!'); return; }
+  if(!EXAM || !EXAM.questions || !EXAM.questions.length){ alert('Vui lòng chọn bài kiểm tra!'); return; }
   
   started = true; isSubmitting = false; 
   activeQuestions = shuffleArray(EXAM.questions);
@@ -420,7 +477,8 @@ function padOptions(opts){
 
 document.addEventListener('DOMContentLoaded', () => {
   $('gradeSelect').onchange = e => loadGrade(e.target.value);
-  $('examSelect').onchange = e => loadExam(e.target.value);$('reloadExamsBtn').onclick = fetchExamsFromCloud;
+  $('examSelect').onchange = e => loadExam(e.target.value);$('docGradeSelect').onchange = renderStudentDocs;
+  $('reloadExamsBtn').onclick = fetchCloudData;
   $('qrBtn').onclick = makeQR;
   $('startBtn').onclick = start;
   $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
@@ -433,8 +491,41 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   $('refreshData').onclick = fetchSheetData;
-  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); };
-  $('tabExams').onclick = () => {$('panelScores').classList.add('hidden'); $('panelExams').classList.remove('hidden'); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
+  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };$('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };$('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
+
+  // NÚT LƯU LINK TÀI LIỆU LÊN CLOUD
+  $('saveDocBtn').onclick = async () => {
+    let g = $('docGrade').value;
+    let title = $('docTitle').value.trim();
+    let link = $('docLink').value.trim();
+    if(!title || !link){ alert('Vui lòng nhập đầy đủ tiêu đề và đường dẫn link tài liệu!'); return; }
+
+    let payload = {
+      action: 'saveDoc',
+      grade: g,
+      doc: { title: title, link: link }
+    };
+
+    $('saveDocBtn').textContent = "⏳ Đang gửi Link lên Cloud...";
+    $('saveDocBtn').disabled = true;
+
+    try {
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify(payload)
+      });
+
+      alert('🎉 ĐÃ GỬI LINK THÀNH CÔNG! Học sinh mở điện thoại sẽ thấy ngay nút đọc tài liệu.');
+      $('docTitle').value = '';$('docLink').value = '';
+      fetchCloudData();
+    } catch(err) {
+      alert('Lỗi: ' + err);
+    } finally {
+      $('saveDocBtn').textContent = "☁️ GỬI LINK TÀI LIỆU LÊN CLOUD";
+      $('saveDocBtn').disabled = false;
+    }
+  };
 
   $('wordFileSelect').onchange = (e) => {
     let file = e.target.files[0];
@@ -453,7 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsArrayBuffer(file);
   };
 
-  // NÚT LƯU ĐỀ LÊN CLOUD
+  // NÚT LƯU ĐỀ THI LÊN CLOUD
   $('saveExamBtn').onclick = async () => {
     let g = $('builderGrade').value;
     let title = $('builderTitle').value.trim();
@@ -476,8 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let payload = {
-      action: 'saveExam',
-      grade: g,
+      action: 'saveExam', grade: g,
       exam: { title: title, timeMinutes: timeM, questions: questions }
     };
 
@@ -486,25 +576,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       await fetch(GOOGLE_SHEETS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
+        method: 'POST', mode: 'no-cors',
         headers: {'Content-Type': 'text/plain;charset=utf-8'},
         body: JSON.stringify(payload)
       });
 
-      alert('🎉 ĐÃ PHÁT HÀNH THÀNH CÔNG! Đề thi đã được lưu lên Cloud. Tất cả học sinh mở điện thoại lên sẽ thấy đề này ngay lập tức.');
+      alert('🎉 ĐÃ PHÁT HÀNH ĐỀ THI THÀNH CÔNG!');
       $('builderTitle').value = '';
       $('wordFileSelect').value = '';$('builderQuestionsContainer').innerHTML = '';
-      fetchExamsFromCloud();
+      fetchCloudData();
     } catch(err) {
-      alert('Lỗi gửi đề lên Cloud: ' + err);
+      alert('Lỗi: ' + err);
     } finally {
-      $('saveExamBtn').textContent = "☁️ LƯU & PHÁT HÀNH TỚI TẤT CẢ ĐIỆN THOẠI";
-      $('saveExamBtn').disabled = false;
+      $('saveExamBtn').textContent = "☁️ LƯU & PHÁT HÀNH ĐỀ THI";
+      $('saveExamBtn'].disabled = false;
     }
   };
 
-  fetchExamsFromCloud();
+  fetchCloudData();
 });
 </script>
 </body>
