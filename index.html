@@ -25,7 +25,7 @@
 <section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA & TÀI LIỆU • THCS</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Học sinh làm bài & xem tài liệu trên Mọi thiết bị • Đồng bộ 100%</p></div></section>
 <div class="container">
 
-<!-- PHẦN 1: CHỌN ĐỀ THI -->
+<!-- CHỌN ĐỀ THI -->
 <section class="card">
 <h2>📝 Chọn bài kiểm tra theo khối lớp</h2>
 <div class="grid">
@@ -35,7 +35,7 @@
     <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
   </select>
 </div>
-<div class="field"><label for="examSelect">Chọn bài / đề thi</label><select id="examSelect"><option value="">Đang tải danh sách đề từ máy chủ...</option></select></div>
+<div class="field"><label for="examSelect">Chọn bài / đề thi</label><select id="examSelect"><option value="">Đang tải danh sách đề...</option></select></div>
 </div>
 <div style="margin-top:14px" class="actions">
   <button class="btn qr-action" id="qrBtn" type="button">📱 Xem mã QR bài này</button>
@@ -56,7 +56,7 @@
 <div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div>
 </section>
 
-<!-- PHẦN 2: TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG CHO HỌC SINH -->
+<!-- TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG CHO HỌC SINH -->
 <section class="card">
 <h2>📚 Tài liệu ôn tập & Đề cương</h2>
 <p class="small">Chọn khối lớp để xem hoặc mở trực tiếp tài liệu ôn tập.</p>
@@ -66,7 +66,7 @@
     <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
   </select>
 </div>
-<div id="studentDocsList" style="border-top:1px solid var(--border);padding-top:12px">⏳ Đang tải tài liệu từ Cloud...</div>
+<div id="studentDocsList" style="border-top:1px solid var(--border);padding-top:12px">⏳ Đang tải tài liệu...</div>
 </section>
 
 <!-- MÀN HÌNH LÀM BÀI -->
@@ -94,7 +94,7 @@
 <!-- KHU VỰC QUẢN TRỊ DÀNH CHO GIÁO VIÊN -->
 <section class="card">
   <div class="actions" style="justify-content:space-between">
-    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Quản lý điểm, đề thi và gửi link tài liệu ôn tập lên Cloud.</div></div>
+    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Quản lý điểm, đề thi và gửi link tài liệu ôn tập.</div></div>
     <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị</button>
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
@@ -113,15 +113,15 @@
       <!-- Xem điểm -->
       <div id="panelScores">
         <div class="actions" style="justify-content:space-between;margin-bottom:10px">
-          <span class="small" id="totalSubmissions">Đang tải dữ liệu từ Google Sheets...</span>
+          <span class="small" id="totalSubmissions">Đang tải bảng điểm...</span>
           <button class="btn primary" id="refreshData" type="button">🔄 Tải lại bảng điểm</button>
         </div>
         <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="7" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
       </div>
 
-      <!-- Upload đề Word -->
+      <!-- Quản lý Đề thi -->
       <div id="panelExams" class="hidden">
-        <h3>Tải đề thi mới từ Tệp Word (.docx) lên Cloud cho Điện thoại</h3>
+        <h3>Tải đề thi mới từ Tệp Word (.docx) lên Cloud</h3>
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
             <label>Chọn khối lớp phát hành</label>
@@ -183,8 +183,16 @@
 <script>
 const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyi8yEfIGPU1WL0zW8Kqlwsi2cxYZ6mxuZycH65z_XGHMQRaD4VdnZZ-GV9bL82C-gA/exec';
 
-let EXAMS_DATA = {};
-let DOCS_DATA = {};
+// Đề dự phòng an toàn tuyệt đối chống lỗi kết nối
+const fallbackExams = {
+  "6": [{ title: "Kiểm tra 15 phút Tin học 6 (Mẫu)", timeMinutes: 15, questions: [{ text: "Thông tin là gì?", options: ["Hiểu biết về sự vật, hiện tượng","Chỉ là con số","Chỉ là văn bản","Các bức tranh"], answer: 0 }] }],
+  "7": [{ title: "Kiểm tra 15 phút Tin học 7 (Mẫu)", timeMinutes: 15, questions: [{ text: "CPU được ví là gì?", options: ["Bộ não của máy tính","Loa","Bàn phím","Màn hình"], answer: 0 }] }],
+  "8": [{ title: "Kiểm tra 15 phút Tin học 8 (Mẫu)", timeMinutes: 15, questions: [{ text: "IoT là gì?", options: ["Internet vạn vật","Mạng xã hội","Phần mềm","Trò chơi"], answer: 0 }] }],
+  "9": [{ title: "Kiểm tra 15 phút Tin học 9 (Mẫu)", timeMinutes: 15, questions: [{ text: "Scratch là gì?", options: ["Ngôn ngữ lập trình trực quan","Trình duyệt","Hệ điều hành","Phần cứng"], answer: 0 }] }]
+};
+
+let EXAMS_DATA = fallbackExams;
+let DOCS_DATA = {"6":[], "7":[], "8":[], "9":[]};
 let currentGrade = "6", examIndex = 0, EXAM = null;
 let answers = [], activeQuestions = [], remaining = 15 * 60, timerId = null, started = false, isSubmitting = false;
 
@@ -196,34 +204,28 @@ async function fetchCloudData() {
     let result = await res.json();
     if (result.success && result.data && Object.keys(result.data).length > 0) {
       EXAMS_DATA = result.data;
-      updateExamSelect();
     }
   } catch(e) {}
+  updateExamSelect();
 
   try {
     let resDoc = await fetch(GOOGLE_SHEETS_URL + '?action=getDocs');
     let resDocJson = await resDoc.json();
     if (resDocJson.success && resDocJson.data) {
       DOCS_DATA = resDocJson.data;
-      renderStudentDocs();
-    } else {
-      let docList = $('studentDocsList');
-      if(docList) docList.innerHTML = '<p class="small">Chưa có tài liệu nào.</p>';
     }
-  } catch(e) {
-    let docList = $('studentDocsList');
-    if(docList) docList.innerHTML = '<p class="small">Chưa có tài liệu ôn tập.</p>';
-  }
+  } catch(e) {}
+  renderStudentDocs();
 }
 
 function updateExamSelect(){
   let select = $('examSelect');
   if(!select) return;
-  let list = EXAMS_DATA[currentGrade] || [];
+  let list = EXAMS_DATA[currentGrade] || fallbackExams[currentGrade];
   if(list.length === 0){
     select.innerHTML = '<option value="">Chưa có đề nào cho khối này.</option>';
     $('examTitle').textContent = "Chưa có đề thi";
-    $('examInfo').textContent = "Thầy vui lòng tải đề Word lên từ phần Quản trị.";
+    $('examInfo').textContent = "Thầy vui lòng tải đề lên từ phần Quản trị.";
     EXAM = null;
     return;
   }
@@ -234,16 +236,17 @@ function updateExamSelect(){
 function loadGrade(g){
   currentGrade = g;
   updateExamSelect();
+  renderStudentDocs();
 }
 
 function loadExam(i){
   examIndex = +i;
-  let list = EXAMS_DATA[currentGrade] || [];
-  if(!list[examIndex]) return;
+  let list = EXAMS_DATA[currentGrade] || fallbackExams[currentGrade];
+  if(!list[examIndex]) examIndex = 0;
   EXAM = list[examIndex];
   
   $('examTitle').textContent = EXAM.title;
-  $('examInfo').textContent = `Khối ${currentGrade} • ${EXAM.questions.length} câu hỏi • ${EXAM.timeMinutes} phút`;
+  $('examInfo').textContent = `Khối ${currentGrade} •${EXAM.questions.length} câu hỏi • ${EXAM.timeMinutes} phút`;
   
   answers = [];
   activeQuestions = [];
@@ -332,7 +335,7 @@ function saveResult(score){
 function makeQR(){
   let base = location.href.split('?')[0];
   let url = base + `?grade=${currentGrade}&exam=${examIndex}`;
-  let qrImg = $('qrImg'), qrLink = $('qrLink'), qrBox =$('qrBox');
+  let qrImg = $('qrImg'), qrLink = $('qrLink'), qrBox = $('qrBox');
   if(qrImg) qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);
   if(qrLink) qrLink.textContent = url;
   if(qrBox) qrBox.classList.remove('hidden');
@@ -352,11 +355,10 @@ function renderQuestions(){
   if(!qContainer || !EXAM) return;
   qContainer.innerHTML = activeQuestions.map((q,i)=>`
     <div class="question">
-      <div class="q-title">Câu ${i+1}. ${q.text}</div>
-      ${q.options.map((o,j)=>`
+      <div class="q-title">Câu ${i+1}. ${q.text}</div>${q.options.map((o,j)=>`
         <label class="option">
           <input type="radio" name="q${i}" value="${j}">
-          <span>${String.fromCharCode(65+j)}.${o}</span>
+          <span>${String.fromCharCode(65+j)}. ${o}</span>
         </label>
       `).join('')}
     </div>
@@ -370,13 +372,13 @@ function renderQuestions(){
 
 function updateProgress(){
   let ansCount = answers.filter(x=>x!==null).length;
-  let ansEl = $('answered'), progEl =$('progressBar');
+  let ansEl = $('answered'), progEl = $('progressBar');
   if(ansEl) ansEl.textContent = `${ansCount}/${activeQuestions.length}`;
   if(progEl) progEl.style.width = `${(ansCount/activeQuestions.length)*100}%`;
 }
 
 function start(){
-  let n = $('name').value.trim(), c =$('className').value.trim();
+  let n = $('name').value.trim(), c = $('className').value.trim();
   if(!n || !c){ alert('Em vui lòng nhập đầy đủ Họ và tên và Lớp.'); return; }
   if(!EXAM || !EXAM.questions || !EXAM.questions.length){ alert('Vui lòng chọn bài kiểm tra!'); return; }
   
@@ -385,9 +387,10 @@ function start(){
   answers = Array(activeQuestions.length).fill(null);
   remaining = (EXAM.timeMinutes || 15) * 60;
 
-  $('studentLabel').textContent = `${n} • ${c}`;
+  $('studentLabel').textContent = `${n} •${c}`;
   $('start').classList.add('hidden'); 
-  $('result').classList.add('hidden');$('exam').classList.remove('hidden');
+  $('result').classList.add('hidden'); 
+  $('exam').classList.remove('hidden');
   
   renderQuestions(); updateProgress(); tick();
   clearInterval(timerId); timerId = setInterval(tick, 1000);
@@ -408,9 +411,10 @@ function finish(auto=false){
   saveResult(score);
   let finalScore = ((score / activeQuestions.length) * 10).toFixed(1);
   
-  $('exam').classList.add('hidden'); $('result').classList.remove('hidden');$('resultText').innerHTML = `
+  $('exam').classList.add('hidden'); $('result').classList.remove('hidden');
+  $('resultText').innerHTML = `
     <div class="score">✅ NỘP BÀI THÀNH CÔNG</div>
-    <p>Số câu đúng: <b>${score} / ${activeQuestions.length}</b></p>
+    <p>Số câu đúng: <b>${score} /${activeQuestions.length}</b></p>
     <p style="font-size:22px;color:var(--primary);font-weight:bold">Điểm số: ${finalScore} điểm</p>
   `;
   window.scrollTo({top:0,behavior:'smooth'});
@@ -477,23 +481,30 @@ function padOptions(opts){
 
 document.addEventListener('DOMContentLoaded', () => {
   $('gradeSelect').onchange = e => loadGrade(e.target.value);
-  $('examSelect').onchange = e => loadExam(e.target.value);$('docGradeSelect').onchange = renderStudentDocs;
+  $('examSelect').onchange = e => loadExam(e.target.value);
+  $('docGradeSelect').onchange = renderStudentDocs;
   $('reloadExamsBtn').onclick = fetchCloudData;
   $('qrBtn').onclick = makeQR;
   $('startBtn').onclick = start;
   $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
-  $('retryBtn').onclick = () => { $('result').classList.add('hidden');$('start').classList.remove('hidden'); started = false; isSubmitting = false; };
+  $('retryBtn').onclick = () => { $('result').classList.add('hidden'); $('start').classList.remove('hidden'); started = false; isSubmitting = false; };
 
-  $('adminToggle').onclick = () => { $('adminPanel').classList.toggle('hidden'); };$('adminLogin').onclick = () => {
-    if($('adminPass').value.trim() === 'Trongthien233') {$('adminContent').classList.remove('hidden');
+  $('adminToggle').onclick = () => { $('adminPanel').classList.toggle('hidden'); };
+  $('adminLogin').onclick = () => {
+    if($('adminPass').value.trim() === 'Trongthien233') {
+      $('adminContent').classList.remove('hidden');
       fetchSheetData();
     } else alert('Mật khẩu không đúng!');
   };
 
   $('refreshData').onclick = fetchSheetData;
-  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };$('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };$('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
+  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden'); $('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };
+  $('tabExams').onclick = () => { $('panelScores').classList.add('hidden'); $('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };
+  $('tabDocs').onclick = () => { $('panelScores').classList.add('hidden'); $('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };
+  
+  $('addQuestionBtn').onclick = () => addBuilderQuestion();
 
-  // NÚT LƯU LINK TÀI LIỆU LÊN CLOUD
+  // NÚT GỬI LINK TÀI LIỆU LÊN CLOUD
   $('saveDocBtn').onclick = async () => {
     let g = $('docGrade').value;
     let title = $('docTitle').value.trim();
@@ -517,7 +528,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       alert('🎉 ĐÃ GỬI LINK THÀNH CÔNG! Học sinh mở điện thoại sẽ thấy ngay nút đọc tài liệu.');
-      $('docTitle').value = '';$('docLink').value = '';
+      $('docTitle').value = '';
+      $('docLink').value = '';
       fetchCloudData();
     } catch(err) {
       alert('Lỗi: ' + err);
@@ -538,63 +550,4 @@ document.addEventListener('DOMContentLoaded', () => {
         $('builderQuestionsContainer').innerHTML = '';
         if($('builderTitle').value.trim() === '') $('builderTitle').value = file.name.replace(/\.[^/.]+$/, "");
         parsedQs.forEach(q => addBuilderQuestion(q));
-        alert(`Nhận diện thành công ${parsedQs.length} câu hỏi!`);
-      });
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  // NÚT LƯU ĐỀ THI LÊN CLOUD
-  $('saveExamBtn').onclick = async () => {
-    let g = $('builderGrade').value;
-    let title = $('builderTitle').value.trim();
-    let timeM = parseInt($('builderTime').value) || 15;
-    if(!title){ alert('Vui lòng nhập tên bài kiểm tra!'); return; }
-
-    let qDivs = document.querySelectorAll('.builder-q');
-    if(qDivs.length === 0){ alert('Vui lòng thêm ít nhất một câu hỏi!'); return; }
-
-    let questions = [];
-    for(let div of qDivs){
-      let text = div.querySelector('.bq-text').value.trim();
-      let o0 = div.querySelector('.bq-opt0').value.trim();
-      let o1 = div.querySelector('.bq-opt1').value.trim();
-      let o2 = div.querySelector('.bq-opt2').value.trim();
-      let o3 = div.querySelector('.bq-opt3').value.trim();
-      let ans = parseInt(div.querySelector('.bq-ans').value);
-      if(!text || !o0 || !o1 || !o2 || !o3){ alert('Vui lòng điền đầy đủ câu hỏi và các đáp án!'); return; }
-      questions.push({text: text, options: [o0, o1, o2, o3], answer: ans});
-    }
-
-    let payload = {
-      action: 'saveExam', grade: g,
-      exam: { title: title, timeMinutes: timeM, questions: questions }
-    };
-
-    $('saveExamBtn').textContent = "⏳ Đang tải đề lên Cloud cho Điện thoại...";
-    $('saveExamBtn').disabled = true;
-
-    try {
-      await fetch(GOOGLE_SHEETS_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify(payload)
-      });
-
-      alert('🎉 ĐÃ PHÁT HÀNH ĐỀ THI THÀNH CÔNG!');
-      $('builderTitle').value = '';
-      $('wordFileSelect').value = '';$('builderQuestionsContainer').innerHTML = '';
-      fetchCloudData();
-    } catch(err) {
-      alert('Lỗi: ' + err);
-    } finally {
-      $('saveExamBtn').textContent = "☁️ LƯU & PHÁT HÀNH ĐỀ THI";
-      $('saveExamBtn'].disabled = false;
-    }
-  };
-
-  fetchCloudData();
-});
-</script>
-</body>
-</html>
+        alert(`Nhận diện thành
