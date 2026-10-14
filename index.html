@@ -99,7 +99,6 @@
   </div>
   <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
     <div class="actions" style="margin-bottom:15px">
-      <!-- Đã sửa type="password" để ẩn ký tự mật khẩu -->
       <input type="password" id="adminPass" placeholder="Nhập mật khẩu quản trị..." style="max-width:280px;padding:12px 13px;border:1px solid var(--border);border-radius:10px" autocomplete="new-password">
       <button class="btn primary" id="adminLogin" type="button">Đăng nhập</button>
     </div>
@@ -183,7 +182,6 @@
   </div>
 </section>
 
-<!-- Đã đổi tên thành Trường THCS Đak Đoa -->
 <div class="footer">Hệ thống kiểm tra trực tuyến • Trường THCS Đak Đoa</div>
 </div></div>
 
@@ -200,23 +198,29 @@ const $ = id => document.getElementById(id);
 async function fetchCloudData() {
   try {
     let res = await fetch(GOOGLE_SHEETS_URL + '?action=getExams');
-    let result = await res.json();
+    let textRes = await res.text();
+    let result = JSON.parse(textRes);
     if (result.success && result.data) {
       EXAMS_DATA = result.data;
-      updateExamSelect();
-      renderAdminExams();
     }
-  } catch(e) {}
+  } catch(e) {
+    EXAMS_DATA = {};
+  }
+  updateExamSelect();
+  renderAdminExams();
 
   try {
     let resDoc = await fetch(GOOGLE_SHEETS_URL + '?action=getDocs');
-    let resDocJson = await resDoc.json();
+    let textDocRes = await resDoc.text();
+    let resDocJson = JSON.parse(textDocRes);
     if (resDocJson.success && resDocJson.data) {
       DOCS_DATA = resDocJson.data;
-      renderStudentDocs();
-      renderAdminDocs();
     }
-  } catch(e) {}
+  } catch(e) {
+    DOCS_DATA = {};
+  }
+  renderStudentDocs();
+  renderAdminDocs();
 }
 
 function updateExamSelect(){
@@ -303,8 +307,8 @@ window.deleteExam = async function(grade, index){
       headers: {'Content-Type': 'text/plain;charset=utf-8'},
       body: JSON.stringify({action: 'deleteExam', grade: grade, index: index})
     });
-    alert('Đã xóa đề thi thành công!');
-    setTimeout(fetchCloudData, 1000);
+    alert('Đã gửi lệnh xóa đề thi!');
+    setTimeout(fetchCloudData, 1200);
   } catch(err) {
     alert('Lỗi khi xóa: ' + err);
   }
@@ -340,8 +344,8 @@ window.deleteDoc = async function(grade, index){
       headers: {'Content-Type': 'text/plain;charset=utf-8'},
       body: JSON.stringify({action: 'deleteDoc', grade: grade, index: index})
     });
-    alert('Đã xóa tài liệu thành công!');
-    setTimeout(fetchCloudData, 1000);
+    alert('Đã gửi lệnh xóa tài liệu!');
+    setTimeout(fetchCloudData, 1200);
   } catch(err) {
     alert('Lỗi khi xóa: ' + err);
   }
@@ -354,7 +358,8 @@ async function fetchSheetData(){
   subEl.textContent = "Đang tải bảng điểm từ Google Sheets...";
   try {
     let res = await fetch(GOOGLE_SHEETS_URL);
-    let result = await res.json();
+    let textRes = await res.text();
+    let result = JSON.parse(textRes);
     if(result.success && result.data){
       let rows = result.data;
       if(rows.length <= 1){
@@ -376,7 +381,7 @@ async function fetchSheetData(){
         </tr>
       `).join('');
     }
-  } catch(e) { subEl.textContent = "Lỗi kết nối."; }
+  } catch(e) { subEl.textContent = "Lỗi kết nối bảng điểm."; }
 }
 
 function saveResult(score){
@@ -426,202 +431,4 @@ function shuffleArray(array) {
 
 function renderQuestions(){
   let qContainer = $('questions');
-  if(!qContainer || !EXAM) return;
-  qContainer.innerHTML = activeQuestions.map((q,i)=>`
-    <div class="question">
-      <div class="q-title">Câu ${i+1}. ${q.text}</div>
-      ${q.options.map((o,j)=>`
-        <label class="option">
-          <input type="radio" name="q${i}" value="${j}">
-          <span>${String.fromCharCode(65+j)}.${o}</span>
-        </label>
-      `).join('')}
-    </div>
-  `).join('');
-  
-  document.querySelectorAll('input[type=radio]').forEach(x=>x.addEventListener('change',e=>{
-    answers[+e.target.name.slice(1)] = +e.target.value;
-    updateProgress();
-  }));
-}
-
-function updateProgress(){
-  let ansCount = answers.filter(x=>x!==null).length;
-  let ansEl = $('answered'), progEl =$('progressBar');
-  if(ansEl) ansEl.textContent = `${ansCount}/${activeQuestions.length}`;
-  if(progEl) progEl.style.width = `${(ansCount/activeQuestions.length)*100}%`;
-}
-
-function start(){
-  let n = $('name').value.trim(), c =$('className').value.trim();
-  if(!n || !c){ alert('Em vui lòng nhập đầy đủ Họ và tên và Lớp.'); return; }
-  if(!EXAM || !EXAM.questions || !EXAM.questions.length){ alert('Vui lòng chọn bài kiểm tra!'); return; }
-  
-  started = true; isSubmitting = false; 
-  activeQuestions = shuffleArray(EXAM.questions);
-  answers = Array(activeQuestions.length).fill(null);
-  remaining = (EXAM.timeMinutes || 15) * 60;
-
-  $('studentLabel').textContent = `${n} • ${c}`;
-  $('start').classList.add('hidden'); 
-  $('result').classList.add('hidden');$('exam').classList.remove('hidden');
-  
-  renderQuestions(); updateProgress(); tick();
-  clearInterval(timerId); timerId = setInterval(tick, 1000);
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function tick(){
-  let m = Math.floor(remaining/60), s = remaining%60;
-  let timerEl = $('timer');
-  if(timerEl) timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  if(remaining <= 0){ clearInterval(timerId); finish(true); } else { remaining--; }
-}
-
-function finish(auto=false){
-  if(!started || isSubmitting) return;
-  isSubmitting = true; clearInterval(timerId);
-  let score = answers.reduce((sum,a,i)=>sum+(a===activeQuestions[i].answer?1:0),0);
-  saveResult(score);
-  let finalScore = ((score / activeQuestions.length) * 10).toFixed(1);
-  
-  $('exam').classList.add('hidden'); $('result').classList.remove('hidden');$('resultText').innerHTML = `
-    <div class="score">✅ NỘP BÀI THÀNH CÔNG</div>
-    <p>Số câu đúng: <b>${score} / ${activeQuestions.length}</b></p>
-    <p style="font-size:22px;color:var(--primary);font-weight:bold">Điểm số: ${finalScore} điểm</p>
-  `;
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function addBuilderQuestion(qData = null){
-  let container = $('builderQuestionsContainer');
-  if(!container) return;
-  let qIndex = container.children.length + 1;
-  let div = document.createElement('div');
-  div.className = 'builder-q';
-  div.innerHTML = `
-    <div class="actions" style="justify-content:space-between;margin-bottom:8px">
-      <strong>Câu hỏi ${qIndex}</strong>
-      <button class="btn danger-action" type="button" style="padding:4px 10px;font-size:13px" onclick="this.parentElement.parentElement.remove()">Xóa</button>
-    </div>
-    <div class="field" style="margin-bottom:8px"><input type="text" class="bq-text" placeholder="Nội dung câu hỏi..." value="${qData?qData.text:''}"></div>
-    <div class="grid">
-      <div class="field"><input type="text" class="bq-opt0" placeholder="Đáp án A" value="${qData?qData.options[0]:''}"></div>
-      <div class="field"><input type="text" class="bq-opt1" placeholder="Đáp án B" value="${qData?qData.options[1]:''}"></div>
-      <div class="field"><input type="text" class="bq-opt2" placeholder="Đáp án C" value="${qData?qData.options[2]:''}"></div>
-      <div class="field"><input type="text" class="bq-opt3" placeholder="Đáp án D" value="${qData?qData.options[3]:''}"></div>
-    </div>
-    <div class="field" style="margin-top:8px">
-      <label class="small">Đáp án đúng:</label>
-      <select class="bq-ans" style="max-width:200px">
-        <option value="0" ${qData&&qData.answer===0?'selected':''}>Đáp án A</option>
-        <option value="1" ${qData&&qData.answer===1?'selected':''}>Đáp án B</option>
-        <option value="2" ${qData&&qData.answer===2?'selected':''}>Đáp án C</option>
-        <option value="3" ${qData&&qData.answer===3?'selected':''}>Đáp án D</option>
-      </select>
-    </div>
-  `;
-  container.appendChild(div);
-}
-
-function parseWordText(text){
-  text = text.replace(/([ \t]+)([A-D][\.\)])/g, '\n$2');
-  let lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  let questions = []; let currentQ = null; let currentOpts = [];
-
-  for(let line of lines){
-    if(/^câu\s*\d+[\:\.]/i.test(line)){
-      if(currentQ && currentOpts.length >= 2){
-        questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
-      }
-      currentQ = line.replace(/^câu\s*\d+[\:\.]\s*/i, '');
-      currentOpts = [];
-    } else if(/^[A-D][\.\)]\s*/i.test(line)){
-      currentOpts.push(line.replace(/^[A-D][\.\)]\s*/i, ''));
-    } else {
-      if(currentOpts.length > 0) currentOpts[currentOpts.length - 1] += " " + line;
-      else if(currentQ) currentQ += " " + line;
-    }
-  }
-  if(currentQ && currentOpts.length >= 2) questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
-  return questions;
-}
-
-function padOptions(opts){
-  while(opts.length < 4) opts.push("Không có đáp án");
-  return opts.slice(0, 4);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  $('gradeSelect').onchange = e => loadGrade(e.target.value);
-  $('examSelect').onchange = e => loadExam(e.target.value);$('docGradeSelect').onchange = renderStudentDocs;
-  $('reloadExamsBtn').onclick = fetchCloudData;
-  $('qrBtn').onclick = makeQR;
-  $('startBtn').onclick = start;
-  $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
-  $('retryBtn').onclick = () => { $('result').classList.add('hidden');$('start').classList.remove('hidden'); started = false; isSubmitting = false; };
-
-  $('adminToggle').onclick = () => { $('adminPanel').classList.toggle('hidden'); };$('adminLogin').onclick = () => {
-    let passInput = $('adminPass');
-    if(!passInput) return;
-    if(passInput.value.trim() === 'Trongthien233') {
-      $('adminContent').classList.remove('hidden');
-      fetchSheetData();
-      fetchCloudData();
-    } else {
-      alert('Mật khẩu không đúng!');
-    }
-  };
-
-  $('refreshData').onclick = fetchSheetData;
-  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };$('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };$('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
-
-  // NÚT GỬI LINK TÀI LIỆU LÊN CLOUD
-  $('saveDocBtn').onclick = async () => {
-    let g = $('docGrade').value;
-    let title = $('docTitle').value.trim();
-    let link = $('docLink').value.trim();
-    if(!title || !link){ alert('Vui lòng nhập đầy đủ tiêu đề và link tài liệu!'); return; }
-
-    let payload = { action: 'saveDoc', grade: g, doc: { title: title, link: link } };
-    $('saveDocBtn').textContent = "⏳ Đang gửi Link lên Cloud...";
-    $('saveDocBtn').disabled = true;
-
-    try {
-      await fetch(GOOGLE_SHEETS_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify(payload)
-      });
-      alert('🎉 ĐÃ GỬI LINK TÀI LIỆU THÀNH CÔNG!');
-      $('docTitle').value = '';$('docLink').value = '';
-      setTimeout(fetchCloudData, 1000);
-    } catch(err) {
-      alert('Lỗi: ' + err);
-    } finally {
-      $('saveDocBtn').textContent = "☁️ GỬI LINK TÀI LIỆU LÊN CLOUD";
-      $('saveDocBtn').disabled = false;
-    }
-  };
-
-  $('wordFileSelect').onchange = (e) => {
-    let file = e.target.files[0];
-    if(!file) return;
-    let reader = new FileReader();
-    reader.onload = function(event) {
-      mammoth.extractRawText({arrayBuffer: event.target.result}).then(function(result) {
-        let parsedQs = parseWordText(result.value);
-        if(parsedQs.length === 0){ alert('Không tự động nhận diện được câu hỏi.'); return; }
-        $('builderQuestionsContainer').innerHTML = '';
-        if($('builderTitle').value.trim() === '') $('builderTitle').value = file.name.replace(/\.[^/.]+$/, "");
-        parsedQs.forEach(q => addBuilderQuestion(q));
-        alert(`Nhận diện thành công ${parsedQs.length} câu hỏi!`);
-      });
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  // NÚT LƯU ĐỀ THI LÊN CLOUD
-  $('saveExamBtn').onclick = async () => {
-    let g = $('builderGrade').value;
-    let title = $('
+  if(!qContainer || !EXAM) return
