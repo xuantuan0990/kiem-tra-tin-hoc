@@ -249,6 +249,17 @@ let answers = [], activeQuestions = [], remaining = 15 * 60, timerId = null, sta
 
 const $ = id => document.getElementById(id);
 
+// Hàm hỗ trợ mã hóa an toàn ký tự đặc biệt (chống lỗi ngắt chuỗi HTML/JSON)
+function escapeHTML(str) {
+  if(!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function initApp(){
   updateExamSelect();
   renderStudentDocs();
@@ -422,12 +433,12 @@ function addEditQuestionRow(qData = null){
       <strong>Câu hỏi ${qIndex}</strong>
       <button class="btn danger-action" type="button" style="padding:4px 10px;font-size:13px" onclick="this.parentElement.parentElement.remove()">Xóa</button>
     </div>
-    <div class="field" style="margin-bottom:8px"><input type="text" class="eq-text" placeholder="Nội dung câu hỏi..." value="${qData?qData.text:''}"></div>
+    <div class="field" style="margin-bottom:8px"><input type="text" class="eq-text" placeholder="Nội dung câu hỏi..." value="${escapeHTML(qData?qData.text:'')}"></div>
     <div class="grid">
-      <div class="field"><input type="text" class="eq-opt0" placeholder="Đáp án A" value="${qData?qData.options[0]:''}"></div>
-      <div class="field"><input type="text" class="eq-opt1" placeholder="Đáp án B" value="${qData?qData.options[1]:''}"></div>
-      <div class="field"><input type="text" class="eq-opt2" placeholder="Đáp án C" value="${qData?qData.options[2]:''}"></div>
-      <div class="field"><input type="text" class="eq-opt3" placeholder="Đáp án D" value="${qData?qData.options[3]:''}"></div>
+      <div class="field"><input type="text" class="eq-opt0" placeholder="Đáp án A" value="${escapeHTML(qData?qData.options[0]:'')}"></div>
+      <div class="field"><input type="text" class="eq-opt1" placeholder="Đáp án B" value="${escapeHTML(qData?qData.options[1]:'')}"></div>
+      <div class="field"><input type="text" class="eq-opt2" placeholder="Đáp án C" value="${escapeHTML(qData?qData.options[2]:'')}"></div>
+      <div class="field"><input type="text" class="eq-opt3" placeholder="Đáp án D" value="${escapeHTML(qData?qData.options[3]:'')}"></div>
     </div>
     <div class="field" style="margin-top:8px">
       <label class="small">Đáp án đúng:</label>
@@ -655,12 +666,12 @@ function addBuilderQuestion(qData = null){
       <strong>Câu hỏi ${qIndex}</strong>
       <button class="btn danger-action" type="button" style="padding:4px 10px;font-size:13px" onclick="this.parentElement.parentElement.remove()">Xóa</button>
     </div>
-    <div class="field" style="margin-bottom:8px"><input type="text" class="bq-text" placeholder="Nội dung câu hỏi..." value="${qData?qData.text:''}"></div>
+    <div class="field" style="margin-bottom:8px"><input type="text" class="bq-text" placeholder="Nội dung câu hỏi..." value="${escapeHTML(qData?qData.text:'')}"></div>
     <div class="grid">
-      <div class="field"><input type="text" class="bq-opt0" placeholder="Đáp án A" value="${qData?qData.options[0]:''}"></div>
-      <div class="field"><input type="text" class="bq-opt1" placeholder="Đáp án B" value="${qData?qData.options[1]:''}"></div>
-      <div class="field"><input type="text" class="bq-opt2" placeholder="Đáp án C" value="${qData?qData.options[2]:''}"></div>
-      <div class="field"><input type="text" class="bq-opt3" placeholder="Đáp án D" value="${qData?qData.options[3]:''}"></div>
+      <div class="field"><input type="text" class="bq-opt0" placeholder="Đáp án A" value="${escapeHTML(qData?qData.options[0]:'')}"></div>
+      <div class="field"><input type="text" class="bq-opt1" placeholder="Đáp án B" value="${escapeHTML(qData?qData.options[1]:'')}"></div>
+      <div class="field"><input type="text" class="bq-opt2" placeholder="Đáp án C" value="${escapeHTML(qData?qData.options[2]:'')}"></div>
+      <div class="field"><input type="text" class="bq-opt3" placeholder="Đáp án D" value="${escapeHTML(qData?qData.options[3]:'')}"></div>
     </div>
     <div class="field" style="margin-top:8px">
       <label class="small">Đáp án đúng:</label>
@@ -838,22 +849,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if(EXAMS_DATA[grade]){
-      // Lấy trạng thái khóa cũ của đề nếu có
       let oldLocked = (EXAMS_DATA[grade][index] && EXAMS_DATA[grade][index].isLocked) || false;
-      
-      // Cập nhật lại đối tượng đề thi tại đúng vị trí index
       EXAMS_DATA[grade][index] = { title: title, timeMinutes: timeM, isLocked: oldLocked, questions: questions };
-      
-      // Lưu lại vào localStorage ngay lập tức
       localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
-      
-      // Cập nhật lại giao diện
       updateExamSelect();
       renderAdminExams();
       $('editExamContainer').classList.add('hidden');
       alert('🎉 ĐÃ CẬP NHẬT & LƯU ĐỀ THI THÀNH CÔNG!');
 
-      // Gửi đồng bộ lên Google Sheets
       try {
         await fetch(GOOGLE_SHEETS_URL, {
           method: 'POST', mode: 'no-cors',
