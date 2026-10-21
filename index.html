@@ -119,9 +119,9 @@
         <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="7" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
       </div>
 
-      <!-- Quản lý & Xóa Đề thi -->
+      <!-- Quản lý & Cập nhật thời gian / Xóa Đề thi -->
       <div id="panelExams" class="hidden">
-        <h3>Danh sách Đề thi hiện có (Có nút Xóa)</h3>
+        <h3>Danh sách Đề thi hiện có (Đổi thời gian / Xóa)</h3>
         <div id="adminExamsList" style="margin-bottom:20px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--bg)">Đang tải danh sách đề...</div>
         
         <h3 style="margin-top:15px">Tải đề thi mới từ Tệp Word (.docx)</h3>
@@ -134,7 +134,7 @@
           </div>
           <div class="field">
             <label>Thời gian làm bài (phút)</label>
-            <input type="number" id="builderTime" value="15" min="1" max="120">
+            <input type="number" id="builderTime" value="15" min="1" max="180" placeholder="Số phút">
           </div>
         </div>
         <div class="field" style="margin-bottom:15px">
@@ -209,7 +209,6 @@ function initApp(){
   renderStudentDocs();
   renderAdminExams();
   renderAdminDocs();
-  // Đồng bộ ngầm từ Cloud về
   fetchCloudDataSilent();
 }
 
@@ -248,7 +247,7 @@ function updateExamSelect(){
     EXAM = null;
     return;
   }
-  select.innerHTML = list.map((ex, idx) => `<option value="${idx}">${ex.title}</option>`).join('');
+  select.innerHTML = list.map((ex, idx) => `<option value="${idx}">${ex.title} (${ex.timeMinutes || 15} phút)</option>`).join('');
   loadExam(0);
 }
 
@@ -266,7 +265,7 @@ function loadExam(i){
   if(!EXAM) return;
   
   $('examTitle').textContent = EXAM.title;
-  $('examInfo').textContent = `Khối ${currentGrade} • ${EXAM.questions.length} câu hỏi • ${EXAM.timeMinutes} phút`;
+  $('examInfo').textContent = `Khối ${currentGrade} • ${EXAM.questions.length} câu hỏi • ${EXAM.timeMinutes || 15} phút`;
   
   answers = [];
   activeQuestions = [];
@@ -303,9 +302,15 @@ function renderAdminExams(){
       EXAMS_DATA[g].forEach((ex, idx) => {
         hasAny = true;
         html += `
-          <div class="actions" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+          <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
             <span>[Khối ${g}] <b>${ex.title}</b> (${ex.questions.length} câu)</span>
-            <button class="btn danger-action" style="padding:6px 12px;font-size:13px" onclick="deleteExam('${g}', ${idx})">🗑️ Xóa đề này</button>
+            <div style="display:flex;align-items:center;gap:8px">
+              <label style="font-size:13px;font-weight:bold">⏱️</label>
+              <input type="number" id="time_${g}_${idx}" value="${ex.timeMinutes || 15}" min="1" max="180" style="width:65px;padding:5px 8px;font-size:13px;border-radius:6px;border:1px solid var(--border)">
+              <span style="font-size:13px">phút</span>
+              <button class="btn secondary" style="padding:6px 10px;font-size:13px" onclick="updateExamTime('${g}', ${idx})">💾 Lưu thời gian</button>
+              <button class="btn danger-action" style="padding:6px 10px;font-size:13px" onclick="deleteExam('${g}', ${idx})">🗑️ Xóa</button>
+            </div>
           </div>
         `;
       });
@@ -313,6 +318,31 @@ function renderAdminExams(){
   }
   container.innerHTML = hasAny ? html : '<p class="small">Chưa có đề thi nào trên hệ thống.</p>';
 }
+
+window.updateExamTime = async function(grade, index){
+  let inputEl = $(`time_${grade}_${index}`);
+  if(!inputEl) return;
+  let newTime = parseInt(inputEl.value);
+  if(isNaN(newTime) || newTime < 1) {
+    alert('Thời gian làm bài phải là số nguyên lớn hơn 0 phút!');
+    return;
+  }
+  if(EXAMS_DATA[grade] && EXAMS_DATA[grade][index]) {
+    EXAMS_DATA[grade][index].timeMinutes = newTime;
+    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
+    updateExamSelect();
+    alert(`Đã cập nhật thời gian làm bài thành ${newTime} phút!`);
+    
+    // Đồng bộ lên Google Sheets
+    try {
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({action: 'updateExamTime', grade: grade, index: index, timeMinutes: newTime})
+      });
+    } catch(err){}
+  }
+};
 
 window.deleteExam = async function(grade, index){
   if(!confirm('Thầy có chắc chắn muốn xóa đề thi này không?')) return;
@@ -505,7 +535,7 @@ function finish(auto=false){
   let finalScore = ((score / activeQuestions.length) * 10).toFixed(1);
   
   $('exam').classList.add('hidden'); $('result').classList.remove('hidden');$('resultText').innerHTML = `
-    <div class="score">✅ NỘP BÀI THÀNH CÔNG</div>
+    <div class="score">${auto ? '⏰ HẾT GIỜ LÀM BÀI' : '✅ NỘP BÀI THÀNH CÔNG'}</div>
     <p>Số câu đúng: <b>${score} / ${activeQuestions.length}</b></p>
     <p style="font-size:22px;color:var(--primary);font-weight:bold">Điểm số: ${finalScore} điểm</p>
   `;
@@ -572,14 +602,16 @@ function padOptions(opts){
 
 document.addEventListener('DOMContentLoaded', () => {
   $('gradeSelect').onchange = e => loadGrade(e.target.value);
-  $('examSelect').onchange = e => loadExam(e.target.value);$('docGradeSelect').onchange = renderStudentDocs;
+  $('examSelect').onchange = e => loadExam(e.target.value);
+  $('docGradeSelect').onchange = renderStudentDocs;
   $('reloadExamsBtn').onclick = () => { fetchCloudDataSilent(); alert('Đã làm mới dữ liệu!'); };
   $('qrBtn').onclick = makeQR;
   $('startBtn').onclick = start;
   $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
   $('retryBtn').onclick = () => { $('result').classList.add('hidden');$('start').classList.remove('hidden'); started = false; isSubmitting = false; };
 
-  $('adminToggle').onclick = () => { $('adminPanel').classList.toggle('hidden'); };$('adminLogin').onclick = () => {
+  $('adminToggle').onclick = () => { $('adminPanel').classList.toggle('hidden'); };
+  $('adminLogin').onclick = () => {
     let passVal = $('adminPass').value.trim();
     if(passVal === 'Trongthien233') {
       $('adminContent').classList.remove('hidden');
@@ -590,7 +622,10 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   $('refreshData').onclick = fetchSheetData;
-  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };$('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };$('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };$('addQuestionBtn').onclick = () => addBuilderQuestion();
+  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };
+  $('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };
+  $('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };
+  $('addQuestionBtn').onclick = () => addBuilderQuestion();
 
   // NÚT GỬI LINK TÀI LIỆU
   $('saveDocBtn').onclick = async () => {
