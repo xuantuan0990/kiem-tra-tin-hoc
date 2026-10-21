@@ -9,7 +9,10 @@
 :root{font-family:Inter,Segoe UI,Arial,sans-serif;color-scheme:light dark;--bg:#f4f7fb;--surface:#fff;--text:#172033;--muted:#667085;--primary:#2563eb;--primary2:#1d4ed8;--border:#dbe2ea;--ok:#15803d;--danger:#dc2626}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}
 #app{min-height:100vh;background-color:var(--bg);padding:0 0 40px}
-.hero{background:linear-gradient(135deg,#1d4ed8,#0f766e);color:white;padding:34px 20px 30px}.hero-inner{max-width:1000px;margin:auto}.badge{display:inline-block;background:#ffffff24;border:1px solid #ffffff40;padding:6px 11px;border-radius:999px;font-size:13px}.hero h1{margin:12px 0 7px;font-size:30px}.hero p{margin:0;color:#e0f2fe}
+.hero{background:linear-gradient(135deg,#1d4ed8,#0f766e);color:white;padding:34px 20px 30px}.hero-inner{max-width:1000px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}
+.hero-content{flex:1;min-width:260px}
+.hero-avatar{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,255,255,0.8);box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.badge{display:inline-block;background:#ffffff24;border:1px solid #ffffff40;padding:6px 11px;border-radius:999px;font-size:13px}.hero h1{margin:12px 0 7px;font-size:30px}.hero p{margin:0;color:#e0f2fe}
 .container{max-width:1000px;margin:22px auto;padding:0 16px}.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 8px 28px #0000000b;margin-bottom:16px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field label{display:block;font-weight:700;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;padding:12px 13px;border:1px solid var(--border);border-radius:10px;font-size:16px;background:var(--surface);color:var(--text)}
 .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer}.primary{background:var(--primary);color:white}.primary:hover{background:var(--primary2)}.secondary{background:#1d4ed8;color:white}.secondary:hover{background:#1e40af}.qr-action{background:#0f766e;color:white}.qr-action:hover{background:#0d5f59}.danger-action{background:#dc2626;color:white}.danger-action:hover{background:#b91c1c}
@@ -22,7 +25,18 @@
 </head>
 <body>
 <div id="app">
-<section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA & TÀI LIỆU • TRƯỜNG THCS ĐAK ĐOA - THẦY TUẤN</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Học sinh làm bài & xem tài liệu trên Mọi thiết bị • Đồng bộ 100%</p></div></section>
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-content">
+      <span class="badge">HỆ THỐNG KIỂM TRA & TÀI LIỆU • TRƯỜNG THCS ĐAK ĐOA - THẦY TUẤN</span>
+      <h1 id="examTitle">Hệ thống Tin học THCS</h1>
+      <p id="examInfo">Học sinh làm bài & xem tài liệu trên Mọi thiết bị • Đồng bộ 100%</p>
+    </div>
+    <div>
+      <img src="thaytuan.jpg" alt="Thầy Tuấn" class="hero-avatar" onerror="this.style.display='none'">
+    </div>
+  </div>
+</section>
 <div class="container">
 
 <!-- CHỌN ĐỀ THI -->
