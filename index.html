@@ -125,11 +125,35 @@
         <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="7" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
       </div>
 
-      <!-- Quản lý Khóa/Mở, Đổi thời gian & Xóa Đề thi -->
+      <!-- Quản lý Khóa/Mở, Sửa, Đổi thời gian & Xóa Đề thi -->
       <div id="panelExams" class="hidden">
-        <h3>Danh sách Đề thi hiện có (Khóa/Mở, Sửa thời gian, Xóa)</h3>
+        <h3>Danh sách Đề thi hiện có (Khóa/Mở, Chỉnh sửa, Xóa)</h3>
         <div id="adminExamsList" style="margin-bottom:20px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--bg)">Đang tải danh sách đề...</div>
         
+        <!-- KHU VỰC CHỈNH SỬA ĐỀ THI (ẨN / HIỆN KHI BẤM NÚT SỬA) -->
+        <div id="editExamContainer" class="hidden" style="margin-bottom:25px;padding:18px;border:2px solid var(--primary);border-radius:14px;background:var(--surface)">
+          <h3 id="editExamHeading" style="color:var(--primary);margin-top:0">✏️ Chỉnh sửa Đề thi</h3>
+          <input type="hidden" id="editExamGrade">
+          <input type="hidden" id="editExamIndex">
+          <div class="grid" style="margin-bottom:10px">
+            <div class="field">
+              <label>Thời gian làm bài (phút)</label>
+              <input type="number" id="editExamTime" min="1" max="180">
+            </div>
+            <div class="field">
+              <label>Tên bài kiểm tra / Tiêu đề</label>
+              <input type="text" id="editExamTitle">
+            </div>
+          </div>
+          <h4>Danh sách câu hỏi trong đề:</h4>
+          <div id="editQuestionsListContainer"></div>
+          <div class="actions" style="margin-top:15px">
+            <button class="btn secondary" id="addEditQuestionBtn" type="button">➕ Thêm câu hỏi</button>
+            <button class="btn primary" id="saveEditedExamBtn" type="button">💾 CẬP NHẬT & LƯU ĐỀ THI</button>
+            <button class="btn danger-action" id="cancelEditExamBtn" type="button">❌ Hủy bỏ</button>
+          </div>
+        </div>
+
         <h3 style="margin-top:15px">Tải đề thi mới từ Tệp Word (.docx)</h3>
         <div class="grid" style="margin-bottom:10px">
           <div class="field">
@@ -317,11 +341,9 @@ function renderAdminExams(){
 
         html += `
           <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-            <span>[Khối ${g}] ${statusBadge} <b>${ex.title}</b> (${ex.questions.length} câu)</span>
+            <span>[Khối ${g}] ${statusBadge} <b>${ex.title}</b> (${ex.questions.length} câu - ${ex.timeMinutes || 15} phút)</span>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <input type="number" id="time_${g}_${idx}" value="${ex.timeMinutes || 15}" min="1" max="180" style="width:60px;padding:5px 6px;font-size:13px;border-radius:6px;border:1px solid var(--border)">
-              <span style="font-size:13px">p</span>
-              <button class="btn secondary" style="padding:6px 8px;font-size:12px" onclick="updateExamTime('${g}', ${idx})">💾 Lưu</button>
+              <button class="btn secondary" style="padding:6px 10px;font-size:12px;background:#0f766e" onclick="openEditExam('${g}', ${idx})">✏️ Sửa đề</button>
               <button class="${lockBtnClass}" style="padding:6px 10px;font-size:12px" onclick="toggleExamLock('${g}', ${idx})">${lockBtnText}</button>
               <button class="btn danger-action" style="padding:6px 10px;font-size:12px" onclick="deleteExam('${g}', ${idx})">🗑️ Xóa</button>
             </div>
@@ -354,29 +376,55 @@ window.toggleExamLock = async function(grade, index){
   }
 };
 
-window.updateExamTime = async function(grade, index){
-  let inputEl = $(`time_${grade}_${index}`);
-  if(!inputEl) return;
-  let newTime = parseInt(inputEl.value);
-  if(isNaN(newTime) || newTime < 1) {
-    alert('Thời gian làm bài phải là số nguyên lớn hơn 0 phút!');
-    return;
+window.openEditExam = function(grade, index){
+  let ex = EXAMS_DATA[grade] && EXAMS_DATA[grade][index];
+  if(!ex) return;
+  
+  $('editExamGrade').value = grade;
+  $('editExamIndex').value = index;
+  $('editExamTitle').value = ex.title;
+  $('editExamTime').value = ex.timeMinutes || 15;
+  
+  let qContainer = $('editQuestionsListContainer');
+  qContainer.innerHTML = '';
+  if(ex.questions && ex.questions.length > 0){
+    ex.questions.forEach(q => addEditQuestionRow(q));
   }
-  if(EXAMS_DATA[grade] && EXAMS_DATA[grade][index]) {
-    EXAMS_DATA[grade][index].timeMinutes = newTime;
-    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
-    updateExamSelect();
-    alert(`Đã cập nhật thời gian thành ${newTime} phút!`);
-    
-    try {
-      await fetch(GOOGLE_SHEETS_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({action: 'updateExamTime', grade: grade, index: index, timeMinutes: newTime})
-      });
-    } catch(err){}
-  }
+  
+  $('editExamContainer').classList.remove('hidden');
+  window.scrollTo({top: $('editExamContainer').offsetTop - 60, behavior: 'smooth'});
 };
+
+function addEditQuestionRow(qData = null){
+  let container = $('editQuestionsListContainer');
+  if(!container) return;
+  let qIndex = container.children.length + 1;
+  let div = document.createElement('div');
+  div.className = 'builder-q';
+  div.innerHTML = `
+    <div class="actions" style="justify-content:space-between;margin-bottom:8px">
+      <strong>Câu hỏi ${qIndex}</strong>
+      <button class="btn danger-action" type="button" style="padding:4px 10px;font-size:13px" onclick="this.parentElement.parentElement.remove()">Xóa</button>
+    </div>
+    <div class="field" style="margin-bottom:8px"><input type="text" class="eq-text" placeholder="Nội dung câu hỏi..." value="${qData?qData.text:''}"></div>
+    <div class="grid">
+      <div class="field"><input type="text" class="eq-opt0" placeholder="Đáp án A" value="${qData?qData.options[0]:''}"></div>
+      <div class="field"><input type="text" class="eq-opt1" placeholder="Đáp án B" value="${qData?qData.options[1]:''}"></div>
+      <div class="field"><input type="text" class="eq-opt2" placeholder="Đáp án C" value="${qData?qData.options[2]:''}"></div>
+      <div class="field"><input type="text" class="eq-opt3" placeholder="Đáp án D" value="${qData?qData.options[3]:''}"></div>
+    </div>
+    <div class="field" style="margin-top:8px">
+      <label class="small">Đáp án đúng:</label>
+      <select class="eq-ans" style="max-width:200px">
+        <option value="0" ${qData&&qData.answer===0?'selected':''}>Đáp án A</option>
+        <option value="1" ${qData&&qData.answer===1?'selected':''}>Đáp án B</option>
+        <option value="2" ${qData&&qData.answer===2?'selected':''}>Đáp án C</option>
+        <option value="3" ${qData&&qData.answer===3?'selected':''}>Đáp án D</option>
+      </select>
+    </div>
+  `;
+  container.appendChild(div);
+}
 
 window.deleteExam = async function(grade, index){
   if(!confirm('Thầy có chắc chắn muốn xóa đề thi này không?')) return;
@@ -665,6 +713,8 @@ document.addEventListener('DOMContentLoaded', () => {
   $('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };
   $('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };
   $('addQuestionBtn').onclick = () => addBuilderQuestion();
+  $('addEditQuestionBtn').onclick = () => addEditQuestionRow();
+  $('cancelEditExamBtn').onclick = () => { $('editExamContainer').classList.add('hidden'); };
 
   $('saveDocBtn').onclick = async () => {
     let g = $('docGrade').value;
@@ -714,7 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let timeM = parseInt($('builderTime').value) || 15;
     if(!title){ alert('Vui lòng nhập tên bài kiểm tra!'); return; }
 
-    let qDivs = document.querySelectorAll('.builder-q');
+    let qDivs = document.querySelectorAll('#builderQuestionsContainer .builder-q');
     if(qDivs.length === 0){ alert('Vui lòng thêm ít nhất một câu hỏi!'); return; }
 
     let questions = [];
@@ -747,6 +797,47 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify({ action: 'saveExam', grade: g, exam: examObj })
       });
     } catch(err){}
+  };
+
+  $('saveEditedExamBtn').onclick = async () => {
+    let grade = $('editExamGrade').value;
+    let index = parseInt($('editExamIndex').value);
+    let title = $('editExamTitle').value.trim();
+    let timeM = parseInt($('editExamTime').value) || 15;
+    if(!title){ alert('Vui lòng nhập tên bài kiểm tra!'); return; }
+
+    let qDivs = document.querySelectorAll('#editQuestionsListContainer .builder-q');
+    if(qDivs.length === 0){ alert('Đề thi phải có ít nhất một câu hỏi!'); return; }
+
+    let questions = [];
+    for(let div of qDivs){
+      let text = div.querySelector('.eq-text').value.trim();
+      let o0 = div.querySelector('.eq-opt0').value.trim();
+      let o1 = div.querySelector('.eq-opt1').value.trim();
+      let o2 = div.querySelector('.eq-opt2').value.trim();
+      let o3 = div.querySelector('.eq-opt3').value.trim();
+      let ans = parseInt(div.querySelector('.eq-ans').value);
+      if(!text || !o0 || !o1 || !o2 || !o3){ alert('Vui lòng điền đầy đủ nội dung các câu hỏi và đáp án!'); return; }
+      questions.push({text: text, options: [o0, o1, o2, o3], answer: ans});
+    }
+
+    if(EXAMS_DATA[grade] && EXAMS_DATA[grade][index]){
+      let oldLocked = !!EXAMS_DATA[grade][index].isLocked;
+      EXAMS_DATA[grade][index] = { title: title, timeMinutes: timeM, isLocked: oldLocked, questions: questions };
+      localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
+      updateExamSelect();
+      renderAdminExams();
+      $('editExamContainer').classList.add('hidden');
+      alert('🎉 ĐÃ CẬP NHẬT ĐỀ THI THÀNH CÔNG!');
+
+      try {
+        await fetch(GOOGLE_SHEETS_URL, {
+          method: 'POST', mode: 'no-cors',
+          headers: {'Content-Type': 'text/plain;charset=utf-8'},
+          body: JSON.stringify({ action: 'saveExam', grade: grade, exam: EXAMS_DATA[grade][index] })
+        });
+      } catch(err){}
+    }
   };
 
   initApp();
