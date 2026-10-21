@@ -110,12 +110,20 @@
         <button class="btn secondary" id="tabDocs" type="button" style="background:#0f766e">📂 Quản lý Tài liệu</button>
       </div>
 
-      <!-- Xem điểm -->
+      <!-- Xem điểm theo khối -->
       <div id="panelScores">
         <div class="actions" style="justify-content:space-between;margin-bottom:10px">
-          <span class="small" id="totalSubmissions">Đang tải bảng điểm...</span>
+          <div class="field" style="margin:0;max-width:220px">
+            <select id="scoreGradeSelect" style="padding:8px">
+              <option value="6">Bảng điểm Khối 6</option>
+              <option value="7">Bảng điểm Khối 7</option>
+              <option value="8">Bảng điểm Khối 8</option>
+              <option value="9">Bảng điểm Khối 9</option>
+            </select>
+          </div>
           <button class="btn primary" id="refreshData" type="button">🔄 Tải lại bảng điểm</button>
         </div>
+        <div class="small" id="totalSubmissions" style="margin-bottom:8px">Đang tải bảng điểm...</div>
         <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="7" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
       </div>
 
@@ -435,20 +443,24 @@ window.deleteDoc = async function(grade, index){
 async function fetchSheetData(){
   let subEl = $('totalSubmissions');
   let histEl = $('historyList');
+  let scoreGrade = $('scoreGradeSelect').value;
   if(!subEl || !histEl || !GOOGLE_SHEETS_URL) return;
-  subEl.textContent = "Đang tải bảng điểm...";
+  
+  subEl.textContent = `Đang tải bảng điểm Khối ${scoreGrade}...`;
+  histEl.innerHTML = '<tr><td colspan="7" class="small" style="padding:10px">Đang tải dữ liệu...</td></tr>';
+
   try {
-    let res = await fetch(GOOGLE_SHEETS_URL);
+    let res = await fetch(GOOGLE_SHEETS_URL + `?action=getScores&grade=${scoreGrade}`);
     let result = await res.json();
     if(result.success && result.data){
       let rows = result.data;
       if(rows.length <= 1){
-        subEl.textContent = "Chưa có bài nộp nào.";
+        subEl.textContent = `Khối ${scoreGrade}: Chưa có bài nộp nào.`;
         histEl.innerHTML = '<tr><td colspan="7" class="small" style="padding:10px">Chưa có bài nộp.</td></tr>';
         return;
       }
       let dataRows = rows.slice(1);
-      subEl.textContent = `Tổng số bài học sinh đã nộp: ${dataRows.length}`;
+      subEl.textContent = `Tổng số bài học sinh Khối ${scoreGrade} đã nộp: ${dataRows.length}`;
       histEl.innerHTML = dataRows.slice().reverse().map(r=>`
         <tr>
           <td style="padding:8px;border-bottom:1px solid var(--border)">${r[0]||''}</td>
@@ -461,7 +473,10 @@ async function fetchSheetData(){
         </tr>
       `).join('');
     }
-  } catch(e) { subEl.textContent = "Không thể tải bảng điểm."; }
+  } catch(e) { 
+    subEl.textContent = "Không thể tải bảng điểm."; 
+    histEl.innerHTML = '<tr><td colspan="7" class="small" style="padding:10px;color:var(--danger)">Lỗi kết nối tải dữ liệu.</td></tr>';
+  }
 }
 
 function saveResult(score){
@@ -472,6 +487,7 @@ function saveResult(score){
     name: nameInput.value.trim(),
     className: classInput.value.trim(),
     grade: 'Khối ' + currentGrade,
+    gradeNum: currentGrade, // Gửi kèm số khối để server ghi vào đúng sheet tương ứng
     exam: EXAM ? EXAM.title : '',
     code: String(examIndex+1).padStart(2,'0'),
     correct: score,
@@ -655,6 +671,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   $('refreshData').onclick = fetchSheetData;
+  $('scoreGradeSelect').onchange = fetchSheetData; // Tự động tải lại bảng điểm khi đổi khối xem
+
   $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };
   $('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };
   $('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };
