@@ -114,4 +114,643 @@
           <div class="field" style="margin:0;max-width:220px">
             <select id="scoreGradeSelect" style="padding:8px">
               <option value="6">Bảng điểm Khối 6</option>
-              <option value="7">B
+              <option value="7">Bảng điểm Khối 7</option>
+              <option value="8">Bảng điểm Khối 8</option>
+              <option value="9">Bảng điểm Khối 9</option>
+            </select>
+          </div>
+          <button class="btn primary" id="refreshData" type="button">🔄 Tải lại bảng điểm</button>
+        </div>
+        <div class="small" id="totalSubmissions" style="margin-bottom:8px">Đang tải bảng điểm...</div>
+        <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="7" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
+      </div>
+
+      <!-- Quản lý Khóa/Mở, Đổi thời gian & Xóa Đề thi -->
+      <div id="panelExams" class="hidden">
+        <h3>Danh sách Đề thi hiện có (Khóa/Mở, Sửa thời gian, Xóa)</h3>
+        <div id="adminExamsList" style="margin-bottom:20px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--bg)">Đang tải danh sách đề...</div>
+        
+        <h3 style="margin-top:15px">Tải đề thi mới từ Tệp Word (.docx)</h3>
+        <div class="grid" style="margin-bottom:10px">
+          <div class="field">
+            <label>Chọn khối lớp phát hành</label>
+            <select id="builderGrade">
+              <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Thời gian làm bài (phút)</label>
+            <input type="number" id="builderTime" value="15" min="1" max="180" placeholder="Số phút">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:15px">
+          <label>Tên bài kiểm tra / Tiêu đề</label>
+          <input type="text" id="builderTitle" placeholder="Ví dụ: Kiểm tra 15 phút Tin học 7">
+        </div>
+        <div class="field" style="margin-bottom:15px;background:var(--bg);padding:15px;border-radius:12px;border:2px dashed var(--border)">
+          <label style="font-weight:bold;margin-bottom:8px">📂 Tải tệp đề kiểm tra (.docx)</label>
+          <input type="file" id="wordFileSelect" accept=".docx" style="padding:8px">
+        </div>
+        <h4>Xem trước các câu hỏi đã nhận diện:</h4>
+        <div id="builderQuestionsContainer"></div>
+        <div class="actions" style="margin-top:15px">
+          <button class="btn secondary" id="addQuestionBtn" type="button">➕ Thêm câu hỏi thủ công</button>
+          <button class="btn primary" id="saveExamBtn" type="button">☁️ LƯU & PHÁT HÀNH ĐỀ THI</button>
+        </div>
+      </div>
+
+      <!-- Quản lý & Xóa Tài liệu ôn tập -->
+      <div id="panelDocs" class="hidden">
+        <h3>Danh sách Tài liệu hiện có (Có nút Xóa)</h3>
+        <div id="adminDocsList" style="margin-bottom:20px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--bg)">Đang tải danh sách tài liệu...</div>
+
+        <h3 style="margin-top:15px">Gửi Link Tài liệu ôn tập / Đề cương mới</h3>
+        <div class="grid" style="margin-bottom:10px">
+          <div class="field">
+            <label>Chọn khối lớp</label>
+            <select id="docGrade">
+              <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tiêu đề tài liệu / Đề cương</label>
+            <input type="text" id="docTitle" placeholder="Ví dụ: Đề cương ôn tập giữa kì 1">
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:15px">
+          <label>Đường dẫn liên kết (URL / Link Google Drive)</label>
+          <input type="text" id="docLink" placeholder="https://drive.google.com/file/d/...">
+        </div>
+        <button class="btn primary" id="saveDocBtn" type="button">☁️ GỬI LINK TÀI LIỆU</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="footer">Hệ thống kiểm tra trực tuyến • Trường THCS Đak Đoa - Thầy Tuấn</div>
+</div></div>
+
+<script>
+const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyi8yEfIGPU1WL0zW8Kqlwsi2cxYZ6mxuZycH65z_XGHMQRaD4VdnZZ-GV9bL82C-gA/exec';
+
+const defaultExams = {
+  "6": [{ title: "Kiểm tra Mẫu Tin học 6", timeMinutes: 15, isLocked: false, questions: [{ text: "Thông tin là gì?", options: ["Hiểu biết về sự vật, hiện tượng","Chỉ là con số","Chỉ là văn bản","Các bức tranh"], answer: 0 }] }],
+  "7": [{ title: "Kiểm tra Mẫu Tin học 7", timeMinutes: 15, isLocked: false, questions: [{ text: "CPU được ví là gì?", options: ["Bộ não của máy tính","Loa","Bàn phím","Màn hình"], answer: 0 }] }],
+  "8": [{ title: "Kiểm tra Mẫu Tin học 8", timeMinutes: 15, isLocked: false, questions: [{ text: "IoT là gì?", options: ["Internet vạn vật","Mạng xã hội","Phần mềm","Trò chơi"], answer: 0 }] }],
+  "9": [{ title: "Kiểm tra Mẫu Tin học 9", timeMinutes: 15, isLocked: false, questions: [{ text: "Scratch là gì?", options: ["Ngôn ngữ lập trình trực quan","Trình duyệt","Hệ điều hành","Phần cứng"], answer: 0 }] }]
+};
+
+let EXAMS_DATA = JSON.parse(localStorage.getItem('dakdoa_exams')) || defaultExams;
+let DOCS_DATA = JSON.parse(localStorage.getItem('dakdoa_docs')) || {"6":[], "7":[], "8":[], "9":[]};
+
+let currentGrade = "6", examIndex = 0, EXAM = null;
+let answers = [], activeQuestions = [], remaining = 15 * 60, timerId = null, started = false, isSubmitting = false;
+
+const $ = id => document.getElementById(id);
+
+function initApp(){
+  updateExamSelect();
+  renderStudentDocs();
+  renderAdminExams();
+  renderAdminDocs();
+  fetchCloudDataSilent();
+}
+
+async function fetchCloudDataSilent() {
+  try {
+    let res = await fetch(GOOGLE_SHEETS_URL + '?action=getExams');
+    let result = await res.json();
+    if (result.success && result.data && Object.keys(result.data).length > 0) {
+      EXAMS_DATA = result.data;
+      localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
+      updateExamSelect();
+      renderAdminExams();
+    }
+  } catch(e){}
+
+  try {
+    let resDoc = await fetch(GOOGLE_SHEETS_URL + '?action=getDocs');
+    let resDocJson = await resDoc.json();
+    if (resDocJson.success && resDocJson.data) {
+      DOCS_DATA = resDocJson.data;
+      localStorage.setItem('dakdoa_docs', JSON.stringify(DOCS_DATA));
+      renderStudentDocs();
+      renderAdminDocs();
+    }
+  } catch(e){}
+}
+
+function updateExamSelect(){
+  let select = $('examSelect');
+  if(!select) return;
+  let list = EXAMS_DATA[currentGrade] || defaultExams[currentGrade] || [];
+  if(list.length === 0){
+    select.innerHTML = '<option value="">Chưa có đề nào cho khối này.</option>';
+    $('examTitle').textContent = "Chưa có đề thi";
+    $('examInfo').textContent = "Thầy vui lòng tải đề lên từ phần Quản trị.";
+    EXAM = null;
+    return;
+  }
+  select.innerHTML = list.map((ex, idx) => {
+    let lockLabel = ex.isLocked ? ' 🔒 [ĐÃ KHÓA]' : '';
+    return `<option value="${idx}">${ex.title} (${ex.timeMinutes || 15} phút)${lockLabel}</option>`;
+  }).join('');
+  loadExam(0);
+}
+
+function loadGrade(g){
+  currentGrade = g;
+  updateExamSelect();
+  renderStudentDocs();
+}
+
+function loadExam(i){
+  examIndex = +i;
+  let list = EXAMS_DATA[currentGrade] || defaultExams[currentGrade] || [];
+  if(!list[examIndex]) examIndex = 0;
+  EXAM = list[examIndex];
+  if(!EXAM) return;
+  
+  let lockStatusText = EXAM.isLocked ? ' • 🔒 TRẠNG THÁI: ĐANG KHÓA (Học sinh chưa thể làm)' : ' • 🔓 TRẠNG THÁI: ĐANG MỞ';
+  $('examTitle').textContent = EXAM.title;
+  $('examInfo').textContent = `Khối ${currentGrade} • ${EXAM.questions.length} câu hỏi • ${EXAM.timeMinutes || 15} phút${lockStatusText}`;
+  
+  answers = [];
+  activeQuestions = [];
+  remaining = (EXAM.timeMinutes || 15) * 60;
+}
+
+function renderStudentDocs(){
+  let gSel = $('docGradeSelect');
+  let container = $('studentDocsList');
+  if(!gSel || !container) return;
+  let g = gSel.value;
+  let docs = DOCS_DATA[g] || [];
+  
+  if(docs.length === 0){
+    container.innerHTML = '<p class="small">Chưa có tài liệu ôn tập nào cho khối này.</p>';
+    return;
+  }
+  container.innerHTML = docs.map(d => `
+    <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span>📄 <b>${d.title}</b></span>
+      <a href="${d.link}" target="_blank" class="btn primary" style="padding:8px 14px;font-size:14px;text-decoration:none">📖 Mở & Đọc tài liệu</a>
+    </div>
+  `).join('');
+}
+
+function renderAdminExams(){
+  let container = $('adminExamsList');
+  if(!container) return;
+  let html = '';
+  let hasAny = false;
+
+  for(let g in EXAMS_DATA){
+    if(EXAMS_DATA[g] && EXAMS_DATA[g].length > 0){
+      EXAMS_DATA[g].forEach((ex, idx) => {
+        hasAny = true;
+        let isLocked = !!ex.isLocked;
+        let lockBtnClass = isLocked ? 'btn primary' : 'btn qr-action';
+        let lockBtnText = isLocked ? '🔓 Mở đề' : '🔒 Khóa đề';
+        let statusBadge = isLocked ? '<span style="color:var(--danger);font-weight:bold">[ĐÃ KHÓA]</span>' : '<span style="color:var(--ok);font-weight:bold">[ĐANG MỞ]</span>';
+
+        html += `
+          <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+            <span>[Khối ${g}] ${statusBadge} <b>${ex.title}</b> (${ex.questions.length} câu)</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <input type="number" id="time_${g}_${idx}" value="${ex.timeMinutes || 15}" min="1" max="180" style="width:60px;padding:5px 6px;font-size:13px;border-radius:6px;border:1px solid var(--border)">
+              <span style="font-size:13px">p</span>
+              <button class="btn secondary" style="padding:6px 8px;font-size:12px" onclick="updateExamTime('${g}', ${idx})">💾 Lưu</button>
+              <button class="${lockBtnClass}" style="padding:6px 10px;font-size:12px" onclick="toggleExamLock('${g}', ${idx})">${lockBtnText}</button>
+              <button class="btn danger-action" style="padding:6px 10px;font-size:12px" onclick="deleteExam('${g}', ${idx})">🗑️ Xóa</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+  }
+  container.innerHTML = hasAny ? html : '<p class="small">Chưa có đề thi nào trên hệ thống.</p>';
+}
+
+window.toggleExamLock = async function(grade, index){
+  if(EXAMS_DATA[grade] && EXAMS_DATA[grade][index]) {
+    let currentStatus = !!EXAMS_DATA[grade][index].isLocked;
+    EXAMS_DATA[grade][index].isLocked = !currentStatus;
+    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
+    renderAdminExams();
+    updateExamSelect();
+    
+    let stateText = EXAMS_DATA[grade][index].isLocked ? 'khóa' : 'mở';
+    alert(`Đã ${stateText} đề kiểm tra thành công!`);
+
+    try {
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({action: 'updateExamLock', grade: grade, index: index, isLocked: EXAMS_DATA[grade][index].isLocked})
+      });
+    } catch(err){}
+  }
+};
+
+window.updateExamTime = async function(grade, index){
+  let inputEl = $(`time_${grade}_${index}`);
+  if(!inputEl) return;
+  let newTime = parseInt(inputEl.value);
+  if(isNaN(newTime) || newTime < 1) {
+    alert('Thời gian làm bài phải là số nguyên lớn hơn 0 phút!');
+    return;
+  }
+  if(EXAMS_DATA[grade] && EXAMS_DATA[grade][index]) {
+    EXAMS_DATA[grade][index].timeMinutes = newTime;
+    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
+    updateExamSelect();
+    alert(`Đã cập nhật thời gian thành ${newTime} phút!`);
+    
+    try {
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({action: 'updateExamTime', grade: grade, index: index, timeMinutes: newTime})
+      });
+    } catch(err){}
+  }
+};
+
+window.deleteExam = async function(grade, index){
+  if(!confirm('Thầy có chắc chắn muốn xóa đề thi này không?')) return;
+  if(EXAMS_DATA[grade]) {
+    EXAMS_DATA[grade].splice(index, 1);
+    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
+  }
+  renderAdminExams();
+  updateExamSelect();
+  
+  try {
+    await fetch(GOOGLE_SHEETS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({action: 'deleteExam', grade: grade, index: index})
+    });
+  } catch(err){}
+  alert('Đã xóa đề thi thành công!');
+};
+
+function renderAdminDocs(){
+  let container = $('adminDocsList');
+  if(!container) return;
+  let html = '';
+  let hasAny = false;
+
+  for(let g in DOCS_DATA){
+    if(DOCS_DATA[g] && DOCS_DATA[g].length > 0){
+      DOCS_DATA[g].forEach((d, idx) => {
+        hasAny = true;
+        html += `
+          <div class="actions" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+            <span>[Khối ${g}] <b>${d.title}</b></span>
+            <button class="btn danger-action" style="padding:6px 12px;font-size:13px" onclick="deleteDoc('${g}', ${idx})">🗑️ Xóa tài liệu</button>
+          </div>
+        `;
+      });
+    }
+  }
+  container.innerHTML = hasAny ? html : '<p class="small">Chưa có tài liệu nào trên hệ thống.</p>';
+}
+
+window.deleteDoc = async function(grade, index){
+  if(!confirm('Thầy có chắc chắn muốn xóa tài liệu này không?')) return;
+  if(DOCS_DATA[grade]) {
+    DOCS_DATA[grade].splice(index, 1);
+    localStorage.setItem('dakdoa_docs', JSON.stringify(DOCS_DATA));
+  }
+  renderAdminDocs();
+  renderStudentDocs();
+
+  try {
+    await fetch(GOOGLE_SHEETS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({action: 'deleteDoc', grade: grade, index: index})
+    });
+  } catch(err){}
+  alert('Đã xóa tài liệu thành công!');
+};
+
+async function fetchSheetData(){
+  let subEl = $('totalSubmissions');
+  let histEl = $('historyList');
+  let scoreGrade = $('scoreGradeSelect').value;
+  if(!subEl || !histEl || !GOOGLE_SHEETS_URL) return;
+  
+  subEl.textContent = `Đang tải bảng điểm Khối ${scoreGrade}...`;
+  histEl.innerHTML = '<tr><td colspan="7" class="small" style="padding:10px">Đang tải dữ liệu...</td></tr>';
+
+  try {
+    let res = await fetch(GOOGLE_SHEETS_URL + `?action=getScores&grade=${scoreGrade}`);
+    let result = await res.json();
+    if(result.success && result.data){
+      let rows = result.data;
+      if(rows.length <= 1){
+        subEl.textContent = `Khối ${scoreGrade}: Chưa có bài nộp nào.`;
+        histEl.innerHTML = '<tr><td colspan="7" class="small" style="padding:10px">Chưa có bài nộp.</td></tr>';
+        return;
+      }
+      let dataRows = rows.slice(1);
+      subEl.textContent = `Tổng số bài học sinh Khối ${scoreGrade} đã nộp: ${dataRows.length}`;
+      histEl.innerHTML = dataRows.slice().reverse().map(r=>`
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${r[0]||''}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)"><b>${r[1]||''}</b></td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${r[2]||''}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${r[3]||''}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${r[4]||''}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--ok);font-weight:bold">${r[6]!==undefined?r[6]:''} câu</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--primary);font-weight:bold">${r[9]!==undefined?r[9]:''} điểm</td>
+        </tr>
+      `).join('');
+    }
+  } catch(e) { 
+    subEl.textContent = "Không thể tải bảng điểm."; 
+    histEl.innerHTML = '<tr><td colspan="7" class="small" style="padding:10px;color:var(--danger)">Lỗi kết nối tải dữ liệu.</td></tr>';
+  }
+}
+
+function saveResult(score){
+  let nameInput = $('name'), classInput =$('className');
+  if(!nameInput || !classInput) return;
+  let result = {
+    time: new Date().toLocaleString('vi-VN'),
+    name: nameInput.value.trim(),
+    className: classInput.value.trim(),
+    grade: 'Khối ' + currentGrade,
+    gradeNum: currentGrade,
+    exam: EXAM ? EXAM.title : '',
+    code: String(examIndex+1).padStart(2,'0'),
+    correct: score,
+    wrong: activeQuestions.length - score,
+    total: activeQuestions.length,
+    score: ((score / activeQuestions.length) * 10).toFixed(1)
+  };
+  if(GOOGLE_SHEETS_URL){
+    fetch(GOOGLE_SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(result)}).catch(()=>{});
+  }
+}
+
+function shuffleArray(array) {
+  let arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function renderQuestions(){
+  let qContainer = $('questions');
+  if(!qContainer || !EXAM) return;
+  qContainer.innerHTML = activeQuestions.map((q,i)=>`
+    <div class="question">
+      <div class="q-title">Câu ${i+1}. ${q.text}</div>
+      ${q.options.map((o,j)=>`
+        <label class="option">
+          <input type="radio" name="q${i}" value="${j}">
+          <span>${String.fromCharCode(65+j)}.${o}</span>
+        </label>
+      `).join('')}
+    </div>
+  `).join('');
+  document.querySelectorAll('input[type=radio]').forEach(x=>x.addEventListener('change',e=>{
+    answers[+e.target.name.slice(1)] = +e.target.value;
+    updateProgress();
+  }));
+}
+
+function updateProgress(){
+  let ansCount = answers.filter(x=>x!==null).length;
+  let ansEl = $('answered'), progEl =$('progressBar');
+  if(ansEl) ansEl.textContent = `${ansCount}/${activeQuestions.length}`;
+  if(progEl) progEl.style.width = `${(ansCount/activeQuestions.length)*100}%`;
+}
+
+function start(){
+  let n = $('name').value.trim(), c =$('className').value.trim();
+  if(!n || !c){ alert('Em vui lòng nhập đầy đủ Họ và tên và Lớp.'); return; }
+  if(!EXAM || !EXAM.questions || !EXAM.questions.length){ alert('Vui lòng chọn bài kiểm tra!'); return; }
+  
+  if(EXAM.isLocked){
+    alert('⚠️ Bài kiểm tra này hiện đang bị KHÓA bởi giáo viên. Học sinh chưa thể làm bài!');
+    return;
+  }
+  
+  started = true; isSubmitting = false; 
+  activeQuestions = shuffleArray(EXAM.questions);
+  answers = Array(activeQuestions.length).fill(null);
+  remaining = (EXAM.timeMinutes || 15) * 60;
+
+  $('studentLabel').textContent = `${n} • ${c}`;
+  $('start').classList.add('hidden'); 
+  $('result').classList.add('hidden');$('exam').classList.remove('hidden');
+  
+  renderQuestions(); updateProgress(); tick();
+  clearInterval(timerId); timerId = setInterval(tick, 1000);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function tick(){
+  let m = Math.floor(remaining/60), s = remaining%60;
+  let timerEl = $('timer');
+  if(timerEl) timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  if(remaining <= 0){ clearInterval(timerId); finish(true); } else { remaining--; }
+}
+
+function finish(auto=false){
+  if(!started || isSubmitting) return;
+  isSubmitting = true; clearInterval(timerId);
+  let score = answers.reduce((sum,a,i)=>sum+(a===activeQuestions[i].answer?1:0),0);
+  saveResult(score);
+  let finalScore = ((score / activeQuestions.length) * 10).toFixed(1);
+  
+  $('exam').classList.add('hidden'); $('result').classList.remove('hidden');$('resultText').innerHTML = `
+    <div class="score">${auto ? '⏰ HẾT GIỜ LÀM BÀI' : '✅ NỘP BÀI THÀNH CÔNG'}</div>
+    <p>Số câu đúng: <b>${score} / ${activeQuestions.length}</b></p>
+    <p style="font-size:22px;color:var(--primary);font-weight:bold">Điểm số: ${finalScore} điểm</p>
+  `;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function addBuilderQuestion(qData = null){
+  let container = $('builderQuestionsContainer');
+  if(!container) return;
+  let qIndex = container.children.length + 1;
+  let div = document.createElement('div');
+  div.className = 'builder-q';
+  div.innerHTML = `
+    <div class="actions" style="justify-content:space-between;margin-bottom:8px">
+      <strong>Câu hỏi ${qIndex}</strong>
+      <button class="btn danger-action" type="button" style="padding:4px 10px;font-size:13px" onclick="this.parentElement.parentElement.remove()">Xóa</button>
+    </div>
+    <div class="field" style="margin-bottom:8px"><input type="text" class="bq-text" placeholder="Nội dung câu hỏi..." value="${qData?qData.text:''}"></div>
+    <div class="grid">
+      <div class="field"><input type="text" class="bq-opt0" placeholder="Đáp án A" value="${qData?qData.options[0]:''}"></div>
+      <div class="field"><input type="text" class="bq-opt1" placeholder="Đáp án B" value="${qData?qData.options[1]:''}"></div>
+      <div class="field"><input type="text" class="bq-opt2" placeholder="Đáp án C" value="${qData?qData.options[2]:''}"></div>
+      <div class="field"><input type="text" class="bq-opt3" placeholder="Đáp án D" value="${qData?qData.options[3]:''}"></div>
+    </div>
+    <div class="field" style="margin-top:8px">
+      <label class="small">Đáp án đúng:</label>
+      <select class="bq-ans" style="max-width:200px">
+        <option value="0" ${qData&&qData.answer===0?'selected':''}>Đáp án A</option>
+        <option value="1" ${qData&&qData.answer===1?'selected':''}>Đáp án B</option>
+        <option value="2" ${qData&&qData.answer===2?'selected':''}>Đáp án C</option>
+        <option value="3" ${qData&&qData.answer===3?'selected':''}>Đáp án D</option>
+      </select>
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+function parseWordText(text){
+  text = text.replace(/([ \t]+)([A-D][\.\)])/g, '\n$2');
+  let lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  let questions = []; let currentQ = null; let currentOpts = [];
+  for(let line of lines){
+    if(/^câu\s*\d+[\:\.]/i.test(line)){
+      if(currentQ && currentOpts.length >= 2){
+        questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
+      }
+      currentQ = line.replace(/^câu\s*\d+[\:\.]\s*/i, '');
+      currentOpts = [];
+    } else if(/^[A-D][\.\)]\s*/i.test(line)){
+      currentOpts.push(line.replace(/^[A-D][\.\)]\s*/i, ''));
+    } else {
+      if(currentOpts.length > 0) currentOpts[currentOpts.length - 1] += " " + line;
+      else if(currentQ) currentQ += " " + line;
+    }
+  }
+  if(currentQ && currentOpts.length >= 2) questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
+  return questions;
+}
+
+function padOptions(opts){
+  while(opts.length < 4) opts.push("Không có đáp án");
+  return opts.slice(0, 4);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  $('gradeSelect').onchange = e => loadGrade(e.target.value);
+  $('examSelect').onchange = e => loadExam(e.target.value);
+  $('docGradeSelect').onchange = renderStudentDocs;
+  $('reloadExamsBtn').onclick = () => { fetchCloudDataSilent(); alert('Đã làm mới dữ liệu!'); };
+  $('startBtn').onclick = start;
+  $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
+  $('retryBtn').onclick = () => { $('result').classList.add('hidden');$('start').classList.remove('hidden'); started = false; isSubmitting = false; };
+
+  $('adminToggle').onclick = () => { $('adminPanel').classList.toggle('hidden'); };
+  $('adminLogin').onclick = () => {
+    let passVal = $('adminPass').value.trim();
+    if(passVal === 'Trongthien233') {
+      $('adminContent').classList.remove('hidden');
+      fetchSheetData();
+    } else {
+      alert('Mật khẩu không đúng!');
+    }
+  };
+
+  $('refreshData').onclick = fetchSheetData;
+  $('scoreGradeSelect').onchange = fetchSheetData;
+
+  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };
+  $('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };
+  $('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };
+  $('addQuestionBtn').onclick = () => addBuilderQuestion();
+
+  $('saveDocBtn').onclick = async () => {
+    let g = $('docGrade').value;
+    let title = $('docTitle').value.trim();
+    let link = $('docLink').value.trim();
+    if(!title || !link){ alert('Vui lòng nhập đầy đủ tiêu đề và link tài liệu!'); return; }
+
+    let docObj = { title: title, link: link };
+    if(!DOCS_DATA[g]) DOCS_DATA[g] = [];
+    DOCS_DATA[g].push(docObj);
+    localStorage.setItem('dakdoa_docs', JSON.stringify(DOCS_DATA));
+    renderStudentDocs();
+    renderAdminDocs();
+
+    alert('🎉 ĐÃ LƯU TÀI LIỆU THÀNH CÔNG!');
+    $('docTitle').value = '';$('docLink').value = '';
+
+    try {
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action: 'saveDoc', grade: g, doc: docObj })
+      });
+    } catch(err){}
+  };
+
+  $('wordFileSelect').onchange = (e) => {
+    let file = e.target.files[0];
+    if(!file) return;
+    let reader = new FileReader();
+    reader.onload = function(event) {
+      mammoth.extractRawText({arrayBuffer: event.target.result}).then(function(result) {
+        let parsedQs = parseWordText(result.value);
+        if(parsedQs.length === 0){ alert('Không tự động nhận diện được câu hỏi.'); return; }
+        $('builderQuestionsContainer').innerHTML = '';
+        if($('builderTitle').value.trim() === '') $('builderTitle').value = file.name.replace(/\.[^/.]+$/, "");
+        parsedQs.forEach(q => addBuilderQuestion(q));
+        alert(`Nhận diện thành công ${parsedQs.length} câu hỏi!`);
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  $('saveExamBtn').onclick = async () => {
+    let g = $('builderGrade').value;
+    let title = $('builderTitle').value.trim();
+    let timeM = parseInt($('builderTime').value) || 15;
+    if(!title){ alert('Vui lòng nhập tên bài kiểm tra!'); return; }
+
+    let qDivs = document.querySelectorAll('.builder-q');
+    if(qDivs.length === 0){ alert('Vui lòng thêm ít nhất một câu hỏi!'); return; }
+
+    let questions = [];
+    for(let div of qDivs){
+      let text = div.querySelector('.bq-text').value.trim();
+      let o0 = div.querySelector('.bq-opt0').value.trim();
+      let o1 = div.querySelector('.bq-opt1').value.trim();
+      let o2 = div.querySelector('.bq-opt2').value.trim();
+      let o3 = div.querySelector('.bq-opt3').value.trim();
+      let ans = parseInt(div.querySelector('.bq-ans').value);
+      if(!text || !o0 || !o1 || !o2 || !o3){ alert('Vui lòng điền đầy đủ câu hỏi và các đáp án!'); return; }
+      questions.push({text: text, options: [o0, o1, o2, o3], answer: ans});
+    }
+
+    let examObj = { title: title, timeMinutes: timeM, isLocked: false, questions: questions };
+    if(!EXAMS_DATA[g]) EXAMS_DATA[g] = [];
+    EXAMS_DATA[g].push(examObj);
+    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
+    updateExamSelect();
+    renderAdminExams();
+
+    alert('🎉 ĐÃ PHÁT HÀNH ĐỀ THI THÀNH CÔNG!');
+    $('builderTitle').value = '';
+    $('wordFileSelect').value = '';$('builderQuestionsContainer').innerHTML = '';
+
+    try {
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({ action: 'saveExam', grade: g, exam: examObj })
+      });
+    } catch(err){}
+  };
+
+  initApp();
+});
+</script>
+</body>
+</html>
