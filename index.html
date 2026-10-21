@@ -1,756 +1,188 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hệ thống Kiểm tra & Tài liệu - Trường THCS Đak Đoa - Thầy Tuấn</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<style>
-:root{font-family:Inter,Segoe UI,Arial,sans-serif;color-scheme:light dark;--bg:#f4f7fb;--surface:#fff;--text:#172033;--muted:#667085;--primary:#2563eb;--primary2:#1d4ed8;--border:#dbe2ea;--ok:#15803d;--danger:#dc2626}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}
-#app{min-height:100vh;background-color:var(--bg);padding:0 0 40px}
-.hero{background:linear-gradient(135deg,#1d4ed8,#0f766e);color:white;padding:34px 20px 30px}.hero-inner{max-width:1000px;margin:auto}.badge{display:inline-block;background:#ffffff24;border:1px solid #ffffff40;padding:6px 11px;border-radius:999px;font-size:13px}.hero h1{margin:12px 0 7px;font-size:30px}.hero p{margin:0;color:#e0f2fe}
-.container{max-width:1000px;margin:22px auto;padding:0 16px}.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 8px 28px #0000000b;margin-bottom:16px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field label{display:block;font-weight:700;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;padding:12px 13px;border:1px solid var(--border);border-radius:10px;font-size:16px;background:var(--surface);color:var(--text)}
-.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer}.primary{background:var(--primary);color:white}.primary:hover{background:var(--primary2)}.secondary{background:#1d4ed8;color:white}.secondary:hover{background:#1e40af}.qr-action{background:#0f766e;color:white}.qr-action:hover{background:#0d5f59}.danger-action{background:#dc2626;color:white}.danger-action:hover{background:#b91c1c}
-.hidden{display:none!important}.topbar{position:sticky;top:0;z-index:4;background:var(--surface);border-bottom:1px solid var(--border);padding:11px 16px}.topbar-inner{max-width:1000px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:10px}.timer{font-weight:800;color:var(--danger);background:#fee2e2;padding:8px 12px;border-radius:10px}.progress{height:8px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin-top:10px}.progress>div{height:100%;background:var(--primary);width:0;transition:width .2s}
-.question{border:1px solid var(--border);border-radius:15px;padding:18px;margin:14px 0}.q-title{font-weight:800;line-height:1.5;margin-bottom:13px}.option{display:flex;gap:10px;align-items:flex-start;padding:11px;border:1px solid var(--border);border-radius:10px;margin:8px 0;cursor:pointer}.option:hover{background:#eff6ff}.option input{margin-top:4px}.submitbox{position:sticky;bottom:12px;background:var(--surface);border:1px solid var(--border);box-shadow:0 8px 30px #0002;padding:14px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}.result{text-align:center}.score{font-size:32px;font-weight:900;color:var(--primary);margin:8px}.small{color:var(--muted);font-size:14px}.footer{text-align:center;color:var(--muted);padding:18px}
-.builder-q{border:1px dashed var(--border);padding:15px;border-radius:12px;margin-bottom:12px;background:var(--bg)}
-@media(max-width:650px){.grid{grid-template-columns:1fr}.hero h1{font-size:25px}.card{padding:16px}.submitbox{flex-direction:column;align-items:stretch}.submitbox .btn{width:100%}}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--surface:#111827;--text:#e5e7eb;--muted:#9ca3af;--border:#263244}.option:hover{background:#172554}.secondary{background:#1f2937;color:var(--text)}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Quản lý Ngân hàng Câu hỏi & Tạo Đề Kiểm Tra Tin Học</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            .print-area { box-shadow: none !important; border: none !important; }
+        }
+    </style>
 </head>
-<body>
-<div id="app">
-<section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA & TÀI LIỆU • TRƯỜNG THCS ĐAK ĐOA - THẦY TUẤN</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Học sinh làm bài & xem tài liệu trên Mọi thiết bị • Đồng bộ 100%</p></div></section>
-<div class="container">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
-<!-- CHỌN ĐỀ THI -->
-<section class="card">
-<h2>📝 Chọn bài kiểm tra theo khối lớp</h2>
-<div class="grid">
-<div class="field">
-  <label for="gradeSelect">Chọn khối lớp</label>
-  <select id="gradeSelect">
-    <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
-  </select>
-</div>
-<div class="field"><label for="examSelect">Chọn bài / đề thi</label><select id="examSelect"><option value="">Đang tải danh sách đề...</option></select></div>
-</div>
-<div style="margin-top:14px" class="actions">
-  <button class="btn secondary" id="reloadExamsBtn" type="button" style="padding:8px 14px;font-size:14px">🔄 Làm mới danh sách</button>
-</div>
-</section>
-
-<!-- THÔNG TIN HỌC SINH -->
-<section id="start" class="card">
-<h2>Thông tin học sinh</h2>
-<p class="small">Em hãy nhập chính xác thông tin trước khi bắt đầu.</p>
-<div class="grid">
-  <div class="field"><label for="name">Họ và tên *</label><input id="name" placeholder="Nguyễn Văn A" autocomplete="name"></div>
-  <div class="field"><label for="className">Lớp *</label><input id="className" placeholder="7A1"></div>
-</div>
-<div style="height:16px"></div>
-<div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div>
-</section>
-
-<!-- TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG CHO HỌC SINH -->
-<section class="card">
-<h2>📚 Tài liệu ôn tập & Đề cương</h2>
-<p class="small">Chọn khối lớp để xem hoặc mở trực tiếp tài liệu ôn tập.</p>
-<div class="field" style="max-width:280px;margin-bottom:14px">
-  <label for="docGradeSelect">Chọn khối lớp</label>
-  <select id="docGradeSelect">
-    <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
-  </select>
-</div>
-<div id="studentDocsList" style="border-top:1px solid var(--border);padding-top:12px">Đang tải tài liệu...</div>
-</section>
-
-<!-- MÀN HÌNH LÀM BÀI -->
-<section id="exam" class="hidden">
-  <div class="topbar">
-    <div class="topbar-inner"><strong id="studentLabel"></strong><span class="timer" id="timer">15:00</span></div>
-    <div class="topbar-inner"><div style="width:100%"><div class="progress"><div id="progressBar"></div></div></div></div>
-  </div>
-  <div class="card" style="margin-top:16px">
-    <div id="questions"></div>
-    <div class="submitbox">
-      <div><strong id="answered">0/10</strong><div class="small">câu đã trả lời</div></div>
-      <button class="btn primary" id="submitBtn">Nộp bài</button>
-    </div>
-  </div>
-</section>
-
-<!-- MÀN HÌNH KẾT QUẢ -->
-<section id="result" class="card hidden result">
-  <h2>Trạng thái nộp bài</h2>
-  <div id="resultText"></div>
-  <div class="actions" style="justify-content:center;margin-top:20px"><button class="btn secondary" id="retryBtn">Làm bài khác</button></div>
-</section>
-
-<!-- KHU VỰC QUẢN TRỊ DÀNH CHO GIÁO VIÊN -->
-<section class="card">
-  <div class="actions" style="justify-content:space-between">
-    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Quản lý điểm, đề thi và tài liệu ôn tập.</div></div>
-    <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị</button>
-  </div>
-  <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
-    <div class="actions" style="margin-bottom:15px">
-      <input type="password" id="adminPass" placeholder="Nhập mật khẩu quản trị..." style="max-width:280px;padding:12px 13px;border:1px solid var(--border);border-radius:10px" autocomplete="new-password">
-      <button class="btn primary" id="adminLogin" type="button">Đăng nhập</button>
-    </div>
-    
-    <div id="adminContent" class="hidden">
-      <div class="actions" style="margin-bottom:15px">
-        <button class="btn primary" id="tabScores" type="button">📊 Xem bảng điểm</button>
-        <button class="btn qr-action" id="tabExams" type="button">📄 Quản lý Đề thi</button>
-        <button class="btn secondary" id="tabDocs" type="button" style="background:#0f766e">📂 Quản lý Tài liệu</button>
-      </div>
-
-      <!-- Xem điểm theo khối -->
-      <div id="panelScores">
-        <div class="actions" style="justify-content:space-between;margin-bottom:10px">
-          <div class="field" style="margin:0;max-width:220px">
-            <select id="scoreGradeSelect" style="padding:8px">
-              <option value="6">Bảng điểm Khối 6</option>
-              <option value="7">Bảng điểm Khối 7</option>
-              <option value="8">Bảng điểm Khối 8</option>
-              <option value="9">Bảng điểm Khối 9</option>
-            </select>
-          </div>
-          <button class="btn primary" id="refreshData" type="button">🔄 Tải lại bảng điểm</button>
-        </div>
-        <div class="small" id="totalSubmissions" style="margin-bottom:8px">Đang tải bảng điểm...</div>
-        <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="7" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
-      </div>
-
-      <!-- Quản lý Khóa/Mở, Đổi thời gian & Xóa Đề thi -->
-      <div id="panelExams" class="hidden">
-        <h3>Danh sách Đề thi hiện có (Khóa/Mở, Sửa thời gian, Xóa)</h3>
-        <div id="adminExamsList" style="margin-bottom:20px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--bg)">Đang tải danh sách đề...</div>
-        
-        <h3 style="margin-top:15px">Tải đề thi mới từ Tệp Word (.docx)</h3>
-        <div class="grid" style="margin-bottom:10px">
-          <div class="field">
-            <label>Chọn khối lớp phát hành</label>
-            <select id="builderGrade">
-              <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Thời gian làm bài (phút)</label>
-            <input type="number" id="builderTime" value="15" min="1" max="180" placeholder="Số phút">
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:15px">
-          <label>Tên bài kiểm tra / Tiêu đề</label>
-          <input type="text" id="builderTitle" placeholder="Ví dụ: Kiểm tra 15 phút Tin học 7">
-        </div>
-        <div class="field" style="margin-bottom:15px;background:var(--bg);padding:15px;border-radius:12px;border:2px dashed var(--border)">
-          <label style="font-weight:bold;margin-bottom:8px">📂 Tải tệp đề kiểm tra (.docx)</label>
-          <input type="file" id="wordFileSelect" accept=".docx" style="padding:8px">
-        </div>
-        <h4>Xem trước các câu hỏi đã nhận diện:</h4>
-        <div id="builderQuestionsContainer"></div>
-        <div class="actions" style="margin-top:15px">
-          <button class="btn secondary" id="addQuestionBtn" type="button">➕ Thêm câu hỏi thủ công</button>
-          <button class="btn primary" id="saveExamBtn" type="button">☁️ LƯU & PHÁT HÀNH ĐỀ THI</button>
-        </div>
-      </div>
-
-      <!-- Quản lý & Xóa Tài liệu ôn tập -->
-      <div id="panelDocs" class="hidden">
-        <h3>Danh sách Tài liệu hiện có (Có nút Xóa)</h3>
-        <div id="adminDocsList" style="margin-bottom:20px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--bg)">Đang tải danh sách tài liệu...</div>
-
-        <h3 style="margin-top:15px">Gửi Link Tài liệu ôn tập / Đề cương mới</h3>
-        <div class="grid" style="margin-bottom:10px">
-          <div class="field">
-            <label>Chọn khối lớp</label>
-            <select id="docGrade">
-              <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Tiêu đề tài liệu / Đề cương</label>
-            <input type="text" id="docTitle" placeholder="Ví dụ: Đề cương ôn tập giữa kì 1">
-          </div>
-        </div>
-        <div class="field" style="margin-bottom:15px">
-          <label>Đường dẫn liên kết (URL / Link Google Drive)</label>
-          <input type="text" id="docLink" placeholder="https://drive.google.com/file/d/...">
-        </div>
-        <button class="btn primary" id="saveDocBtn" type="button">☁️ GỬI LINK TÀI LIỆU</button>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<div class="footer">Hệ thống kiểm tra trực tuyến • Trường THCS Đak Đoa - Thầy Tuấn</div>
-</div></div>
-
-<script>
-const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyi8yEfIGPU1WL0zW8Kqlwsi2cxYZ6mxuZycH65z_XGHMQRaD4VdnZZ-GV9bL82C-gA/exec';
-
-const defaultExams = {
-  "6": [{ title: "Kiểm tra Mẫu Tin học 6", timeMinutes: 15, isLocked: false, questions: [{ text: "Thông tin là gì?", options: ["Hiểu biết về sự vật, hiện tượng","Chỉ là con số","Chỉ là văn bản","Các bức tranh"], answer: 0 }] }],
-  "7": [{ title: "Kiểm tra Mẫu Tin học 7", timeMinutes: 15, isLocked: false, questions: [{ text: "CPU được ví là gì?", options: ["Bộ não của máy tính","Loa","Bàn phím","Màn hình"], answer: 0 }] }],
-  "8": [{ title: "Kiểm tra Mẫu Tin học 8", timeMinutes: 15, isLocked: false, questions: [{ text: "IoT là gì?", options: ["Internet vạn vật","Mạng xã hội","Phần mềm","Trò chơi"], answer: 0 }] }],
-  "9": [{ title: "Kiểm tra Mẫu Tin học 9", timeMinutes: 15, isLocked: false, questions: [{ text: "Scratch là gì?", options: ["Ngôn ngữ lập trình trực quan","Trình duyệt","Hệ điều hành","Phần cứng"], answer: 0 }] }]
-};
-
-let EXAMS_DATA = JSON.parse(localStorage.getItem('dakdoa_exams')) || defaultExams;
-let DOCS_DATA = JSON.parse(localStorage.getItem('dakdoa_docs')) || {"6":[], "7":[], "8":[], "9":[]};
-
-let currentGrade = "6", examIndex = 0, EXAM = null;
-let answers = [], activeQuestions = [], remaining = 15 * 60, timerId = null, started = false, isSubmitting = false;
-
-const $ = id => document.getElementById(id);
-
-function initApp(){
-  updateExamSelect();
-  renderStudentDocs();
-  renderAdminExams();
-  renderAdminDocs();
-  fetchCloudDataSilent();
-}
-
-async function fetchCloudDataSilent() {
-  try {
-    let res = await fetch(GOOGLE_SHEETS_URL + '?action=getExams');
-    let result = await res.json();
-    if (result.success && result.data && Object.keys(result.data).length > 0) {
-      EXAMS_DATA = result.data;
-      localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
-      updateExamSelect();
-      renderAdminExams();
-    }
-  } catch(e){}
-
-  try {
-    let resDoc = await fetch(GOOGLE_SHEETS_URL + '?action=getDocs');
-    let resDocJson = await resDoc.json();
-    if (resDocJson.success && resDocJson.data) {
-      DOCS_DATA = resDocJson.data;
-      localStorage.setItem('dakdoa_docs', JSON.stringify(DOCS_DATA));
-      renderStudentDocs();
-      renderAdminDocs();
-    }
-  } catch(e){}
-}
-
-function updateExamSelect(){
-  let select = $('examSelect');
-  if(!select) return;
-  let list = EXAMS_DATA[currentGrade] || defaultExams[currentGrade] || [];
-  if(list.length === 0){
-    select.innerHTML = '<option value="">Chưa có đề nào cho khối này.</option>';
-    $('examTitle').textContent = "Chưa có đề thi";
-    $('examInfo').textContent = "Thầy vui lòng tải đề lên từ phần Quản trị.";
-    EXAM = null;
-    return;
-  }
-  select.innerHTML = list.map((ex, idx) => {
-    let lockLabel = ex.isLocked ? ' 🔒 [ĐÃ KHÓA]' : '';
-    return `<option value="${idx}">${ex.title} (${ex.timeMinutes || 15} phút)${lockLabel}</option>`;
-  }).join('');
-  loadExam(0);
-}
-
-function loadGrade(g){
-  currentGrade = g;
-  updateExamSelect();
-  renderStudentDocs();
-}
-
-function loadExam(i){
-  examIndex = +i;
-  let list = EXAMS_DATA[currentGrade] || defaultExams[currentGrade] || [];
-  if(!list[examIndex]) examIndex = 0;
-  EXAM = list[examIndex];
-  if(!EXAM) return;
-  
-  let lockStatusText = EXAM.isLocked ? ' • 🔒 TRẠNG THÁI: ĐANG KHÓA (Học sinh chưa thể làm)' : ' • 🔓 TRẠNG THÁI: ĐANG MỞ';
-  $('examTitle').textContent = EXAM.title;
-  $('examInfo').textContent = `Khối ${currentGrade} • ${EXAM.questions.length} câu hỏi • ${EXAM.timeMinutes || 15} phút${lockStatusText}`;
-  
-  answers = [];
-  activeQuestions = [];
-  remaining = (EXAM.timeMinutes || 15) * 60;
-}
-
-function renderStudentDocs(){
-  let gSel = $('docGradeSelect');
-  let container = $('studentDocsList');
-  if(!gSel || !container) return;
-  let g = gSel.value;
-  let docs = DOCS_DATA[g] || [];
-  
-  if(docs.length === 0){
-    container.innerHTML = '<p class="small">Chưa có tài liệu ôn tập nào cho khối này.</p>';
-    return;
-  }
-  container.innerHTML = docs.map(d => `
-    <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-      <span>📄 <b>${d.title}</b></span>
-      <a href="${d.link}" target="_blank" class="btn primary" style="padding:8px 14px;font-size:14px;text-decoration:none">📖 Mở & Đọc tài liệu</a>
-    </div>
-  `).join('');
-}
-
-function renderAdminExams(){
-  let container = $('adminExamsList');
-  if(!container) return;
-  let html = '';
-  let hasAny = false;
-
-  for(let g in EXAMS_DATA){
-    if(EXAMS_DATA[g] && EXAMS_DATA[g].length > 0){
-      EXAMS_DATA[g].forEach((ex, idx) => {
-        hasAny = true;
-        let isLocked = !!ex.isLocked;
-        let lockBtnClass = isLocked ? 'btn primary' : 'btn qr-action';
-        let lockBtnText = isLocked ? '🔓 Mở đề' : '🔒 Khóa đề';
-        let statusBadge = isLocked ? '<span style="color:var(--danger);font-weight:bold">[ĐÃ KHÓA]</span>' : '<span style="color:var(--ok);font-weight:bold">[ĐANG MỞ]</span>';
-
-        html += `
-          <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-            <span>[Khối ${g}] ${statusBadge} <b>${ex.title}</b> (${ex.questions.length} câu)</span>
-            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-              <input type="number" id="time_${g}_${idx}" value="${ex.timeMinutes || 15}" min="1" max="180" style="width:60px;padding:5px 6px;font-size:13px;border-radius:6px;border:1px solid var(--border)">
-              <span style="font-size:13px">p</span>
-              <button class="btn secondary" style="padding:6px 8px;font-size:12px" onclick="updateExamTime('${g}', ${idx})">💾 Lưu</button>
-              <button class="${lockBtnClass}" style="padding:6px 10px;font-size:12px" onclick="toggleExamLock('${g}', ${idx})">${lockBtnText}</button>
-              <button class="btn danger-action" style="padding:6px 10px;font-size:12px" onclick="deleteExam('${g}', ${idx})">🗑️ Xóa</button>
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white shadow-md no-print">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                💻 Quản Lý Ngân Hàng Đề Kiểm Tra Tin Học 9
+            </h1>
+            <div class="mt-3 md:mt-0 flex gap-2">
+                <button onclick="switchTab('bank')" id="btnBank" class="px-4 py-2 bg-indigo-700 rounded-lg font-medium transition hover:bg-indigo-800 shadow">Ngân hàng câu hỏi</button>
+                <button onclick="switchTab('exam')" id="btnExam" class="px-4 py-2 bg-indigo-500 rounded-lg font-medium transition hover:bg-indigo-600 shadow">Tạo đề thi ngẫu nhiên</button>
             </div>
-          </div>
-        `;
-      });
-    }
-  }
-  container.innerHTML = hasAny ? html : '<p class="small">Chưa có đề thi nào trên hệ thống.</p>';
-}
+        </div>
+    </header>
 
-window.toggleExamLock = async function(grade, index){
-  if(EXAMS_DATA[grade] && EXAMS_DATA[grade][index]) {
-    let currentStatus = !!EXAMS_DATA[grade][index].isLocked;
-    EXAMS_DATA[grade][index].isLocked = !currentStatus;
-    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
-    renderAdminExams();
-    updateExamSelect();
-    
-    let stateText = EXAMS_DATA[grade][index].isLocked ? 'khóa' : 'mở';
-    alert(`Đã ${stateText} đề kiểm tra thành công!`);
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
 
-    try {
-      await fetch(GOOGLE_SHEETS_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({action: 'updateExamLock', grade: grade, index: index, isLocked: EXAMS_DATA[grade][index].isLocked})
-      });
-    } catch(err){}
-  }
-};
+        <!-- TAB 1: NGÂN HÀNG CÂU HỎI & CHỈNH SỬA -->
+        <section id="tabBank" class="space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div class="flex flex-wrap gap-3 items-center">
+                    <select id="filterLesson" onchange="filterQuestions()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="">Tất cả các bài</option>
+                        <option value="1">Bài 1: Thế giới kỹ thuật số</option>
+                        <option value="2">Bài 2: Thông tin trong giải quyết vấn đề</option>
+                        <option value="3">Bài 3: Đánh giá chất lượng thông tin</option>
+                        <option value="4">Bài 4: Pháp luật về sử dụng Internet</option>
+                    </select>
+                    <select id="filterLevel" onchange="filterQuestions()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="">Tất cả mức độ</option>
+                        <option value="Biết">Biết</option>
+                        <option value="Hiểu">Hiểu</option>
+                    </select>
+                    <input type="text" id="searchInput" onkeyup="filterQuestions()" placeholder="Tìm kiếm nội dung câu hỏi..." class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-64">
+                </div>
+                <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition shadow flex items-center gap-2">
+                    ➕ Thêm câu hỏi mới
+                </button>
+            </div>
 
-window.updateExamTime = async function(grade, index){
-  let inputEl = $(`time_${grade}_${index}`);
-  if(!inputEl) return;
-  let newTime = parseInt(inputEl.value);
-  if(isNaN(newTime) || newTime < 1) {
-    alert('Thời gian làm bài phải là số nguyên lớn hơn 0 phút!');
-    return;
-  }
-  if(EXAMS_DATA[grade] && EXAMS_DATA[grade][index]) {
-    EXAMS_DATA[grade][index].timeMinutes = newTime;
-    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
-    updateExamSelect();
-    alert(`Đã cập nhật thời gian thành ${newTime} phút!`);
-    
-    try {
-      await fetch(GOOGLE_SHEETS_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({action: 'updateExamTime', grade: grade, index: index, timeMinutes: newTime})
-      });
-    } catch(err){}
-  }
-};
+            <!-- Danh sách câu hỏi -->
+            <div id="questionsListContainer" class="space-y-4">
+                <!-- Được render bằng JavaScript -->
+            </div>
+        </section>
 
-window.deleteExam = async function(grade, index){
-  if(!confirm('Thầy có chắc chắn muốn xóa đề thi này không?')) return;
-  if(EXAMS_DATA[grade]) {
-    EXAMS_DATA[grade].splice(index, 1);
-    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
-  }
-  renderAdminExams();
-  updateExamSelect();
-  
-  try {
-    await fetch(GOOGLE_SHEETS_URL, {
-      method: 'POST', mode: 'no-cors',
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify({action: 'deleteExam', grade: grade, index: index})
-    });
-  } catch(err){}
-  alert('Đã xóa đề thi thành công!');
-};
+        <!-- TAB 2: TẠO VÀ XEM ĐỀ THI -->
+        <section id="tabExam" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 no-print space-y-4">
+                <h2 class="text-lg font-bold text-slate-700">Tùy chỉnh cấu trúc đề kiểm tra</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Tên mã đề / Tiêu đề:</label>
+                        <input type="text" id="examTitle" value="KIỂM TRA 15 PHÚT - MÔN TIN HỌC 9" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Mã đề:</label>
+                        <input type="text" id="examCode" value="101" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Số lượng câu hỏi:</label>
+                        <input type="number" id="examCount" value="20" min="1" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="generateExam()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition shadow flex items-center justify-center gap-2">
+                            🎲 Trộn đề ngẫu nhiên
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-function renderAdminDocs(){
-  let container = $('adminDocsList');
-  if(!container) return;
-  let html = '';
-  let hasAny = false;
+            <!-- Khu vực hiển thị đề thi để in hoặc làm -->
+            <div id="examPreviewArea" class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 print-area space-y-6">
+                <div class="text-center space-y-1 border-b pb-4">
+                    <h3 id="previewTitle" class="font-bold text-xl uppercase">KIỂM TRA 15 PHÚT - MÔN TIN HỌC 9</h3>
+                    <p class="text-sm font-semibold text-slate-600">Mã đề: <span id="previewCode">101</span></p>
+                </div>
+                <div id="previewQuestionsContainer" class="space-y-4">
+                    <p class="text-center text-slate-500 italic py-8">Chưa có đề nào được tạo. Hãy bấm "Trộn đề ngẫu nhiên" ở trên!</p>
+                </div>
+                
+                <!-- Bảng đáp án ẩn/hiện -->
+                <div id="answerKeyContainer" class="mt-8 pt-6 border-t border-dashed border-slate-300 hidden">
+                    <h4 class="font-bold text-base text-slate-700 mb-2">BẢNG ĐÁP ÁN ĐỀ THI</h4>
+                    <div id="answerKeyGrid" class="grid grid-cols-5 md:grid-cols-10 gap-2 text-sm"></div>
+                </div>
 
-  for(let g in DOCS_DATA){
-    if(DOCS_DATA[g] && DOCS_DATA[g].length > 0){
-      DOCS_DATA[g].forEach((d, idx) => {
-        hasAny = true;
-        html += `
-          <div class="actions" style="justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
-            <span>[Khối ${g}] <b>${d.title}</b></span>
-            <button class="btn danger-action" style="padding:6px 12px;font-size:13px" onclick="deleteDoc('${g}', ${idx})">🗑️ Xóa tài liệu</button>
-          </div>
-        `;
-      });
-    }
-  }
-  container.innerHTML = hasAny ? html : '<p class="small">Chưa có tài liệu nào trên hệ thống.</p>';
-}
+                <div class="flex justify-end gap-3 pt-4 no-print">
+                    <button onclick="toggleAnswerKey()" id="btnToggleKey" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-4 py-2 rounded-lg text-sm transition">Hiện đáp án</button>
+                    <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition shadow">🖨️ In đề / Lưu PDF</button>
+                </div>
+            </div>
+        </section>
 
-window.deleteDoc = async function(grade, index){
-  if(!confirm('Thầy có chắc chắn muốn xóa tài liệu này không?')) return;
-  if(DOCS_DATA[grade]) {
-    DOCS_DATA[grade].splice(index, 1);
-    localStorage.setItem('dakdoa_docs', JSON.stringify(DOCS_DATA));
-  }
-  renderAdminDocs();
-  renderStudentDocs();
+    </main>
 
-  try {
-    await fetch(GOOGLE_SHEETS_URL, {
-      method: 'POST', mode: 'no-cors',
-      headers: {'Content-Type': 'text/plain;charset=utf-8'},
-      body: JSON.stringify({action: 'deleteDoc', grade: grade, index: index})
-    });
-  } catch(err){}
-  alert('Đã xóa tài liệu thành công!');
-};
+    <!-- MODAL THÊM / SỬA CÂU HỎI -->
+    <div id="questionModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center">
+                <h3 id="modalTitle" class="font-bold text-lg">Thêm câu hỏi mới</h3>
+                <button onclick="closeModal()" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 space-y-4 overflow-y-auto flex-grow">
+                <input type="hidden" id="editIndex" value="-1">
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Thuộc bài học:</label>
+                        <select id="modalLesson" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="1">Bài 1: Thế giới kỹ thuật số</option>
+                            <option value="2">Bài 2: Thông tin trong giải quyết vấn đề</option>
+                            <option value="3">Bài 3: Đánh giá chất lượng thông tin</option>
+                            <option value="4">Bài 4: Pháp luật về sử dụng Internet</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Mức độ:</label>
+                        <select id="modalLevel" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="Biết">Biết</option>
+                            <option value="Hiểu">Hiểu</option>
+                        </select>
+                    </div>
+                </div>
 
-async function fetchSheetData(){
-  let subEl = $('totalSubmissions');
-  let histEl = $('historyList');
-  let scoreGrade = $('scoreGradeSelect').value;
-  if(!subEl || !histEl || !GOOGLE_SHEETS_URL) return;
-  
-  subEl.textContent = `Đang tải bảng điểm Khối ${scoreGrade}...`;
-  histEl.innerHTML = '<tr><td colspan="7" class="small" style="padding:10px">Đang tải dữ liệu...</td></tr>';
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nội dung câu hỏi:</label>
+                    <textarea id="modalText" rows="3" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Nhập nội dung câu hỏi..."></textarea>
+                </div>
 
-  try {
-    let res = await fetch(GOOGLE_SHEETS_URL + `?action=getScores&grade=${scoreGrade}`);
-    let result = await res.json();
-    if(result.success && result.data){
-      let rows = result.data;
-      if(rows.length <= 1){
-        subEl.textContent = `Khối ${scoreGrade}: Chưa có bài nộp nào.`;
-        histEl.innerHTML = '<tr><td colspan="7" class="small" style="padding:10px">Chưa có bài nộp.</td></tr>';
-        return;
-      }
-      let dataRows = rows.slice(1);
-      subEl.textContent = `Tổng số bài học sinh Khối ${scoreGrade} đã nộp: ${dataRows.length}`;
-      histEl.innerHTML = dataRows.slice().reverse().map(r=>`
-        <tr>
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${r[0]||''}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)"><b>${r[1]||''}</b></td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${r[2]||''}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${r[3]||''}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${r[4]||''}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--ok);font-weight:bold">${r[6]!==undefined?r[6]:''} câu</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border);color:var(--primary);font-weight:bold">${r[9]!==undefined?r[9]:''} điểm</td>
-        </tr>
-      `).join('');
-    }
-  } catch(e) { 
-    subEl.textContent = "Không thể tải bảng điểm."; 
-    histEl.innerHTML = '<tr><td colspan="7" class="small" style="padding:10px;color:var(--danger)">Lỗi kết nối tải dữ liệu.</td></tr>';
-  }
-}
+                <div class="space-y-3">
+                    <label class="block text-sm font-medium text-slate-700">Các phương án trả lời:</label>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-sm text-slate-500 w-6">A.</span>
+                        <input type="text" id="modalOptA" class="flex-grow border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Đáp án A">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-sm text-slate-500 w-6">B.</span>
+                        <input type="text" id="modalOptB" class="flex-grow border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Đáp án B">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-sm text-slate-500 w-6">C.</span>
+                        <input type="text" id="modalOptC" class="flex-grow border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Đáp án C">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-sm text-slate-500 w-6">D.</span>
+                        <input type="text" id="modalOptD" class="flex-grow border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Đáp án D">
+                    </div>
+                </div>
 
-function saveResult(score){
-  let nameInput = $('name'), classInput =$('className');
-  if(!nameInput || !classInput) return;
-  let result = {
-    time: new Date().toLocaleString('vi-VN'),
-    name: nameInput.value.trim(),
-    className: classInput.value.trim(),
-    grade: 'Khối ' + currentGrade,
-    gradeNum: currentGrade,
-    exam: EXAM ? EXAM.title : '',
-    code: String(examIndex+1).padStart(2,'0'),
-    correct: score,
-    wrong: activeQuestions.length - score,
-    total: activeQuestions.length,
-    score: ((score / activeQuestions.length) * 10).toFixed(1)
-  };
-  if(GOOGLE_SHEETS_URL){
-    fetch(GOOGLE_SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(result)}).catch(()=>{});
-  }
-}
-
-function shuffleArray(array) {
-  let arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function renderQuestions(){
-  let qContainer = $('questions');
-  if(!qContainer || !EXAM) return;
-  qContainer.innerHTML = activeQuestions.map((q,i)=>`
-    <div class="question">
-      <div class="q-title">Câu ${i+1}. ${q.text}</div>
-      ${q.options.map((o,j)=>`
-        <label class="option">
-          <input type="radio" name="q${i}" value="${j}">
-          <span>${String.fromCharCode(65+j)}.${o}</span>
-        </label>
-      `).join('')}
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Đáp án đúng:</label>
+                    <select id="modalCorrect" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="A">Đáp án A</option>
+                        <option value="B">Đáp án B</option>
+                        <option value="C">Đáp án C</option>
+                        <option value="D">Đáp án D</option>
+                    </select>
+                </div>
+            </div>
+            <div class="bg-slate-100 px-6 py-3 flex justify-end gap-3 border-t">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm font-medium transition">Hủy</button>
+                <button onclick="saveQuestion()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow">Lưu câu hỏi</button>
+            </div>
+        </div>
     </div>
-  `).join('');
-  document.querySelectorAll('input[type=radio]').forEach(x=>x.addEventListener('change',e=>{
-    answers[+e.target.name.slice(1)] = +e.target.value;
-    updateProgress();
-  }));
-}
 
-function updateProgress(){
-  let ansCount = answers.filter(x=>x!==null).length;
-  let ansEl = $('answered'), progEl =$('progressBar');
-  if(ansEl) ansEl.textContent = `${ansCount}/${activeQuestions.length}`;
-  if(progEl) progEl.style.width = `${(ansCount/activeQuestions.length)*100}%`;
-}
-
-function start(){
-  let n = $('name').value.trim(), c =$('className').value.trim();
-  if(!n || !c){ alert('Em vui lòng nhập đầy đủ Họ và tên và Lớp.'); return; }
-  if(!EXAM || !EXAM.questions || !EXAM.questions.length){ alert('Vui lòng chọn bài kiểm tra!'); return; }
-  
-  if(EXAM.isLocked){
-    alert('⚠️ Bài kiểm tra này hiện đang bị KHÓA bởi giáo viên. Học sinh chưa thể làm bài!');
-    return;
-  }
-  
-  started = true; isSubmitting = false; 
-  activeQuestions = shuffleArray(EXAM.questions);
-  answers = Array(activeQuestions.length).fill(null);
-  remaining = (EXAM.timeMinutes || 15) * 60;
-
-  $('studentLabel').textContent = `${n} • ${c}`;
-  $('start').classList.add('hidden'); 
-  $('result').classList.add('hidden');$('exam').classList.remove('hidden');
-  
-  renderQuestions(); updateProgress(); tick();
-  clearInterval(timerId); timerId = setInterval(tick, 1000);
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function tick(){
-  let m = Math.floor(remaining/60), s = remaining%60;
-  let timerEl = $('timer');
-  if(timerEl) timerEl.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  if(remaining <= 0){ clearInterval(timerId); finish(true); } else { remaining--; }
-}
-
-function finish(auto=false){
-  if(!started || isSubmitting) return;
-  isSubmitting = true; clearInterval(timerId);
-  let score = answers.reduce((sum,a,i)=>sum+(a===activeQuestions[i].answer?1:0),0);
-  saveResult(score);
-  let finalScore = ((score / activeQuestions.length) * 10).toFixed(1);
-  
-  $('exam').classList.add('hidden'); $('result').classList.remove('hidden');$('resultText').innerHTML = `
-    <div class="score">${auto ? '⏰ HẾT GIỜ LÀM BÀI' : '✅ NỘP BÀI THÀNH CÔNG'}</div>
-    <p>Số câu đúng: <b>${score} / ${activeQuestions.length}</b></p>
-    <p style="font-size:22px;color:var(--primary);font-weight:bold">Điểm số: ${finalScore} điểm</p>
-  `;
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function addBuilderQuestion(qData = null){
-  let container = $('builderQuestionsContainer');
-  if(!container) return;
-  let qIndex = container.children.length + 1;
-  let div = document.createElement('div');
-  div.className = 'builder-q';
-  div.innerHTML = `
-    <div class="actions" style="justify-content:space-between;margin-bottom:8px">
-      <strong>Câu hỏi ${qIndex}</strong>
-      <button class="btn danger-action" type="button" style="padding:4px 10px;font-size:13px" onclick="this.parentElement.parentElement.remove()">Xóa</button>
-    </div>
-    <div class="field" style="margin-bottom:8px"><input type="text" class="bq-text" placeholder="Nội dung câu hỏi..." value="${qData?qData.text:''}"></div>
-    <div class="grid">
-      <div class="field"><input type="text" class="bq-opt0" placeholder="Đáp án A" value="${qData?qData.options[0]:''}"></div>
-      <div class="field"><input type="text" class="bq-opt1" placeholder="Đáp án B" value="${qData?qData.options[1]:''}"></div>
-      <div class="field"><input type="text" class="bq-opt2" placeholder="Đáp án C" value="${qData?qData.options[2]:''}"></div>
-      <div class="field"><input type="text" class="bq-opt3" placeholder="Đáp án D" value="${qData?qData.options[3]:''}"></div>
-    </div>
-    <div class="field" style="margin-top:8px">
-      <label class="small">Đáp án đúng:</label>
-      <select class="bq-ans" style="max-width:200px">
-        <option value="0" ${qData&&qData.answer===0?'selected':''}>Đáp án A</option>
-        <option value="1" ${qData&&qData.answer===1?'selected':''}>Đáp án B</option>
-        <option value="2" ${qData&&qData.answer===2?'selected':''}>Đáp án C</option>
-        <option value="3" ${qData&&qData.answer===3?'selected':''}>Đáp án D</option>
-      </select>
-    </div>
-  `;
-  container.appendChild(div);
-}
-
-function parseWordText(text){
-  text = text.replace(/([ \t]+)([A-D][\.\)])/g, '\n$2');
-  let lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  let questions = []; let currentQ = null; let currentOpts = [];
-  for(let line of lines){
-    if(/^câu\s*\d+[\:\.]/i.test(line)){
-      if(currentQ && currentOpts.length >= 2){
-        questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
-      }
-      currentQ = line.replace(/^câu\s*\d+[\:\.]\s*/i, '');
-      currentOpts = [];
-    } else if(/^[A-D][\.\)]\s*/i.test(line)){
-      currentOpts.push(line.replace(/^[A-D][\.\)]\s*/i, ''));
-    } else {
-      if(currentOpts.length > 0) currentOpts[currentOpts.length - 1] += " " + line;
-      else if(currentQ) currentQ += " " + line;
-    }
-  }
-  if(currentQ && currentOpts.length >= 2) questions.push({text: currentQ, options: padOptions(currentOpts), answer: 0});
-  return questions;
-}
-
-function padOptions(opts){
-  while(opts.length < 4) opts.push("Không có đáp án");
-  return opts.slice(0, 4);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  $('gradeSelect').onchange = e => loadGrade(e.target.value);
-  $('examSelect').onchange = e => loadExam(e.target.value);
-  $('docGradeSelect').onchange = renderStudentDocs;
-  $('reloadExamsBtn').onclick = () => { fetchCloudDataSilent(); alert('Đã làm mới dữ liệu!'); };
-  $('startBtn').onclick = start;
-  $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
-  $('retryBtn').onclick = () => { $('result').classList.add('hidden');$('start').classList.remove('hidden'); started = false; isSubmitting = false; };
-
-  $('adminToggle').onclick = () => { $('adminPanel').classList.toggle('hidden'); };
-  $('adminLogin').onclick = () => {
-    let passVal = $('adminPass').value.trim();
-    if(passVal === 'Trongthien233') {
-      $('adminContent').classList.remove('hidden');
-      fetchSheetData();
-    } else {
-      alert('Mật khẩu không đúng!');
-    }
-  };
-
-  $('refreshData').onclick = fetchSheetData;
-  $('scoreGradeSelect').onchange = fetchSheetData;
-
-  $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };
-  $('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };
-  $('tabDocs').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.remove('hidden'); };
-  $('addQuestionBtn').onclick = () => addBuilderQuestion();
-
-  $('saveDocBtn').onclick = async () => {
-    let g = $('docGrade').value;
-    let title = $('docTitle').value.trim();
-    let link = $('docLink').value.trim();
-    if(!title || !link){ alert('Vui lòng nhập đầy đủ tiêu đề và link tài liệu!'); return; }
-
-    let docObj = { title: title, link: link };
-    if(!DOCS_DATA[g]) DOCS_DATA[g] = [];
-    DOCS_DATA[g].push(docObj);
-    localStorage.setItem('dakdoa_docs', JSON.stringify(DOCS_DATA));
-    renderStudentDocs();
-    renderAdminDocs();
-
-    alert('🎉 ĐÃ LƯU TÀI LIỆU THÀNH CÔNG!');
-    $('docTitle').value = '';$('docLink').value = '';
-
-    try {
-      await fetch(GOOGLE_SHEETS_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({ action: 'saveDoc', grade: g, doc: docObj })
-      });
-    } catch(err){}
-  };
-
-  $('wordFileSelect').onchange = (e) => {
-    let file = e.target.files[0];
-    if(!file) return;
-    let reader = new FileReader();
-    reader.onload = function(event) {
-      mammoth.extractRawText({arrayBuffer: event.target.result}).then(function(result) {
-        let parsedQs = parseWordText(result.value);
-        if(parsedQs.length === 0){ alert('Không tự động nhận diện được câu hỏi.'); return; }
-        $('builderQuestionsContainer').innerHTML = '';
-        if($('builderTitle').value.trim() === '') $('builderTitle').value = file.name.replace(/\.[^/.]+$/, "");
-        parsedQs.forEach(q => addBuilderQuestion(q));
-        alert(`Nhận diện thành công ${parsedQs.length} câu hỏi!`);
-      });
-    };
-    reader.readAsArrayBuffer(file);
-  };
-
-  $('saveExamBtn').onclick = async () => {
-    let g = $('builderGrade').value;
-    let title = $('builderTitle').value.trim();
-    let timeM = parseInt($('builderTime').value) || 15;
-    if(!title){ alert('Vui lòng nhập tên bài kiểm tra!'); return; }
-
-    let qDivs = document.querySelectorAll('.builder-q');
-    if(qDivs.length === 0){ alert('Vui lòng thêm ít nhất một câu hỏi!'); return; }
-
-    let questions = [];
-    for(let div of qDivs){
-      let text = div.querySelector('.bq-text').value.trim();
-      let o0 = div.querySelector('.bq-opt0').value.trim();
-      let o1 = div.querySelector('.bq-opt1').value.trim();
-      let o2 = div.querySelector('.bq-opt2').value.trim();
-      let o3 = div.querySelector('.bq-opt3').value.trim();
-      let ans = parseInt(div.querySelector('.bq-ans').value);
-      if(!text || !o0 || !o1 || !o2 || !o3){ alert('Vui lòng điền đầy đủ câu hỏi và các đáp án!'); return; }
-      questions.push({text: text, options: [o0, o1, o2, o3], answer: ans});
-    }
-
-    let examObj = { title: title, timeMinutes: timeM, isLocked: false, questions: questions };
-    if(!EXAMS_DATA[g]) EXAMS_DATA[g] = [];
-    EXAMS_DATA[g].push(examObj);
-    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
-    updateExamSelect();
-    renderAdminExams();
-
-    alert('🎉 ĐÃ PHÁT HÀNH ĐỀ THI THÀNH CÔNG!');
-    $('builderTitle').value = '';
-    $('wordFileSelect').value = '';$('builderQuestionsContainer').innerHTML = '';
-
-    try {
-      await fetch(GOOGLE_SHEETS_URL, {
-        method: 'POST', mode: 'no-cors',
-        headers: {'Content-Type': 'text/plain;charset=utf-8'},
-        body: JSON.stringify({ action: 'saveExam', grade: g, exam: examObj })
-      });
-    } catch(err){}
-  };
-
-  initApp();
-});
-</script>
+    <!-- Nhúng file JavaScript -->
+    <script src="script.js"></script>
 </body>
 </html>
