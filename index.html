@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hệ thống Kiểm tra & Tài liệu - Trường THCS Đak Đoa</title>
+<title>Hệ thống Kiểm tra & Tài liệu - Trường THCS Đak Đoa - Thầy Tuấn</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
 :root{font-family:Inter,Segoe UI,Arial,sans-serif;color-scheme:light dark;--bg:#f4f7fb;--surface:#fff;--text:#172033;--muted:#667085;--primary:#2563eb;--primary2:#1d4ed8;--border:#dbe2ea;--ok:#15803d;--danger:#dc2626}
@@ -22,7 +22,7 @@
 </head>
 <body>
 <div id="app">
-<section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA & TÀI LIỆU • TRƯỜNG THCS ĐAK ĐOA</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Học sinh làm bài & xem tài liệu trên Mọi thiết bị • Đồng bộ 100%</p></div></section>
+<section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA & TÀI LIỆU • TRƯỜNG THCS ĐAK ĐOA - THẦY TUẤN</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Học sinh làm bài & xem tài liệu trên Mọi thiết bị • Đồng bộ 100%</p></div></section>
 <div class="container">
 
 <!-- CHỌN ĐỀ THI -->
@@ -38,10 +38,8 @@
 <div class="field"><label for="examSelect">Chọn bài / đề thi</label><select id="examSelect"><option value="">Đang tải danh sách đề...</option></select></div>
 </div>
 <div style="margin-top:14px" class="actions">
-  <button class="btn qr-action" id="qrBtn" type="button">📱 Xem mã QR bài này</button>
   <button class="btn secondary" id="reloadExamsBtn" type="button" style="padding:8px 14px;font-size:14px">🔄 Làm mới danh sách</button>
 </div>
-<div id="qrBox" class="hidden" style="margin-top:16px;text-align:center;border-top:1px solid var(--border);padding-top:16px"><img id="qrImg" alt="Mã QR" width="200" height="200" style="border:6px solid white;border-radius:8px"><p class="small">Học sinh quét mã QR để mở đúng bài kiểm tra.</p><div id="qrLink" class="small" style="word-break:break-all"></div></div>
 </section>
 
 <!-- THÔNG TIN HỌC SINH -->
@@ -190,7 +188,7 @@
   </div>
 </section>
 
-<div class="footer">Hệ thống kiểm tra trực tuyến • Trường THCS Đak Đoa</div>
+<div class="footer">Hệ thống kiểm tra trực tuyến • Trường THCS Đak Đoa - Thầy Tuấn</div>
 </div></div>
 
 <script>
@@ -487,7 +485,7 @@ function saveResult(score){
     name: nameInput.value.trim(),
     className: classInput.value.trim(),
     grade: 'Khối ' + currentGrade,
-    gradeNum: currentGrade, // Gửi kèm số khối để server ghi vào đúng sheet tương ứng
+    gradeNum: currentGrade,
     exam: EXAM ? EXAM.title : '',
     code: String(examIndex+1).padStart(2,'0'),
     correct: score,
@@ -498,15 +496,6 @@ function saveResult(score){
   if(GOOGLE_SHEETS_URL){
     fetch(GOOGLE_SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(result)}).catch(()=>{});
   }
-}
-
-function makeQR(){
-  let base = location.href.split('?')[0];
-  let url = base + `?grade=${currentGrade}&exam=${examIndex}`;
-  let qrImg = $('qrImg'), qrLink = $('qrLink'), qrBox =$('qrBox');
-  if(qrImg) qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);
-  if(qrLink) qrLink.textContent = url;
-  if(qrBox) qrBox.classList.remove('hidden');
 }
 
 function shuffleArray(array) {
@@ -654,7 +643,6 @@ document.addEventListener('DOMContentLoaded', () => {
   $('examSelect').onchange = e => loadExam(e.target.value);
   $('docGradeSelect').onchange = renderStudentDocs;
   $('reloadExamsBtn').onclick = () => { fetchCloudDataSilent(); alert('Đã làm mới dữ liệu!'); };
-  $('qrBtn').onclick = makeQR;
   $('startBtn').onclick = start;
   $('submitBtn').onclick = () => { if(confirm('Em chắc chắn muốn nộp bài?')) finish(false); };
   $('retryBtn').onclick = () => { $('result').classList.add('hidden');$('start').classList.remove('hidden'); started = false; isSubmitting = false; };
@@ -671,7 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   $('refreshData').onclick = fetchSheetData;
-  $('scoreGradeSelect').onchange = fetchSheetData; // Tự động tải lại bảng điểm khi đổi khối xem
+  $('scoreGradeSelect').onchange = fetchSheetData;
 
   $('tabScores').onclick = () => { $('panelScores').classList.remove('hidden');$('panelExams').classList.add('hidden'); $('panelDocs').classList.add('hidden'); };
   $('tabExams').onclick = () => { $('panelScores').classList.add('hidden');$('panelExams').classList.remove('hidden'); $('panelDocs').classList.add('hidden'); };
