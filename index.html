@@ -119,9 +119,9 @@
         <div style="overflow:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Thời gian</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Họ tên</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Lớp</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Khối</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Bài kiểm tra</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Đúng</th><th style="text-align:left;padding:8px;border-bottom:1px solid var(--border)">Điểm</th></tr></thead><tbody id="historyList"><tr><td colspan="7" class="small" style="padding:10px">Chưa có dữ liệu.</td></tr></tbody></table></div>
       </div>
 
-      <!-- Quản lý & Cập nhật thời gian / Xóa Đề thi -->
+      <!-- Quản lý Khóa/Mở, Đổi thời gian & Xóa Đề thi -->
       <div id="panelExams" class="hidden">
-        <h3>Danh sách Đề thi hiện có (Đổi thời gian / Xóa)</h3>
+        <h3>Danh sách Đề thi hiện có (Khóa/Mở, Sửa thời gian, Xóa)</h3>
         <div id="adminExamsList" style="margin-bottom:20px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--bg)">Đang tải danh sách đề...</div>
         
         <h3 style="margin-top:15px">Tải đề thi mới từ Tệp Word (.docx)</h3>
@@ -190,10 +190,10 @@ const GOOGLE_SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyi8yEfIGPU1W
 
 // Đề mẫu mặc định phòng hờ
 const defaultExams = {
-  "6": [{ title: "Kiểm tra Mẫu Tin học 6", timeMinutes: 15, questions: [{ text: "Thông tin là gì?", options: ["Hiểu biết về sự vật, hiện tượng","Chỉ là con số","Chỉ là văn bản","Các bức tranh"], answer: 0 }] }],
-  "7": [{ title: "Kiểm tra Mẫu Tin học 7", timeMinutes: 15, questions: [{ text: "CPU được ví là gì?", options: ["Bộ não của máy tính","Loa","Bàn phím","Màn hình"], answer: 0 }] }],
-  "8": [{ title: "Kiểm tra Mẫu Tin học 8", timeMinutes: 15, questions: [{ text: "IoT là gì?", options: ["Internet vạn vật","Mạng xã hội","Phần mềm","Trò chơi"], answer: 0 }] }],
-  "9": [{ title: "Kiểm tra Mẫu Tin học 9", timeMinutes: 15, questions: [{ text: "Scratch là gì?", options: ["Ngôn ngữ lập trình trực quan","Trình duyệt","Hệ điều hành","Phần cứng"], answer: 0 }] }]
+  "6": [{ title: "Kiểm tra Mẫu Tin học 6", timeMinutes: 15, isLocked: false, questions: [{ text: "Thông tin là gì?", options: ["Hiểu biết về sự vật, hiện tượng","Chỉ là con số","Chỉ là văn bản","Các bức tranh"], answer: 0 }] }],
+  "7": [{ title: "Kiểm tra Mẫu Tin học 7", timeMinutes: 15, isLocked: false, questions: [{ text: "CPU được ví là gì?", options: ["Bộ não của máy tính","Loa","Bàn phím","Màn hình"], answer: 0 }] }],
+  "8": [{ title: "Kiểm tra Mẫu Tin học 8", timeMinutes: 15, isLocked: false, questions: [{ text: "IoT là gì?", options: ["Internet vạn vật","Mạng xã hội","Phần mềm","Trò chơi"], answer: 0 }] }],
+  "9": [{ title: "Kiểm tra Mẫu Tin học 9", timeMinutes: 15, isLocked: false, questions: [{ text: "Scratch là gì?", options: ["Ngôn ngữ lập trình trực quan","Trình duyệt","Hệ điều hành","Phần cứng"], answer: 0 }] }]
 };
 
 let EXAMS_DATA = JSON.parse(localStorage.getItem('dakdoa_exams')) || defaultExams;
@@ -247,7 +247,10 @@ function updateExamSelect(){
     EXAM = null;
     return;
   }
-  select.innerHTML = list.map((ex, idx) => `<option value="${idx}">${ex.title} (${ex.timeMinutes || 15} phút)</option>`).join('');
+  select.innerHTML = list.map((ex, idx) => {
+    let lockLabel = ex.isLocked ? ' 🔒 [ĐÃ KHÓA]' : '';
+    return `<option value="${idx}">${ex.title} (${ex.timeMinutes || 15} phút)${lockLabel}</option>`;
+  }).join('');
   loadExam(0);
 }
 
@@ -264,8 +267,9 @@ function loadExam(i){
   EXAM = list[examIndex];
   if(!EXAM) return;
   
+  let lockStatusText = EXAM.isLocked ? ' • 🔒 TRẠNG THÁI: ĐANG KHÓA (Học sinh chưa thể làm)' : ' • 🔓 TRẠNG THÁI: ĐANG MỞ';
   $('examTitle').textContent = EXAM.title;
-  $('examInfo').textContent = `Khối ${currentGrade} • ${EXAM.questions.length} câu hỏi • ${EXAM.timeMinutes || 15} phút`;
+  $('examInfo').textContent = `Khối ${currentGrade} • ${EXAM.questions.length} câu hỏi • ${EXAM.timeMinutes || 15} phút${lockStatusText}`;
   
   answers = [];
   activeQuestions = [];
@@ -301,15 +305,20 @@ function renderAdminExams(){
     if(EXAMS_DATA[g] && EXAMS_DATA[g].length > 0){
       EXAMS_DATA[g].forEach((ex, idx) => {
         hasAny = true;
+        let isLocked = !!ex.isLocked;
+        let lockBtnClass = isLocked ? 'btn primary' : 'btn qr-action';
+        let lockBtnText = isLocked ? '🔓 Mở đề' : '🔒 Khóa đề';
+        let statusBadge = isLocked ? '<span style="color:var(--danger);font-weight:bold">[ĐÃ KHÓA]</span>' : '<span style="color:var(--ok);font-weight:bold">[ĐANG MỞ]</span>';
+
         html += `
           <div class="actions" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-            <span>[Khối ${g}] <b>${ex.title}</b> (${ex.questions.length} câu)</span>
-            <div style="display:flex;align-items:center;gap:8px">
-              <label style="font-size:13px;font-weight:bold">⏱️</label>
-              <input type="number" id="time_${g}_${idx}" value="${ex.timeMinutes || 15}" min="1" max="180" style="width:65px;padding:5px 8px;font-size:13px;border-radius:6px;border:1px solid var(--border)">
-              <span style="font-size:13px">phút</span>
-              <button class="btn secondary" style="padding:6px 10px;font-size:13px" onclick="updateExamTime('${g}', ${idx})">💾 Lưu thời gian</button>
-              <button class="btn danger-action" style="padding:6px 10px;font-size:13px" onclick="deleteExam('${g}', ${idx})">🗑️ Xóa</button>
+            <span>[Khối ${g}] ${statusBadge} <b>${ex.title}</b> (${ex.questions.length} câu)</span>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+              <input type="number" id="time_${g}_${idx}" value="${ex.timeMinutes || 15}" min="1" max="180" style="width:60px;padding:5px 6px;font-size:13px;border-radius:6px;border:1px solid var(--border)">
+              <span style="font-size:13px">p</span>
+              <button class="btn secondary" style="padding:6px 8px;font-size:12px" onclick="updateExamTime('${g}', ${idx})">💾 Lưu</button>
+              <button class="${lockBtnClass}" style="padding:6px 10px;font-size:12px" onclick="toggleExamLock('${g}', ${idx})">${lockBtnText}</button>
+              <button class="btn danger-action" style="padding:6px 10px;font-size:12px" onclick="deleteExam('${g}', ${idx})">🗑️ Xóa</button>
             </div>
           </div>
         `;
@@ -318,6 +327,27 @@ function renderAdminExams(){
   }
   container.innerHTML = hasAny ? html : '<p class="small">Chưa có đề thi nào trên hệ thống.</p>';
 }
+
+window.toggleExamLock = async function(grade, index){
+  if(EXAMS_DATA[grade] && EXAMS_DATA[grade][index]) {
+    let currentStatus = !!EXAMS_DATA[grade][index].isLocked;
+    EXAMS_DATA[grade][index].isLocked = !currentStatus;
+    localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
+    renderAdminExams();
+    updateExamSelect();
+    
+    let stateText = EXAMS_DATA[grade][index].isLocked ? 'khóa' : 'mở';
+    alert(`Đã ${stateText} đề kiểm tra thành công!`);
+
+    try {
+      await fetch(GOOGLE_SHEETS_URL, {
+        method: 'POST', mode: 'no-cors',
+        headers: {'Content-Type': 'text/plain;charset=utf-8'},
+        body: JSON.stringify({action: 'updateExamLock', grade: grade, index: index, isLocked: EXAMS_DATA[grade][index].isLocked})
+      });
+    } catch(err){}
+  }
+};
 
 window.updateExamTime = async function(grade, index){
   let inputEl = $(`time_${grade}_${index}`);
@@ -331,9 +361,8 @@ window.updateExamTime = async function(grade, index){
     EXAMS_DATA[grade][index].timeMinutes = newTime;
     localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
     updateExamSelect();
-    alert(`Đã cập nhật thời gian làm bài thành ${newTime} phút!`);
+    alert(`Đã cập nhật thời gian thành ${newTime} phút!`);
     
-    // Đồng bộ lên Google Sheets
     try {
       await fetch(GOOGLE_SHEETS_URL, {
         method: 'POST', mode: 'no-cors',
@@ -506,6 +535,12 @@ function start(){
   if(!n || !c){ alert('Em vui lòng nhập đầy đủ Họ và tên và Lớp.'); return; }
   if(!EXAM || !EXAM.questions || !EXAM.questions.length){ alert('Vui lòng chọn bài kiểm tra!'); return; }
   
+  // Kiểm tra nếu đề bị khóa
+  if(EXAM.isLocked){
+    alert('⚠️ Bài kiểm tra này hiện đang bị KHÓA bởi giáo viên. Học sinh chưa thể làm bài!');
+    return;
+  }
+  
   started = true; isSubmitting = false; 
   activeQuestions = shuffleArray(EXAM.questions);
   answers = Array(activeQuestions.length).fill(null);
@@ -670,7 +705,7 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsArrayBuffer(file);
   };
 
-  // NÚT LƯU ĐỀ THI
+  // NÚT LƯU ĐỀ THI (mặc định isLocked: false)
   $('saveExamBtn').onclick = async () => {
     let g = $('builderGrade').value;
     let title = $('builderTitle').value.trim();
@@ -692,7 +727,7 @@ document.addEventListener('DOMContentLoaded', () => {
       questions.push({text: text, options: [o0, o1, o2, o3], answer: ans});
     }
 
-    let examObj = { title: title, timeMinutes: timeM, questions: questions };
+    let examObj = { title: title, timeMinutes: timeM, isLocked: false, questions: questions };
     if(!EXAMS_DATA[g]) EXAMS_DATA[g] = [];
     EXAMS_DATA[g].push(examObj);
     localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
