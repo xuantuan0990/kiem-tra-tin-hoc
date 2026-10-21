@@ -1,188 +1,117 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống Quản lý Ngân hàng Câu hỏi & Tạo Đề Kiểm Tra Tin Học</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white !important; }
-            .print-area { box-shadow: none !important; border: none !important; }
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hệ thống Kiểm tra & Tài liệu - Trường THCS Đak Đoa - Thầy Tuấn</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+:root{font-family:Inter,Segoe UI,Arial,sans-serif;color-scheme:light dark;--bg:#f4f7fb;--surface:#fff;--text:#172033;--muted:#667085;--primary:#2563eb;--primary2:#1d4ed8;--border:#dbe2ea;--ok:#15803d;--danger:#dc2626}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}
+#app{min-height:100vh;background-color:var(--bg);padding:0 0 40px}
+.hero{background:linear-gradient(135deg,#1d4ed8,#0f766e);color:white;padding:34px 20px 30px}.hero-inner{max-width:1000px;margin:auto}.badge{display:inline-block;background:#ffffff24;border:1px solid #ffffff40;padding:6px 11px;border-radius:999px;font-size:13px}.hero h1{margin:12px 0 7px;font-size:30px}.hero p{margin:0;color:#e0f2fe}
+.container{max-width:1000px;margin:22px auto;padding:0 16px}.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 8px 28px #0000000b;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field label{display:block;font-weight:700;margin-bottom:7px}.field input,.field select,.field textarea{width:100%;padding:12px 13px;border:1px solid var(--border);border-radius:10px;font-size:16px;background:var(--surface);color:var(--text)}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.btn{border:0;border-radius:10px;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer}.primary{background:var(--primary);color:white}.primary:hover{background:var(--primary2)}.secondary{background:#1d4ed8;color:white}.secondary:hover{background:#1e40af}.qr-action{background:#0f766e;color:white}.qr-action:hover{background:#0d5f59}.danger-action{background:#dc2626;color:white}.danger-action:hover{background:#b91c1c}
+.hidden{display:none!important}.topbar{position:sticky;top:0;z-index:4;background:var(--surface);border-bottom:1px solid var(--border);padding:11px 16px}.topbar-inner{max-width:1000px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:10px}.timer{font-weight:800;color:var(--danger);background:#fee2e2;padding:8px 12px;border-radius:10px}.progress{height:8px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin-top:10px}.progress>div{height:100%;background:var(--primary);width:0;transition:width .2s}
+.question{border:1px solid var(--border);border-radius:15px;padding:18px;margin:14px 0}.q-title{font-weight:800;line-height:1.5;margin-bottom:13px}.option{display:flex;gap:10px;align-items:flex-start;padding:11px;border:1px solid var(--border);border-radius:10px;margin:8px 0;cursor:pointer}.option:hover{background:#eff6ff}.option input{margin-top:4px}.submitbox{position:sticky;bottom:12px;background:var(--surface);border:1px solid var(--border);box-shadow:0 8px 30px #0002;padding:14px;border-radius:14px;display:flex;justify-content:space-between;align-items:center;gap:12px}.result{text-align:center}.score{font-size:32px;font-weight:900;color:var(--primary);margin:8px}.small{color:var(--muted);font-size:14px}.footer{text-align:center;color:var(--muted);padding:18px}
+.builder-q{border:1px dashed var(--border);padding:15px;border-radius:12px;margin-bottom:12px;background:var(--bg)}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.hero h1{font-size:25px}.card{padding:16px}.submitbox{flex-direction:column;align-items:stretch}.submitbox .btn{width:100%}}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--surface:#111827;--text:#e5e7eb;--muted:#9ca3af;--border:#263244}.option:hover{background:#172554}.secondary{background:#1f2937;color:var(--text)}}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body>
+<div id="app">
+<section class="hero"><div class="hero-inner"><span class="badge">HỆ THỐNG KIỂM TRA & TÀI LIỆU • TRƯỜNG THCS ĐAK ĐOA - THẦY TUẤN</span><h1 id="examTitle">Hệ thống Tin học THCS</h1><p id="examInfo">Học sinh làm bài & xem tài liệu trên Mọi thiết bị • Đồng bộ 100%</p></div></section>
+<div class="container">
 
-    <!-- Header -->
-    <header class="bg-indigo-600 text-white shadow-md no-print">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center">
-            <h1 class="text-2xl font-bold flex items-center gap-2">
-                💻 Quản Lý Ngân Hàng Đề Kiểm Tra Tin Học 9
-            </h1>
-            <div class="mt-3 md:mt-0 flex gap-2">
-                <button onclick="switchTab('bank')" id="btnBank" class="px-4 py-2 bg-indigo-700 rounded-lg font-medium transition hover:bg-indigo-800 shadow">Ngân hàng câu hỏi</button>
-                <button onclick="switchTab('exam')" id="btnExam" class="px-4 py-2 bg-indigo-500 rounded-lg font-medium transition hover:bg-indigo-600 shadow">Tạo đề thi ngẫu nhiên</button>
-            </div>
-        </div>
-    </header>
+<!-- CHỌN ĐỀ THI -->
+<section class="card">
+<h2>📝 Chọn bài kiểm tra theo khối lớp</h2>
+<div class="grid">
+<div class="field">
+  <label for="gradeSelect">Chọn khối lớp</label>
+  <select id="gradeSelect">
+    <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
+  </select>
+</div>
+<div class="field"><label for="examSelect">Chọn bài / đề thi</label><select id="examSelect"><option value="">Đang tải danh sách đề...</option></select></div>
+</div>
+<div style="margin-top:14px" class="actions">
+  <button class="btn secondary" id="reloadExamsBtn" type="button" style="padding:8px 14px;font-size:14px">🔄 Làm mới danh sách</button>
+</div>
+</section>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+<!-- THÔNG TIN HỌC SINH -->
+<section id="start" class="card">
+<h2>Thông tin học sinh</h2>
+<p class="small">Em hãy nhập chính xác thông tin trước khi bắt đầu.</p>
+<div class="grid">
+  <div class="field"><label for="name">Họ và tên *</label><input id="name" placeholder="Nguyễn Văn A" autocomplete="name"></div>
+  <div class="field"><label for="className">Lớp *</label><input id="className" placeholder="7A1"></div>
+</div>
+<div style="height:16px"></div>
+<div class="actions"><button class="btn primary" id="startBtn">Bắt đầu làm bài (Trộn ngẫu nhiên câu hỏi)</button></div>
+</section>
 
-        <!-- TAB 1: NGÂN HÀNG CÂU HỎI & CHỈNH SỬA -->
-        <section id="tabBank" class="space-y-6">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
-                <div class="flex flex-wrap gap-3 items-center">
-                    <select id="filterLesson" onchange="filterQuestions()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option value="">Tất cả các bài</option>
-                        <option value="1">Bài 1: Thế giới kỹ thuật số</option>
-                        <option value="2">Bài 2: Thông tin trong giải quyết vấn đề</option>
-                        <option value="3">Bài 3: Đánh giá chất lượng thông tin</option>
-                        <option value="4">Bài 4: Pháp luật về sử dụng Internet</option>
-                    </select>
-                    <select id="filterLevel" onchange="filterQuestions()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option value="">Tất cả mức độ</option>
-                        <option value="Biết">Biết</option>
-                        <option value="Hiểu">Hiểu</option>
-                    </select>
-                    <input type="text" id="searchInput" onkeyup="filterQuestions()" placeholder="Tìm kiếm nội dung câu hỏi..." class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-64">
-                </div>
-                <button onclick="openAddModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition shadow flex items-center gap-2">
-                    ➕ Thêm câu hỏi mới
-                </button>
-            </div>
+<!-- TÀI LIỆU ÔN TẬP & ĐỀ CƯƠNG CHO HỌC SINH -->
+<section class="card">
+<h2>📚 Tài liệu ôn tập & Đề cương</h2>
+<p class="small">Chọn khối lớp để xem hoặc mở trực tiếp tài liệu ôn tập.</p>
+<div class="field" style="max-width:280px;margin-bottom:14px">
+  <label for="docGradeSelect">Chọn khối lớp</label>
+  <select id="docGradeSelect">
+    <option value="6">Khối 6</option><option value="7">Khối 7</option><option value="8">Khối 8</option><option value="9">Khối 9</option>
+  </select>
+</div>
+<div id="studentDocsList" style="border-top:1px solid var(--border);padding-top:12px">Đang tải tài liệu...</div>
+</section>
 
-            <!-- Danh sách câu hỏi -->
-            <div id="questionsListContainer" class="space-y-4">
-                <!-- Được render bằng JavaScript -->
-            </div>
-        </section>
-
-        <!-- TAB 2: TẠO VÀ XEM ĐỀ THI -->
-        <section id="tabExam" class="space-y-6 hidden">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 no-print space-y-4">
-                <h2 class="text-lg font-bold text-slate-700">Tùy chỉnh cấu trúc đề kiểm tra</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Tên mã đề / Tiêu đề:</label>
-                        <input type="text" id="examTitle" value="KIỂM TRA 15 PHÚT - MÔN TIN HỌC 9" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Mã đề:</label>
-                        <input type="text" id="examCode" value="101" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Số lượng câu hỏi:</label>
-                        <input type="number" id="examCount" value="20" min="1" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="generateExam()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2 px-4 rounded-lg text-sm transition shadow flex items-center justify-center gap-2">
-                            🎲 Trộn đề ngẫu nhiên
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Khu vực hiển thị đề thi để in hoặc làm -->
-            <div id="examPreviewArea" class="bg-white p-8 rounded-xl shadow-sm border border-slate-200 print-area space-y-6">
-                <div class="text-center space-y-1 border-b pb-4">
-                    <h3 id="previewTitle" class="font-bold text-xl uppercase">KIỂM TRA 15 PHÚT - MÔN TIN HỌC 9</h3>
-                    <p class="text-sm font-semibold text-slate-600">Mã đề: <span id="previewCode">101</span></p>
-                </div>
-                <div id="previewQuestionsContainer" class="space-y-4">
-                    <p class="text-center text-slate-500 italic py-8">Chưa có đề nào được tạo. Hãy bấm "Trộn đề ngẫu nhiên" ở trên!</p>
-                </div>
-                
-                <!-- Bảng đáp án ẩn/hiện -->
-                <div id="answerKeyContainer" class="mt-8 pt-6 border-t border-dashed border-slate-300 hidden">
-                    <h4 class="font-bold text-base text-slate-700 mb-2">BẢNG ĐÁP ÁN ĐỀ THI</h4>
-                    <div id="answerKeyGrid" class="grid grid-cols-5 md:grid-cols-10 gap-2 text-sm"></div>
-                </div>
-
-                <div class="flex justify-end gap-3 pt-4 no-print">
-                    <button onclick="toggleAnswerKey()" id="btnToggleKey" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium px-4 py-2 rounded-lg text-sm transition">Hiện đáp án</button>
-                    <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition shadow">🖨️ In đề / Lưu PDF</button>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- MODAL THÊM / SỬA CÂU HỎI -->
-    <div id="questionModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center">
-                <h3 id="modalTitle" class="font-bold text-lg">Thêm câu hỏi mới</h3>
-                <button onclick="closeModal()" class="text-white/80 hover:text-white text-xl font-bold">&times;</button>
-            </div>
-            <div class="p-6 space-y-4 overflow-y-auto flex-grow">
-                <input type="hidden" id="editIndex" value="-1">
-                
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Thuộc bài học:</label>
-                        <select id="modalLesson" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <option value="1">Bài 1: Thế giới kỹ thuật số</option>
-                            <option value="2">Bài 2: Thông tin trong giải quyết vấn đề</option>
-                            <option value="3">Bài 3: Đánh giá chất lượng thông tin</option>
-                            <option value="4">Bài 4: Pháp luật về sử dụng Internet</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Mức độ:</label>
-                        <select id="modalLevel" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                            <option value="Biết">Biết</option>
-                            <option value="Hiểu">Hiểu</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Nội dung câu hỏi:</label>
-                    <textarea id="modalText" rows="3" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Nhập nội dung câu hỏi..."></textarea>
-                </div>
-
-                <div class="space-y-3">
-                    <label class="block text-sm font-medium text-slate-700">Các phương án trả lời:</label>
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-sm text-slate-500 w-6">A.</span>
-                        <input type="text" id="modalOptA" class="flex-grow border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Đáp án A">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-sm text-slate-500 w-6">B.</span>
-                        <input type="text" id="modalOptB" class="flex-grow border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Đáp án B">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-sm text-slate-500 w-6">C.</span>
-                        <input type="text" id="modalOptC" class="flex-grow border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Đáp án C">
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-bold text-sm text-slate-500 w-6">D.</span>
-                        <input type="text" id="modalOptD" class="flex-grow border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Đáp án D">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Đáp án đúng:</label>
-                    <select id="modalCorrect" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                        <option value="A">Đáp án A</option>
-                        <option value="B">Đáp án B</option>
-                        <option value="C">Đáp án C</option>
-                        <option value="D">Đáp án D</option>
-                    </select>
-                </div>
-            </div>
-            <div class="bg-slate-100 px-6 py-3 flex justify-end gap-3 border-t">
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-sm font-medium transition">Hủy</button>
-                <button onclick="saveQuestion()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition shadow">Lưu câu hỏi</button>
-            </div>
-        </div>
+<!-- MÀN HÌNH LÀM BÀI -->
+<section id="exam" class="hidden">
+  <div class="topbar">
+    <div class="topbar-inner"><strong id="studentLabel"></strong><span class="timer" id="timer">15:00</span></div>
+    <div class="topbar-inner"><div style="width:100%"><div class="progress"><div id="progressBar"></div></div></div></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div id="questions"></div>
+    <div class="submitbox">
+      <div><strong id="answered">0/10</strong><div class="small">câu đã trả lời</div></div>
+      <button class="btn primary" id="submitBtn">Nộp bài</button>
     </div>
+  </div>
+</section>
 
-    <!-- Nhúng file JavaScript -->
-    <script src="script.js"></script>
-</body>
-</html>
+<!-- MÀN HÌNH KẾT QUẢ -->
+<section id="result" class="card hidden result">
+  <h2>Trạng thái nộp bài</h2>
+  <div id="resultText"></div>
+  <div class="actions" style="justify-content:center;margin-top:20px"><button class="btn secondary" id="retryBtn">Làm bài khác</button></div>
+</section>
+
+<!-- KHU VỰC QUẢN TRỊ DÀNH CHO GIÁO VIÊN -->
+<section class="card">
+  <div class="actions" style="justify-content:space-between">
+    <div><h2 style="margin:0">Khu vực dành cho Giáo viên</h2><div class="small">Quản lý điểm, đề thi và tài liệu ôn tập.</div></div>
+    <button class="btn secondary" id="adminToggle" type="button">🔐 Mở Quản trị</button>
+  </div>
+  <div id="adminPanel" class="hidden" style="margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+    <div class="actions" style="margin-bottom:15px">
+      <input type="password" id="adminPass" placeholder="Nhập mật khẩu quản trị..." style="max-width:280px;padding:12px 13px;border:1px solid var(--border);border-radius:10px" autocomplete="new-password">
+      <button class="btn primary" id="adminLogin" type="button">Đăng nhập</button>
+    </div>
+    
+    <div id="adminContent" class="hidden">
+      <div class="actions" style="margin-bottom:15px">
+        <button class="btn primary" id="tabScores" type="button">📊 Xem bảng điểm</button>
+        <button class="btn qr-action" id="tabExams" type="button">📄 Quản lý Đề thi</button>
+        <button class="btn secondary" id="tabDocs" type="button" style="background:#0f766e">📂 Quản lý Tài liệu</button>
+      </div>
+
+      <!-- Xem điểm theo khối -->
+      <div id="panelScores">
+        <div class="actions" style="justify-content:space-between;margin-bottom:10px">
+          <div class="field" style="margin:0;max-width:220px">
+            <select id="scoreGradeSelect" style="padding:8px">
+              <option value="6">Bảng điểm Khối 6</option>
+              <option value="7">B
