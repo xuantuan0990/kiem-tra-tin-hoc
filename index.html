@@ -146,7 +146,7 @@
         <h3>Danh sách Đề thi hiện có (Khóa/Mở, Chỉnh sửa, Xóa)</h3>
         <div id="adminExamsList" style="margin-bottom:20px;border:1px solid var(--border);padding:12px;border-radius:10px;background:var(--bg)">Đang tải danh sách đề...</div>
         
-        <!-- KHU VỰC CHỈNH SỬA ĐỀ THI (ẨN / HIỆN KHI BẤM NÚT SỬA) -->
+        <!-- KHU VỰC CHỈNH SỬA ĐỀ THI -->
         <div id="editExamContainer" class="hidden" style="margin-bottom:25px;padding:18px;border:2px solid var(--primary);border-radius:14px;background:var(--surface)">
           <h3 id="editExamHeading" style="color:var(--primary);margin-top:0">✏️ Chỉnh sửa Đề thi</h3>
           <input type="hidden" id="editExamGrade">
@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await fetch(GOOGLE_SHEETS_URL, {
           method: 'POST', mode: 'no-cors',
           headers: {'Content-Type': 'text/plain;charset=utf-8'},
-          body: JSON.stringify({ action: 'saveExam', grade: grade, exam: EXAMS_DATA[grade][index] })
+          body: JSON.stringify({ action: 'updateExamContent', grade: grade, index: index, exam: EXAMS_DATA[grade][index] })
         });
       } catch(err){}
     }
