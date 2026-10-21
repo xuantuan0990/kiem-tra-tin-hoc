@@ -837,15 +837,23 @@ document.addEventListener('DOMContentLoaded', () => {
       questions.push({text: text, options: [o0, o1, o2, o3], answer: ans});
     }
 
-    if(EXAMS_DATA[grade] && EXAMS_DATA[grade][index]){
-      let oldLocked = !!EXAMS_DATA[grade][index].isLocked;
+    if(EXAMS_DATA[grade]){
+      // Lấy trạng thái khóa cũ của đề nếu có
+      let oldLocked = (EXAMS_DATA[grade][index] && EXAMS_DATA[grade][index].isLocked) || false;
+      
+      // Cập nhật lại đối tượng đề thi tại đúng vị trí index
       EXAMS_DATA[grade][index] = { title: title, timeMinutes: timeM, isLocked: oldLocked, questions: questions };
+      
+      // Lưu lại vào localStorage ngay lập tức
       localStorage.setItem('dakdoa_exams', JSON.stringify(EXAMS_DATA));
+      
+      // Cập nhật lại giao diện
       updateExamSelect();
       renderAdminExams();
       $('editExamContainer').classList.add('hidden');
-      alert('🎉 ĐÃ CẬP NHẬT ĐỀ THI THÀNH CÔNG!');
+      alert('🎉 ĐÃ CẬP NHẬT & LƯU ĐỀ THI THÀNH CÔNG!');
 
+      // Gửi đồng bộ lên Google Sheets
       try {
         await fetch(GOOGLE_SHEETS_URL, {
           method: 'POST', mode: 'no-cors',
